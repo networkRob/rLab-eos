@@ -1,0 +1,39 @@
+topology:
+  name: L2
+nodes:
+  spine1:
+    mac: 00:1c:73:c0:c6:01
+    links:
+      - spine2
+      - leaf1
+      - leaf2
+      - leaf3
+  spine2:
+    mac: 00:1c:73:c1:c6:01
+    links:
+      - spine1
+      - leaf1
+      - leaf2
+      - leaf3
+  leaf1:
+    mac: 00:1c:73:c2:c6:01
+    links:
+      - spine1
+      - spine2
+      - host10
+      - host11
+  leaf2:
+    mac: 00:1c:73:c3:c6:01
+    links:
+      - spine1
+      - spine2
+      - host20
+      - host21
+  leaf3:
+    mac: 00:1c:73:c4:c6:01
+    links:
+      - spine1
+      - spine2
+      - host30
+      - host31
+      
