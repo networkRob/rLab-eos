@@ -84,8 +84,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--type", type=str, help="Topology to build", default=None, required=True)
     parser.add_argument("-i", "--image", type=str, help="cEOS image to use", default="4.22.1F.Trunk", required=False)
-    # parser.add_argument("-u", "--user", type=str, help="User to login with", default=None, required=True)
-    # parser.add_argument("-s", "--setup", type=str, help="User to use for AAA setup", default=None, required=False)
-    # parser.add_argument("-d","--debug", action="store_true", help="Print log messages.", required=False)
     args = parser.parse_args()
     main(args)
