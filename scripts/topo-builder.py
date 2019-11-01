@@ -62,6 +62,8 @@ def main(args):
         for eindex in range(1, len(NODES[_node]['intfs']) + 1):
             if eindex == 1:
                 CMDS.append("sudo ovs-docker add-port {0} eth{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name'], topo_yaml['nodes'][_node]['mac']))
+            else:
+                CMDS.append("sudo ovs-docker add-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name']))
     if CMDS:
         with open(BASE_PATH + "/scripts/{}-start.sh".format(_tag), 'w') as fout:
             fout.write("#!/bin/bash\n")
