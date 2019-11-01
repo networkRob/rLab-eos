@@ -69,11 +69,11 @@ def main(args):
                 CMDS.append("sudo ovs-docker add-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name']))
             CMDS_DOWN.append("sudo ovs-docker del-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name']))
     if CMDS:
-        with open(BASE_PATH + "/scripts/{}-start.sh".format(_tag), 'w') as fout:
+        with open(BASE_PATH + "/cnt/{}-start.sh".format(_tag), 'w') as fout:
             fout.write("#!/bin/bash\n")
             for _cmd in CMDS:
                 fout.write(_cmd + "\n")
-        with open(BASE_PATH + "/scripts/{}-stop.sh".format(_tag), 'w') as fout:
+        with open(BASE_PATH + "/cnt/{}-stop.sh".format(_tag), 'w') as fout:
             fout.write("#!/bin/bash\n")
             for _cmd in CMDS_DOWN:
                 fout.write(_cmd + "\n")
