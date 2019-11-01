@@ -1,0 +1,185 @@
+! Startup-config last modified at  Thu Aug 29 13:25:18 2019 by rmartin
+! device: L3-L11 (vEOS, EOS-4.21.7M)
+!
+! boot system flash:/vEOS-lab-4.21.7M.swi
+!
+daemon TerminAttr
+   exec /usr/bin/TerminAttr -ingestgrpcurl=192.168.50.14:9910 -taillogs -cvcompression=gzip -ingestauth=key,rob-lab -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent -ingestvrf=MGMT
+   no shutdown
+!
+event-monitor
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+lldp management-address vrf MGMT
+!
+logging buffered 200
+!
+hostname L3-L11
+ip domain lookup source-interface Management1
+ip name-server vrf MGMT 192.168.21.4
+ip name-server vrf MGMT 192.168.21.5
+ip domain-name rob.lab
+!
+ntp server vrf MGMT 192.168.50.1 source Management1
+!
+radius-server host dock-01.mhome.lab vrf MGMT key 7 047B19571C354D
+!
+aaa group server radius mhome
+   !! server pc-radius-01.mhome.lab vrf MGMT
+   server dock-01.mhome.lab vrf MGMT
+!
+snmp-server community mh0m3 ro
+snmp-server vrf MGMT
+!
+spanning-tree mode mstp
+no spanning-tree vlan 4094
+!
+service unsupported-transceiver systest 975ba0e1
+!
+aaa authentication login default group mhome local
+aaa authentication login console local
+aaa authorization exec default group mhome local
+aaa authorization commands all default local
+!
+no aaa root
+!
+username arista privilege 15 role network-admin secret sha512 $6$1WX5awmOhAFOXqKe$QGxPTq59tg4eu5BbTlOe9QuJYVnq6.9CbzG45g1yXKWS5zUOwGXGrvE249Lf9VXZ4MctVGZfXxy5RKTXIG/Xw/
+username arista sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDS0+bGs8XOLIWKGNwbnWmU/U/O1niUDrWCjnx6DciSS416nyturioQlpNLCeRe8CZDwYz9Q3WO0oaK9cig5KhYHzKUOGJWhmYqMR18j/0X03ealkaG7Uu8LR3hDNdaDm5shcyhp2WBKSw1e5bToXF0zEOXp4c6Np4eTM8oyFyp2XgrB3jGKiBenFycWFgwS9mS3xUpupyIHT+VMLrbOLL38gGEpESgGOKdGa/KEwk83TQzOCAR2fvJ/Hj+26KMPLtveRTVJvkweIh7iP6PkBAXFMFctwoozZJDGiXL7os1MSArncb7QXIR7EHbQ76gaHFoBNaI6/d1s15symv5MBoF
+username builder privilege 15 role auto-build secret sha512 $6$Jd5a5njJmBQ3Bh4o$JWd6pqhsc7gAv6nwELsr3AEEPsWyiMfmzg5gO0tMEG4kXQ14oqkblQdCpqxfUYeB44tUDi8ApiuI2beimn0eT1
+username builder sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+oMHrcKgBdONJ/2zqwjMgYqC9Ao+fK4YmvP82RU+QLMylGSGHjnto+s25JBYpjaKsCG9LhIKreZgYxTeBLV0tfuIR8cAHwuUSGfvYO9y/7zLwBJBKZoUOXqXBQw60VE0EM4i7i3iWTh3ga8qXFxxGjIIdSJlTKsIkfhuoI4Au2Z5fF6CZnxiBfM5x/y7Um+3EMxaXXFiAntS5GQeveSkAnsAw8I1Tn/RbM2AQkG6vLEarQlC3j6NXsuDGhlV13Cz/u4hdz+kVbsGbjLeDndXvCvCgDj/mPcY0atOtjw4w5onKY5gfpNl94tc4VokDhKC3Dkr3RdotRzhiO/WDNHVX
+!
+role auto-build
+   10 deny mode exec command configure|python-shell|\|
+   20 permit mode exec command .*
+!
+clock timezone CST6CDT
+!
+vlan 12
+   name VLAN-12
+!
+vlan 4093
+   name iBGP-PEER
+!
+vlan 4094
+   name MLAG
+   trunk group MLAGPEER
+!
+vrf definition LAB
+   description LAB-VRF
+   rd 100:101
+!
+vrf definition MGMT
+   description MGMT-VRF
+   rd 100:100
+!
+interface Port-Channel1
+   switchport mode trunk
+   switchport trunk group MLAGPEER
+!
+interface Ethernet1
+   description MLAG-Peer-Link
+   channel-group 1 mode active
+!
+interface Ethernet2
+   no switchport
+   ip address 10.0.1.1/31
+!
+interface Ethernet3
+   no switchport
+   ip address 10.0.2.1/31
+!
+interface Ethernet4
+   switchport access vlan 12
+!
+interface Loopback0
+   ip address 10.0.254.3/32
+!
+interface Loopback1
+   ip address 10.0.255.2/32
+!
+interface Management1
+   description Management
+   vrf forwarding MGMT
+   ip address 192.168.50.232/24
+!
+interface Vlan4093
+   ip address 10.0.253.0/31
+!
+interface Vlan4094
+   description MLAG
+   no autostate
+   ip address 10.0.0.1/30
+!
+interface Vxlan1
+   vxlan source-interface Loopback1
+   vxlan udp-port 4789
+   vxlan vlan 12 vni 100012
+!
+ip route vrf MGMT 0.0.0.0/0 192.168.50.1
+!
+ip routing
+ip routing vrf LAB
+ip routing vrf MGMT
+!
+ip prefix-list underlay-out
+   seq 10 permit 10.0.255.0/24 le 32
+   seq 20 permit 10.0.254.0/24 le 32
+!
+mlag configuration
+   domain-id L11-L12
+   local-interface Vlan4094
+   peer-address 10.0.0.2
+   peer-link Port-Channel1
+!
+ip radius vrf MGMT source-interface Management1
+!
+route-map rm-underlay-out permit 10
+   match ip address prefix-list underlay-out
+!
+router bgp 65001
+   router-id 10.0.254.3
+   maximum-paths 2 ecmp 2
+   neighbor SPINE peer-group
+   neighbor SPINE remote-as 65000
+   neighbor SPINE route-map rm-underlay-out out
+   neighbor SPINE maximum-routes 12000 
+   neighbor SPINE-EVPN peer-group
+   neighbor SPINE-EVPN remote-as 65000
+   neighbor SPINE-EVPN next-hop-unchanged
+   neighbor SPINE-EVPN update-source Loopback0
+   neighbor SPINE-EVPN ebgp-multihop
+   neighbor SPINE-EVPN send-community extended
+   neighbor SPINE-EVPN maximum-routes 0 
+   neighbor 10.0.1.0 peer-group SPINE
+   neighbor 10.0.2.0 peer-group SPINE
+   neighbor 10.0.253.1 remote-as 65001
+   neighbor 10.0.253.1 maximum-routes 12000 
+   neighbor 10.0.254.1 peer-group SPINE-EVPN
+   neighbor 10.0.254.2 peer-group SPINE-EVPN
+   redistribute connected
+   !
+   vlan 12
+      rd 10.0.254.3:12
+      route-target both 1:12
+      redistribute learned
+   !
+   address-family evpn
+      neighbor SPINE-EVPN activate
+   !
+   address-family ipv4
+      no neighbor SPINE-EVPN activate
+!
+management api http-commands
+   protocol unix-socket
+   no shutdown
+   !
+   vrf MGMT
+      no shutdown
+   !
+   vrf default
+      no shutdown
+!
+end

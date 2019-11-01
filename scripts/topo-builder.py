@@ -11,6 +11,7 @@ CONFIGS = BASE_PATH + "/configs/"
 OVS_BRIDGES = []
 NODES = {}
 CMDS = []
+CMDS_DOWN = []
 
 def openTopo(topo):
     try:
@@ -59,16 +60,25 @@ def main(args):
     for _node in NODES:
         CMDS.append("docker create --name={0} --privileged -v $(pwd)/configs/{1}:/mnt/flash/startup-config -e INTFTYPE=eth -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(NODES[_node]['name'], NODES[_node]['name'], args.image))
         CMDS.append("docker start {}".format(NODES[_node]['name']))
+        CMDS_DOWN.append("docker stop {}".format(NODES[_node]['name']))
+        CMDS_DOWN.append("docker rm {}".format(NODES[_node]['name']))
         for eindex in range(1, len(NODES[_node]['intfs']) + 1):
             if eindex == 1:
                 CMDS.append("sudo ovs-docker add-port {0} eth{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name'], topo_yaml['nodes'][_node]['mac']))
             else:
                 CMDS.append("sudo ovs-docker add-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name']))
+            CMDS_DOWN.append("sudo ovs-docker del-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name']))
     if CMDS:
         with open(BASE_PATH + "/scripts/{}-start.sh".format(_tag), 'w') as fout:
             fout.write("#!/bin/bash\n")
             for _cmd in CMDS:
                 fout.write(_cmd + "\n")
+        with open(BASE_PATH + "/scripts/{}-stop.sh".format(_tag), 'w') as fout:
+            fout.write("#!/bin/bash\n")
+            for _cmd in CMDS_DOWN:
+                fout.write(_cmd + "\n")
+            for _br in OVS_BRIDGES:
+                fout.write("sudo ovs-vsctl del-br {}\n".format(_br))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
