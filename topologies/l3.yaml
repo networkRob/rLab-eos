@@ -1,0 +1,73 @@
+topology:
+  name: L3
+images:
+  ceos: 4.22.1F.Trunk
+  host: chost:0.1
+nodes:
+  spine1:
+    mac: 00:1c:73:c0:c6:01
+    links:
+      - leaf11
+      - leaf12
+      - leaf21
+      - leaf22
+      - leaf31
+      - leaf32
+  spine2:
+    mac: 00:1c:73:c1:c6:01
+    links:
+      - leaf11
+      - leaf12
+      - leaf21
+      - leaf22
+      - leaf31
+      - leaf32
+  leaf11:
+    mac: 00:1c:73:c2:c6:01
+    links:
+      - leaf12
+      - spine1
+      - spine2
+      - host11
+  leaf12:
+    mac: 00:1c:73:c3:c6:01
+    links:
+      - leaf11
+      - spine1
+      - spine2
+  leaf21:
+    mac: 00:1c:73:c4:c6:01
+    links:
+      - leaf22
+      - spine1
+      - spine2
+      - host21
+  leaf22:
+    mac: 00:1c:73:c5:c6:01
+    links:
+      - leaf21
+      - spine1
+      - spine2
+  leaf31:
+    mac: 00:1c:73:c6:c6:01
+    links:
+      - leaf32
+      - spine1
+      - spine2
+  leaf32:
+    mac: 00:1c:73:c7:c6:01
+    links:
+      - leaf31
+      - spine1
+      - spine2
+hosts:
+  host11:
+    ipaddress: 192.168.12.11/24
+    gateway: 192.168.12.1
+    links:
+      - leaf11
+  host21:
+    ipaddress: 192.168.12.21/24
+    gateway: 192.168.12.1
+    links:
+      - leaf21
