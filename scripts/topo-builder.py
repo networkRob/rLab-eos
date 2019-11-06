@@ -86,7 +86,7 @@ def main(args):
             CMDS_DOWN.append("sudo ovs-docker del-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name']))
     # Create commands to create host containers
     for _host in HOSTS:
-        CMDS.append("docker create --name={0} --net=none {1}".format(HOSTS[_host]['name'], host_img))
+        CMDS.append("docker create --name={0} --hostname={0} --net=none {1}".format(HOSTS[_host]['name'], host_img))
         CMDS.append("docker start {}".format(HOSTS[_host]['name']))
         CMDS_DOWN.append("docker stop {}".format(HOSTS[_host]['name']))
         CMDS_DOWN.append("docker rm {}".format(HOSTS[_host]['name']))
