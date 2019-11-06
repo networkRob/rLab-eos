@@ -76,23 +76,23 @@ def main(args):
     for _node in NODES:
         CMDS.append("docker create --name={0} --privileged -v $(pwd)/configs/{1}:/mnt/flash -e INTFTYPE=eth -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(NODES[_node]['name'], NODES[_node]['name'], ceos_img))
         CMDS.append("docker start {}".format(NODES[_node]['name']))
-        CMDS_DOWN.append("docker stop {}".format(NODES[_node]['name']))
-        CMDS_DOWN.append("docker rm {}".format(NODES[_node]['name']))
         for eindex in range(1, len(NODES[_node]['intfs']) + 1):
             if eindex == 1:
                 CMDS.append("sudo ovs-docker add-port {0} eth{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name'], topo_yaml['nodes'][_node]['mac']))
             else:
                 CMDS.append("sudo ovs-docker add-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name']))
             CMDS_DOWN.append("sudo ovs-docker del-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, NODES[_node]['name']))
+        CMDS_DOWN.append("docker stop {}".format(NODES[_node]['name']))
+        CMDS_DOWN.append("docker rm {}".format(NODES[_node]['name']))
     # Create commands to create host containers
     for _host in HOSTS:
         CMDS.append("docker create --name={0} --hostname={0} --net=none {1}".format(HOSTS[_host]['name'], host_img))
         CMDS.append("docker start {}".format(HOSTS[_host]['name']))
-        CMDS_DOWN.append("docker stop {}".format(HOSTS[_host]['name']))
-        CMDS_DOWN.append("docker rm {}".format(HOSTS[_host]['name']))
         for eindex in range(0, len(HOSTS[_host]['intfs'])):
             CMDS.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, HOSTS[_host]['name'], topo_yaml['hosts'][_host]['ipaddress']))
             CMDS_DOWN.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, HOSTS[_host]['name'], topo_yaml['hosts'][_host]['ipaddress']))
+        CMDS_DOWN.append("docker stop {}".format(HOSTS[_host]['name']))
+        CMDS_DOWN.append("docker rm {}".format(HOSTS[_host]['name']))
     if CMDS:
         with open(BASE_PATH + "/cnt/{}-start.sh".format(_tag), 'w') as fout:
             fout.write("#!/bin/bash\n")
