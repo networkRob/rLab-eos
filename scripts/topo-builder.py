@@ -58,7 +58,7 @@ def main(args):
         CMDS.append("sudo ovs-vsctl set bridge {} other-config:forward-bpdu=true".format(_br))
     # Create commands to create cEOS containers:
     for _node in NODES:
-        CMDS.append("docker create --name={0} --privileged -v $(pwd)/configs/{1}:/mnt/flash/startup-config -e INTFTYPE=eth -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(NODES[_node]['name'], NODES[_node]['name'], args.image))
+        CMDS.append("docker create --name={0} --privileged -v $(pwd)/configs/{1}:/mnt/flash -e INTFTYPE=eth -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(NODES[_node]['name'], NODES[_node]['name'], args.image))
         CMDS.append("docker start {}".format(NODES[_node]['name']))
         CMDS_DOWN.append("docker stop {}".format(NODES[_node]['name']))
         CMDS_DOWN.append("docker rm {}".format(NODES[_node]['name']))
