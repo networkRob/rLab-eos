@@ -1,5 +1,8 @@
 topology:
   name: L2
+images:
+  ceos: 4.22.1F.Trunk
+  host: chost:0.1
 nodes:
   spine1:
     mac: 00:1c:73:c0:c6:01
@@ -36,4 +39,28 @@ nodes:
       - spine2
       - host30
       - host31
-      
+hosts:
+  host10:
+    ipaddress: 10.0.12.11/24
+    links:
+      - leaf1
+  host11:
+    ipaddress: 10.0.13.11/24
+    links:
+      - leaf1
+  host20:
+    ipaddress: 10.0.12.21/24
+    links:
+      - leaf2
+  host21:
+    ipaddress: 10.0.13.21/24
+    links:
+      - leaf2
+  host30:
+    ipaddress: 10.0.12.31/24
+    links:
+      - leaf3
+  host31:
+    ipaddress: 10.0.13.31/24
+    links:
+      - leaf3

@@ -55,3 +55,21 @@ sudo ovs-docker add-port l2spine1leaf2 eth1 l2leaf2 --macaddress=00:1c:73:c3:c6:
 sudo ovs-docker add-port l2spine2leaf2 eth2 l2leaf2
 sudo ovs-docker add-port l2leaf2host20 eth3 l2leaf2
 sudo ovs-docker add-port l2leaf2host21 eth4 l2leaf2
+docker create --name=l2host31 --net=none chost:0.1
+docker start l2host31
+sudo ovs-docker add-port l2leaf3host31 eth0 l2host31 --ipaddress=10.0.13.31/24
+docker create --name=l2host30 --net=none chost:0.1
+docker start l2host30
+sudo ovs-docker add-port l2leaf3host30 eth0 l2host30 --ipaddress=10.0.12.31/24
+docker create --name=l2host20 --net=none chost:0.1
+docker start l2host20
+sudo ovs-docker add-port l2leaf2host20 eth0 l2host20 --ipaddress=10.0.12.21/24
+docker create --name=l2host21 --net=none chost:0.1
+docker start l2host21
+sudo ovs-docker add-port l2leaf2host21 eth0 l2host21 --ipaddress=10.0.13.21/24
+docker create --name=l2host11 --net=none chost:0.1
+docker start l2host11
+sudo ovs-docker add-port l2leaf1host11 eth0 l2host11 --ipaddress=10.0.13.11/24
+docker create --name=l2host10 --net=none chost:0.1
+docker start l2host10
+sudo ovs-docker add-port l2leaf1host10 eth0 l2host10 --ipaddress=10.0.12.11/24
