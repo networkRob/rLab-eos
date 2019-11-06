@@ -1,7 +1,7 @@
 topology:
   name: L2
 images:
-  ceos: 4.22.1F.Trunk.Vol
+  ceos: 4.22.1F.Trunk
   host: chost:0.1
 nodes:
   spine1:
