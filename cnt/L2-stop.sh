@@ -29,22 +29,22 @@ sudo ovs-docker del-port l2leaf2host20 eth3 l2leaf2
 sudo ovs-docker del-port l2leaf2host21 eth4 l2leaf2
 docker stop l2leaf2
 docker rm l2leaf2
-sudo ovs-docker del-port l2leaf3host31 eth0 l2host31 --ipaddress=10.0.13.31/24
+sudo ovs-docker del-port l2leaf3host31 eth0 l2host31 --ipaddress=10.0.13.31/24 --gateway=10.0.13.1
 docker stop l2host31
 docker rm l2host31
-sudo ovs-docker del-port l2leaf3host30 eth0 l2host30 --ipaddress=10.0.12.31/24
+sudo ovs-docker del-port l2leaf3host30 eth0 l2host30 --ipaddress=10.0.12.31/24 --gateway=10.0.12.1
 docker stop l2host30
 docker rm l2host30
-sudo ovs-docker del-port l2leaf2host20 eth0 l2host20 --ipaddress=10.0.12.21/24
+sudo ovs-docker del-port l2leaf2host20 eth0 l2host20 --ipaddress=10.0.12.21/24 --gateway=10.0.12.1
 docker stop l2host20
 docker rm l2host20
-sudo ovs-docker del-port l2leaf2host21 eth0 l2host21 --ipaddress=10.0.13.21/24
+sudo ovs-docker del-port l2leaf2host21 eth0 l2host21 --ipaddress=10.0.13.21/24 --gateway=10.0.13.1
 docker stop l2host21
 docker rm l2host21
-sudo ovs-docker del-port l2leaf1host11 eth0 l2host11 --ipaddress=10.0.13.11/24
+sudo ovs-docker del-port l2leaf1host11 eth0 l2host11 --ipaddress=10.0.13.11/24 --gateway=10.0.13.1
 docker stop l2host11
 docker rm l2host11
-sudo ovs-docker del-port l2leaf1host10 eth0 l2host10 --ipaddress=10.0.12.11/24
+sudo ovs-docker del-port l2leaf1host10 eth0 l2host10 --ipaddress=10.0.12.11/24 --gateway=10.0.12.1
 docker stop l2host10
 docker rm l2host10
 sudo ovs-vsctl del-br l2spine1spine2

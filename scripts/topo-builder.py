@@ -89,8 +89,8 @@ def main(args):
         CMDS.append("docker create --name={0} --hostname={0} --net=none {1}".format(HOSTS[_host]['name'], host_img))
         CMDS.append("docker start {}".format(HOSTS[_host]['name']))
         for eindex in range(0, len(HOSTS[_host]['intfs'])):
-            CMDS.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, HOSTS[_host]['name'], topo_yaml['hosts'][_host]['ipaddress']))
-            CMDS_DOWN.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, HOSTS[_host]['name'], topo_yaml['hosts'][_host]['ipaddress']))
+            CMDS.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, HOSTS[_host]['name'], topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
+            CMDS_DOWN.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, HOSTS[_host]['name'], topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
         CMDS_DOWN.append("docker stop {}".format(HOSTS[_host]['name']))
         CMDS_DOWN.append("docker rm {}".format(HOSTS[_host]['name']))
     if CMDS:

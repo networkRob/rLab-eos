@@ -42,25 +42,31 @@ nodes:
 hosts:
   host10:
     ipaddress: 10.0.12.11/24
+    gateway: 10.0.12.1
     links:
       - leaf1
   host11:
     ipaddress: 10.0.13.11/24
+    gateway: 10.0.13.1
     links:
       - leaf1
   host20:
     ipaddress: 10.0.12.21/24
+    gateway: 10.0.12.1
     links:
       - leaf2
   host21:
     ipaddress: 10.0.13.21/24
+    gateway: 10.0.13.1
     links:
       - leaf2
   host30:
     ipaddress: 10.0.12.31/24
+    gateway: 10.0.12.1
     links:
       - leaf3
   host31:
     ipaddress: 10.0.13.31/24
+    gateway: 10.0.13.1
     links:
       - leaf3
