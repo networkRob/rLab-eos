@@ -23,11 +23,12 @@ def openTopo(topo):
     except:
         return(False)
 
-def checkBridge(dev1, dev2):
+def checkBridge(dev1, dev2, _tag):
     global OVS_BRIDGES
     _addBr = True
+    name_len = len(dev1 + dev2 + _tag)
     for _br in OVS_BRIDGES:
-        if dev1 in _br and dev2 in _br:
+        if dev1 in _br and dev2 in _br and len(_br) == name_len:
             _addBr = False
             return({'status': _addBr, 'name': _br})
     return({'status': _addBr, 'name':''})
@@ -48,7 +49,7 @@ def main(args):
             }
             for _peer in topo_yaml['nodes'][_node]['links']:
                 intf += 1
-                _brCheck = checkBridge(_node, _peer)
+                _brCheck = checkBridge(_node, _peer, _tag)
                 if _brCheck['status']:
                     _brName = _tag.lower() + _node + _peer
                     OVS_BRIDGES.append(_brName)
@@ -56,16 +57,17 @@ def main(args):
                 else:
                     NODES[_node]['intfs']['eth{}'.format(intf)] = _brCheck['name']
         # Section to parse hosts
-        for _host in topo_yaml['hosts']:
-            intf = 0
-            HOSTS[_host] = {
-                'intfs': {},
-                'name': _tag.lower() + _host
-            }
-            for _peer in topo_yaml['hosts'][_host]['links']:
-                _brCheck = checkBridge(_host, _peer)
-                HOSTS[_host]['intfs']['eth{}'.format(intf)] = _brCheck['name']
-                intf += 1
+        if topo_yaml['hosts']:
+            for _host in topo_yaml['hosts']:
+                intf = 0
+                HOSTS[_host] = {
+                    'intfs': {},
+                    'name': _tag.lower() + _host
+                }
+                for _peer in topo_yaml['hosts'][_host]['links']:
+                    _brCheck = checkBridge(_host, _peer, _tag)
+                    HOSTS[_host]['intfs']['eth{}'.format(intf)] = _brCheck['name']
+                    intf += 1
             
     # Create commands to create Open vSwitch bridges
     for _br in OVS_BRIDGES:
@@ -74,7 +76,7 @@ def main(args):
     
     # Create commands to create cEOS containers:
     for _node in NODES:
-        CMDS.append("docker create --name={0} --net=none --privileged -v $(pwd)/configs/{1}:/mnt/flash/:Z -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(NODES[_node]['name'], NODES[_node]['name'], ceos_img))
+        CMDS.append("docker create --name={0} --net=none --privileged -v $(pwd)/configs/{1}/{2}:/mnt/flash/:Z -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(NODES[_node]['name'], topo_yaml['topology']['name'], NODES[_node]['name'], ceos_img))
         CMDS.append("docker start {}".format(NODES[_node]['name']))
         for eindex in range(1, len(NODES[_node]['intfs']) + 1):
             if eindex == 1:
