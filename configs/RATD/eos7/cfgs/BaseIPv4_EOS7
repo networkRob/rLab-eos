@@ -1,0 +1,31 @@
+terminal length 0
+service routing protocols model multi-agent
+hostname eos7
+aaa authentication policy on-success log
+aaa authentication policy on-failure log
+aaa root secret sha512 $6$xvKkJigr3SLt23fw$eTLH9vWAGZH2JzxTdWJlbh/Bc7dzopetT.mXmmBQOgydSXE7LGevA.qGHaGSh7rrdNmzsqsB4GPHSquUqpS5g0
+username admin privilege 15 role network-admin secret sha512 $6$u8TzyADEPApe7ULy$BKaJv5rag8YW2ishA1t2ETWuINXZdefjwxqRMoXiynTSUW6btDrRI6PE4Ig4tzeHGEe3WbtEC1BihBiu0Z1t0/
+username arista privilege 15 role network-admin secret sha512 $6$oZdidujmIcSJhiXd$mOmLeJbY3u49JmFZSOKunH3Rws.7NGnrrFcjzTaLgSK0llB03xVEcYTKzPRs0ZbDzuV7QpDMZcwjxlHXJWQU3.
+username cvpadmin privilege 15 secret sha512 $6$qx23orQXpTktxB2s$PyooyETPhvJ69yow1WB.wqB3oOG9PCQaNSqgaW1PC9pG7IM0Gs6Lyt7ARKIMmwcTzRKGC9808OXcuigWRlBbn1
+interface Ethernet1
+   description EOS3
+   no switchport
+   ip address 10.3.7.7/24
+interface Ethernet2
+   description EOS10
+interface Ethernet3
+   description EOS1
+   no switchport
+   ip address 10.1.7.7/24
+interface Ethernet4
+   description EOS19
+   no switchport
+   ip address 10.7.19.7/24
+interface Loopback0
+   ip address 7.7.7.7/32
+interface Management1
+   ip address 192.168.0.16/24
+   no lldp transmit
+ip routing
+management api http-commands
+   no shutdown

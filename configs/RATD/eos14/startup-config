@@ -1,0 +1,23 @@
+terminal length 0
+service routing protocols model multi-agent
+hostname eos14
+aaa authentication policy on-success log
+aaa authentication policy on-failure log
+aaa root secret sha512 $6$XayZDTdqsrO17Mxn$3Dot5qXGZE9giQV0xwJa5W7Y/jmdnD4tOJticwKavv/d5NxJzOJ4fMnHwcfGU9RSsneKS03PK3.3AWCgNwZ7M1
+username admin privilege 15 role network-admin secret sha512 $6$h/fWZtwFxMJ4H759$ezIzhkJBi2VztKnVvq6SMIvnYNywUcAKf5YA2TXjrkEk/ENJoc27M2iwARDCaLEyb61.mX8PfZ3.mOKRmLGYq/
+username arista privilege 15 role network-admin secret sha512 $6$WC0NV15OXw4vt5Ll$BqdoIdkl0cWjlL/tCqWVA2mELw1WIf.ypKoxxpoBf3v4SGrCKkSzUtHHokrY/q6RTmSmdedpGSV/47TzsPP3R0
+username cvpadmin privilege 15 secret sha512 $6$eeQE1iCtx1aZ05qg$7ZrP.BILxAvlwpbhxyfBgGOuP2LSDQ/46g6c8pyd0ecjY9gzBIusdzvEJP2Qx2VDwi6CNbOsQwK/Bs1b6fazZ1
+interface Ethernet1
+   description EOS8
+   no switchport
+interface Ethernet2
+   description EOS6
+   no switchport
+interface Loopback0
+   ip address 14.14.14.14/32
+interface Management1
+   ip address 192.168.0.23/24
+   no lldp transmit
+ip routing
+management api http-commands
+   no shutdown
