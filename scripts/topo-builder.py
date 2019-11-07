@@ -76,7 +76,7 @@ def main(args):
     
     # Create commands to create cEOS containers:
     for _node in NODES:
-        CMDS.append("docker create --name={0} --net=none --privileged -v $(pwd)/configs/{1}/{2}:/mnt/flash/:Z -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(NODES[_node]['name'], topo_yaml['topology']['name'], NODES[_node]['name'], ceos_img))
+        CMDS.append("docker create --name={0} --net=none --privileged -v $(pwd)/configs/{1}/{2}:/mnt/flash/:Z -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(NODES[_node]['name'], topo_yaml['topology']['name'], _node, ceos_img))
         CMDS.append("docker start {}".format(NODES[_node]['name']))
         for eindex in range(1, len(NODES[_node]['intfs']) + 1):
             if eindex == 1:
