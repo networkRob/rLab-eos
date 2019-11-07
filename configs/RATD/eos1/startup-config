@@ -35,15 +35,6 @@ interface Loopback0
 interface Management1
    ip address 192.168.0.10/24
    no lldp transmit
-event-handler ovs-restart
-   trigger on-boot
-   action bash sudo systemctl restart openvswitch
-   delay 30
-   asynchronous
-ip access-list ALL
-   permit ip any any
 ip routing
-control-plane
-   ip access-group ALL in
 management api http-commands
    no shutdown
