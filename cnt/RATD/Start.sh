@@ -1,3 +1,4 @@
+#!/bin/bash
 docker start ratdeos16
 sudo ovs-docker add-port ratdeos4eos16 eth1 ratdeos16 --macaddress=00:1c:73:d5:c6:01
 docker start ratdeos9

@@ -16,6 +16,7 @@ CMDS_CREATE = []
 CMDS_START = []
 CMDS_STOP = []
 CMDS_DESTROY = []
+CMDS = {}
 
 def openTopo(topo):
     try:
@@ -114,6 +115,13 @@ def main(args):
         CMDS_STOP.append("docker stop {}".format(_hname))
         CMDS_DESTROY.append("docker volume rm {}".format(_hname))
 
+    # Check and create topo commands
+    if topo_yaml['commands']:
+        for _cmd in topo_yaml['commands']:
+            CMDS[_cmd] = []
+            for _node in topo_yaml['commands'][_cmd]:
+                CMDS[_cmd].append("docker exec -it ratd{0} Cli -c \"$(sudo cat $(docker volume inspect --format".format(_node) + r"'{{ .Mountpoint }}'" + " ratd{0})/cfgs/IS-IS_{1})\"".format(_node, _node.upper()))
+
     # Check to see if dest dir is created
     if not isdir(BASE_PATH + "/cnt/{0}".format(_tag)):
         mkdir(BASE_PATH + "/cnt/{0}".format(_tag))
@@ -129,11 +137,21 @@ def main(args):
             for _br in OVS_BRIDGES:
                 fout.write("sudo ovs-vsctl del-br {}\n".format(_br))
         with open(BASE_PATH + "/cnt/{0}/Start.sh".format(_tag), 'w') as fout:
+            fout.write("#!/bin/bash\n")
             for _cmd in CMDS_START:
                 fout.write(_cmd + "\n")
         with open(BASE_PATH + "/cnt/{0}/Stop.sh".format(_tag), 'w') as fout:
+            fout.write("#!/bin/bash\n")
             for _cmd in CMDS_STOP:
                 fout.write(_cmd + "\n")
+        if CMDS:
+            for _cmd in CMDS:
+                _tmp = CMDS[_cmd]
+                with open(BASE_PATH + "/cnt/{0}/CMD-{1}.sh".format(_tag, _cmd), 'w') as fout:
+                    fout.write("#!/bin/bash\n")
+                    for _ncmd in _tmp:
+                        fout.write(_ncmd + "\n")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

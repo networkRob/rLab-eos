@@ -127,3 +127,14 @@ nodes:
     links:
       - eos3
 hosts:
+commands:
+  is-is:
+    - eos1
+    - eos2
+    - eos3
+    - eos4
+    - eos5
+    - eos6
+    - eos7
+    - eos8
+    

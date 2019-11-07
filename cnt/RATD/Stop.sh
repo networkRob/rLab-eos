@@ -1,3 +1,4 @@
+#!/bin/bash
 sudo ovs-docker del-port ratdeos4eos16 eth1 ratdeos16
 docker stop ratdeos16
 sudo ovs-docker del-port ratdeos4eos9 eth1 ratdeos9
