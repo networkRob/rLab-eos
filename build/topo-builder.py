@@ -120,7 +120,7 @@ def main(args):
         for _cmd in topo_yaml['commands']:
             CMDS[_cmd] = []
             for _node in topo_yaml['commands'][_cmd]:
-                CMDS[_cmd].append("docker exec -it ratd{0} Cli -c \"$(sudo cat $(docker volume inspect --format".format(_node) + r"'{{ .Mountpoint }}'" + " ratd{0})/cfgs/IS-IS_{1})\"".format(_node, _node.upper()))
+                CMDS[_cmd].append("docker exec -it ratd{0} Cli -c \"$(sudo cat $(docker volume inspect --format ".format(_node) + r"'{{ .Mountpoint }}'" + " ratd{0})/cfgs/IS-IS_{1})\"".format(_node, _node.upper()))
 
     # Check to see if dest dir is created
     if not isdir(BASE_PATH + "/cnt/{0}".format(_tag)):
