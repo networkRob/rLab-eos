@@ -1,0 +1,34 @@
+!
+service routing protocols model multi-agent
+!
+hostname eos9
+!
+spanning-tree mode mstp
+!
+!
+aaa authorization exec default local
+!
+!
+username arista privilege 15 role network-admin secret sha512 $6$EoWo1xKgVqkLkfiG$Np7c6.pQZ/Z3i1Tw/Ph6VtjwJID63kb1RVeSzLi4EnfdAjo/9bKCT7Z7phcFcmVIiY3PAlW42z9L0GBPO8k56/
+!
+interface Ethernet1
+   description EOS4
+!
+interface Ethernet2
+   description EOS3
+!
+interface Loopback0
+   ip address 9.9.9.9/32
+!
+interface Management0
+   ip address 192.168.0.18/24
+!
+!
+!
+ip routing
+!
+!
+management api http-commands
+   no shutdown
+!
+end
