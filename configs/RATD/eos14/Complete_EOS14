@@ -1,0 +1,112 @@
+!
+!
+   no shutdown
+!
+!
+service routing protocols model multi-agent
+!
+!
+hostname eos14
+!
+spanning-tree mode mstp
+!
+!
+aaa authorization exec default local
+!
+!
+username arista privilege 15 role network-admin secret sha512 $6$WC0NV15OXw4vt5Ll$BqdoIdkl0cWjlL/tCqWVA2mELw1WIf.ypKoxxpoBf3v4SGrCKkSzUtHHokrY/q6RTmSmdedpGSV/47TzsPP3R0
+!
+interface Port-Channel14
+   description PEs: EOS6,EOS8
+   no switchport
+   ip address 10.0.0.14/24
+!
+interface Ethernet1
+   description EOS8
+   no switchport
+   channel-group 14 mode active
+!
+interface Ethernet2
+   description EOS6
+   no switchport
+   channel-group 14 mode active
+!
+interface Ethernet3
+!
+interface Ethernet4
+!
+interface Ethernet5
+!
+interface Ethernet6
+!
+interface Ethernet7
+!
+interface Ethernet8
+!
+interface Ethernet9
+!
+interface Ethernet10
+!
+interface Ethernet11
+!
+interface Ethernet12
+!
+interface Ethernet13
+!
+interface Ethernet14
+!
+interface Ethernet15
+!
+interface Ethernet16
+!
+interface Ethernet17
+!
+interface Ethernet18
+!
+interface Ethernet19
+!
+interface Ethernet20
+!
+interface Ethernet21
+!
+interface Ethernet22
+!
+interface Ethernet23
+!
+interface Ethernet24
+!
+interface Ethernet25
+!
+interface Ethernet26
+!
+interface Ethernet27
+!
+interface Ethernet28
+!
+interface Ethernet29
+!
+interface Ethernet30
+!
+interface Ethernet31
+!
+interface Ethernet32
+!
+interface Loopback0
+   ip address 14.14.14.14/32
+!
+interface Management0
+   ip address 192.168.0.23/24
+!
+!
+!
+ip routing
+!
+!
+router ospf 200
+   network 0.0.0.0/0 area 0.0.0.0
+   max-lsa 12000
+!
+management api http-commands
+   no shutdown
+!
+end

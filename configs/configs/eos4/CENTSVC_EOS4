@@ -1,0 +1,216 @@
+! Startup-config last modified at  Mon Nov 11 19:57:38 2019 by arista
+! device: eos4 (vEOS, EOS-4.21.2F)
+!
+terminal length 0
+!
+daemon TerminAttr
+   exec /usr/bin/TerminAttr -ingestgrpcurl=192.168.0.5:9910 -taillogs -ingestauth=key, -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent -ingestvrf=default
+   no shutdown
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+agent PhyEthtool shutdown
+!
+hostname eos4
+!
+spanning-tree mode mstp
+!
+tacacs-server key 7 070E33455D1D18
+tacacs-server host 192.168.0.4
+!
+aaa authentication policy on-success log
+aaa authentication policy on-failure log
+aaa authorization exec default local
+!
+aaa root secret sha512 $6$JG5EbBCiOE4ayPGU$Sn0ctWWYs8eV25iopU03h4WxMysAGznIP60CrTr4rVAJA6sbfGWgGjEu/nVOIXhboD8GiLgUxRpGgHa0.2JYm/
+!
+username admin privilege 15 role network-admin secret sha512 $6$UmjYPdsgYfgfPuoo$CAJlQK0oEquDAA0KapSy3lvqJkDRE1ReTHCVS9rl563bEoqFE8ZmxLcd/LCbgCRniznBsF.C/C/2hk0DF.WCC.
+username arista privilege 15 role network-admin secret sha512 $6$N5/Xkom/0kq/kQm.$ovoDjFpMCHuUHJdP3CieZunOrnqh4CG0QlwK7kVIgUPfoaAINyDLPh5pute6KF3cEzPskqyrXcZ.6YaVlKnnY1
+username arista sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6bJB3TkBEQZ9jNyO1kbdU0P20gZ1D72CvsPNZ5S4bbciBNTT/MHX8GwyLmM9k+ihaHK2JtRhWFcdsm9MojRgjAuzw4wn/6pa92y/93GvaYL//dOBXrHctZsX3PX7TZFL9VVBVA8aFp5iXxEM8uyKWhxnBo/D0eR25Jed4gHVHQMi6Hyh7eKRpE3E6kvRlSkhNikZ5EwdoM7lg2i6rjf7+o3G6isGtxliMZD98N6qWW79U6euS072qkK/q3dfgyHdd8a8MD5VLWbYR9ikhKwpXAmxcFn5aRllqXJ++QAW0NO78noI91ICRxpAuQSzgrntdwXdyFWiqyiD3AxK28qWZ arista@labaccess
+username cvpadmin privilege 15 secret sha512 $6$.DpgsV2AccT7ArtF$tGOjuNJCW3dCn7uo4MzY3gdgcv6B.4UIaJYKb774Ld8ngF9nA6TGMRcBJQYyUkEd2pEkoGvOh7f4f2MjiEstd/
+username ec2-user nopassword
+username ec2-user sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCHEDh9HDGbWA58rkYi6M6RTgVeSQl1ilIBOIhzJy6QSevBHtUUDijGIlbBOoGZl5JHRn8UvmdKQBN5ygAUbGOE4sbh9n8BPrlsg1osaN2pwE73JWMSI50pSLCQO/3HBpwHyQ3bo5ZYLj0MzpKEMatMe7gy5pkjF4P0AKU0s9/qo9ixXlWHDw/9DJCfucUk6zwBiTUJxPKTskTFWvDRr/Yo+GUz5of9i/jIA37ux/20RjVuedqy3+LoYbwD7jYUJlq525g+OAZwIY+07Nz8alpBayW+asYKBosD5kMDrf+kLmFGbsNxYXJCEjEuEmDw7fQt5Gscos2BRG4Egcik1T0p
+!
+vlan 20
+   name Customer2_E-LAN
+!
+interface Port-Channel9
+   description CE-EOS9
+   switchport access vlan 20
+   !
+   evpn ethernet-segment
+      identifier 0000:0200:0200:1000:0608
+      route-target import 00:02:00:01:00:20
+   lacp system-id 0000.0000.0034
+   spanning-tree portfast
+!
+interface Ethernet1
+   description EOS9
+   channel-group 9 mode active
+!
+interface Ethernet2
+   description EOS8
+   no switchport
+   ip address 10.4.8.4/24
+   isis enable 100
+   isis circuit-type level-2
+   isis network point-to-point
+!
+interface Ethernet3
+   description EOS5
+   no switchport
+   ip address 10.4.5.4/24
+   isis enable 100
+   isis circuit-type level-2
+   isis network point-to-point
+!
+interface Ethernet4
+   description EOS2
+   no switchport
+   ip address 10.2.4.4/24
+   isis enable 100
+   isis circuit-type level-2
+   isis network point-to-point
+!
+interface Ethernet5
+   description EOS3
+   no switchport
+   ip address 10.3.4.4/24
+   isis enable 100
+   isis circuit-type level-2
+   isis network point-to-point
+!
+interface Ethernet6
+   description EOS16
+   no switchport
+!
+interface Ethernet7
+!
+interface Ethernet8
+!
+interface Ethernet9
+!
+interface Ethernet10
+!
+interface Ethernet11
+!
+interface Ethernet12
+!
+interface Ethernet13
+!
+interface Ethernet14
+!
+interface Ethernet15
+!
+interface Ethernet16
+!
+interface Ethernet17
+!
+interface Ethernet18
+!
+interface Ethernet19
+!
+interface Ethernet20
+!
+interface Ethernet21
+!
+interface Ethernet22
+!
+interface Ethernet23
+!
+interface Ethernet24
+!
+interface Ethernet25
+!
+interface Ethernet26
+!
+interface Ethernet27
+!
+interface Ethernet28
+!
+interface Ethernet29
+!
+interface Ethernet30
+!
+interface Ethernet31
+!
+interface Ethernet32
+!
+interface Loopback0
+   ip address 4.4.4.4/32
+   isis enable 100
+   isis passive
+   node-segment ipv4 index 4
+!
+interface Management1
+   ip address 192.168.0.13/24
+   no lldp transmit
+!
+event-handler ovs-restart
+   trigger on-boot
+   action bash sudo systemctl restart openvswitch
+   delay 30
+   asynchronous
+!
+ip access-list ALL
+   10 permit ip any any
+!
+ip routing
+!
+control-plane
+   ip access-group ALL in
+!
+mpls ip
+!
+mpls ldp
+   router-id 4.4.4.4
+   transport-address interface Loopback0
+   no shutdown
+   !
+   pseudowires
+      mtu 9000
+      !
+      pseudowire PW1
+         neighbor 1.1.1.1
+         pseudowire-id 1617
+!
+patch panel
+   patch EOS1-PW1
+      connector 1 interface Ethernet6
+      connector 2 pseudowire ldp PW1
+!
+router bgp 100
+   router-id 4.4.4.4
+   no bgp default ipv4-unicast
+   maximum-paths 2
+   neighbor 5.5.5.5 remote-as 100
+   neighbor 5.5.5.5 update-source Loopback0
+   neighbor 5.5.5.5 send-community
+   neighbor 5.5.5.5 maximum-routes 12000 
+   !
+   vlan 20
+      rd 4.4.4.4:20
+      route-target both 2:20
+      redistribute learned
+   !
+   address-family evpn
+      neighbor default encapsulation mpls next-hop-self source-interface Loopback0
+      neighbor 5.5.5.5 activate
+!
+router isis 100
+   net 49.1111.0000.0004.00
+   is-type level-2
+   advertise passive-only
+   !
+   address-family ipv4 unicast
+   !
+   segment-routing mpls
+      router-id 4.4.4.4
+      no shutdown
+!
+management api http-commands
+   no shutdown
+!
+end

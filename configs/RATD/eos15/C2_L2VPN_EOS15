@@ -1,0 +1,106 @@
+!
+!
+   no shutdown
+!
+!
+service routing protocols model multi-agent
+!
+!
+hostname eos15
+!
+spanning-tree mode mstp
+!
+!
+aaa authorization exec default local
+!
+!
+username arista privilege 15 role network-admin secret sha512 $6$whMVx8YaRDGVr8hP$9ZOKp.nM33RdEJoE/UPCEa.Nbrrs4ucKumOg2zHvSMHg4JDn6PIINHvbqRpUDHKdiY7muCdWvQfxN7UkKGdtd0
+!
+interface Ethernet1
+   description EOS8
+   no switchport
+   ip address 10.8.15.15/24
+!
+interface Ethernet2
+!
+interface Ethernet3
+!
+interface Ethernet4
+!
+interface Ethernet5
+!
+interface Ethernet6
+!
+interface Ethernet7
+!
+interface Ethernet8
+!
+interface Ethernet9
+!
+interface Ethernet10
+!
+interface Ethernet11
+!
+interface Ethernet12
+!
+interface Ethernet13
+!
+interface Ethernet14
+!
+interface Ethernet15
+!
+interface Ethernet16
+!
+interface Ethernet17
+!
+interface Ethernet18
+!
+interface Ethernet19
+!
+interface Ethernet20
+!
+interface Ethernet21
+!
+interface Ethernet22
+!
+interface Ethernet23
+!
+interface Ethernet24
+!
+interface Ethernet25
+!
+interface Ethernet26
+!
+interface Ethernet27
+!
+interface Ethernet28
+!
+interface Ethernet29
+!
+interface Ethernet30
+!
+interface Ethernet31
+!
+interface Ethernet32
+!
+interface Loopback0
+   ip address 15.15.15.15/32
+!
+interface Management0
+   ip address 192.168.0.24/24
+!
+!
+!
+ip routing
+!
+!
+router bgp 15
+   router-id 15.15.15.15
+   neighbor 10.8.15.8 remote-as 100
+   neighbor 10.8.15.8 maximum-routes 12000 
+   network 15.15.15.15/32
+!
+management api http-commands
+   no shutdown
+!
+end

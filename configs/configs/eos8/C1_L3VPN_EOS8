@@ -1,0 +1,171 @@
+! Startup-config last modified at  Mon Nov 11 20:01:17 2019 by arista
+! device: eos8 (vEOS, EOS-4.21.2F)
+!
+terminal length 0
+!
+daemon TerminAttr
+   exec /usr/bin/TerminAttr -ingestgrpcurl=192.168.0.5:9910 -taillogs -ingestauth=key, -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent -ingestvrf=default
+   no shutdown
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+agent PhyEthtool shutdown
+!
+hostname eos8
+!
+spanning-tree mode mstp
+!
+tacacs-server key 7 070E33455D1D18
+tacacs-server host 192.168.0.4
+!
+aaa authentication policy on-success log
+aaa authentication policy on-failure log
+aaa authorization exec default local
+!
+aaa root secret sha512 $6$6I0E3gnavS7kZDdp$EYRnxS5VYMzmahXtcgLDy0U2Ca.hnKLtTxADzLjtrY6oZufCipN2jpJBtluByR12hCRiFFxs7PZx6RYU7EyWc/
+!
+username admin privilege 15 role network-admin secret sha512 $6$qANnWfPqIoEuqKLH$tTZo3m9nWjDeFsLPPnRZwIPu8R6GFlZdE9AOpGao9qK603GZ9FuSEFYl.rpslpCBidiQMtlS6W7gM4CcxNn4G1
+username arista privilege 15 role network-admin secret sha512 $6$4yJ3sA4vNih54XZy$ShdE7OWrFSETgj92OOzpSbHpODYc/uEUEsmu1Sx6KZ41fCjltt6DvwiaInsoVBSZ/g6ysz7Npkyw6Lw4XJGTq/
+username arista sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6bJB3TkBEQZ9jNyO1kbdU0P20gZ1D72CvsPNZ5S4bbciBNTT/MHX8GwyLmM9k+ihaHK2JtRhWFcdsm9MojRgjAuzw4wn/6pa92y/93GvaYL//dOBXrHctZsX3PX7TZFL9VVBVA8aFp5iXxEM8uyKWhxnBo/D0eR25Jed4gHVHQMi6Hyh7eKRpE3E6kvRlSkhNikZ5EwdoM7lg2i6rjf7+o3G6isGtxliMZD98N6qWW79U6euS072qkK/q3dfgyHdd8a8MD5VLWbYR9ikhKwpXAmxcFn5aRllqXJ++QAW0NO78noI91ICRxpAuQSzgrntdwXdyFWiqyiD3AxK28qWZ arista@labaccess
+username cvpadmin privilege 15 secret sha512 $6$lfySt.l5WsBSuqLL$AyyYzrXogtC7VAjcR0RY4o0xbmxwcbYfzpqyuImI0qRTdBsif79UkFmiqzoRCAoveOt3xn0w79QQhdU0u5iF7.
+username ec2-user nopassword
+username ec2-user sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCHEDh9HDGbWA58rkYi6M6RTgVeSQl1ilIBOIhzJy6QSevBHtUUDijGIlbBOoGZl5JHRn8UvmdKQBN5ygAUbGOE4sbh9n8BPrlsg1osaN2pwE73JWMSI50pSLCQO/3HBpwHyQ3bo5ZYLj0MzpKEMatMe7gy5pkjF4P0AKU0s9/qo9ixXlWHDw/9DJCfucUk6zwBiTUJxPKTskTFWvDRr/Yo+GUz5of9i/jIA37ux/20RjVuedqy3+LoYbwD7jYUJlq525g+OAZwIY+07Nz8alpBayW+asYKBosD5kMDrf+kLmFGbsNxYXJCEjEuEmDw7fQt5Gscos2BRG4Egcik1T0p
+!
+interface Ethernet1
+   description EOS4
+   no switchport
+   ip address 10.4.8.8/24
+   isis enable 100
+   isis circuit-type level-2
+   isis network point-to-point
+!
+interface Ethernet2
+   description EOS15
+   no switchport
+   ip address 10.8.15.8/24
+!
+interface Ethernet3
+   description EOS6
+   no switchport
+   ip address 10.6.8.8/24
+   isis enable 100
+   isis circuit-type level-2
+   isis network point-to-point
+!
+interface Ethernet4
+   description EOS14
+!
+interface Ethernet5
+   description EOS18
+   no switchport
+   ip address 10.8.18.8/24
+!
+interface Ethernet6
+!
+interface Ethernet7
+!
+interface Ethernet8
+!
+interface Ethernet9
+!
+interface Ethernet10
+!
+interface Ethernet11
+!
+interface Ethernet12
+!
+interface Ethernet13
+!
+interface Ethernet14
+!
+interface Ethernet15
+!
+interface Ethernet16
+!
+interface Ethernet17
+!
+interface Ethernet18
+!
+interface Ethernet19
+!
+interface Ethernet20
+!
+interface Ethernet21
+!
+interface Ethernet22
+!
+interface Ethernet23
+!
+interface Ethernet24
+!
+interface Ethernet25
+!
+interface Ethernet26
+!
+interface Ethernet27
+!
+interface Ethernet28
+!
+interface Ethernet29
+!
+interface Ethernet30
+!
+interface Ethernet31
+!
+interface Ethernet32
+!
+interface Loopback0
+   ip address 8.8.8.8/32
+   isis enable 100
+   isis passive
+   node-segment ipv4 index 8
+!
+interface Management1
+   ip address 192.168.0.17/24
+   no lldp transmit
+!
+event-handler ovs-restart
+   trigger on-boot
+   action bash sudo systemctl restart openvswitch
+   delay 30
+   asynchronous
+!
+ip access-list ALL
+   10 permit ip any any
+!
+ip routing
+!
+control-plane
+   ip access-group ALL in
+!
+mpls ip
+!
+router bgp 100
+   router-id 8.8.8.8
+   no bgp default ipv4-unicast
+   neighbor 5.5.5.5 remote-as 100
+   neighbor 5.5.5.5 update-source Loopback0
+   neighbor 5.5.5.5 send-community
+   neighbor 5.5.5.5 maximum-routes 12000 
+   !
+   address-family evpn
+      neighbor default encapsulation mpls next-hop-self source-interface Loopback0
+      neighbor 5.5.5.5 activate
+!
+router isis 100
+   net 49.1111.0000.0008.00
+   is-type level-2
+   advertise passive-only
+   !
+   address-family ipv4 unicast
+   !
+   segment-routing mpls
+      router-id 8.8.8.8
+      no shutdown
+!
+management api http-commands
+   no shutdown
+!
+end

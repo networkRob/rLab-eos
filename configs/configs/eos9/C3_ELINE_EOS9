@@ -1,0 +1,139 @@
+! Startup-config last modified at  Mon Nov 11 19:59:58 2019 by arista
+! device: eos9 (vEOS, EOS-4.21.2F)
+!
+terminal length 0
+!
+daemon TerminAttr
+   exec /usr/bin/TerminAttr -ingestgrpcurl=192.168.0.5:9910 -taillogs -ingestauth=key, -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent -ingestvrf=default
+   no shutdown
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+agent PhyEthtool shutdown
+!
+hostname eos9
+!
+spanning-tree mode mstp
+!
+tacacs-server key 7 070E33455D1D18
+tacacs-server host 192.168.0.4
+!
+aaa authentication policy on-success log
+aaa authentication policy on-failure log
+aaa authorization exec default local
+!
+aaa root secret sha512 $6$R2y1O5V99gzmOIEF$310om41M9d0UmuWHfe5Aq.eeAZqDNyr9B3DE7IapF9C7OSvX4ohxTcwVxozRV.73pwkh6A4Xjkr99euobIr8f.
+!
+username admin privilege 15 role network-admin secret sha512 $6$E7KQ3DG2NEvPwAr5$drHSzfN/9n4TdQN1.F73cyXbD4BLmfPK5/L8yHhH8v/zXJCnsCxYxUSEsqBU.l5piu58B0NiXQkPUYTiRiBkK.
+username arista privilege 15 role network-admin secret sha512 $6$EoWo1xKgVqkLkfiG$Np7c6.pQZ/Z3i1Tw/Ph6VtjwJID63kb1RVeSzLi4EnfdAjo/9bKCT7Z7phcFcmVIiY3PAlW42z9L0GBPO8k56/
+username arista sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6bJB3TkBEQZ9jNyO1kbdU0P20gZ1D72CvsPNZ5S4bbciBNTT/MHX8GwyLmM9k+ihaHK2JtRhWFcdsm9MojRgjAuzw4wn/6pa92y/93GvaYL//dOBXrHctZsX3PX7TZFL9VVBVA8aFp5iXxEM8uyKWhxnBo/D0eR25Jed4gHVHQMi6Hyh7eKRpE3E6kvRlSkhNikZ5EwdoM7lg2i6rjf7+o3G6isGtxliMZD98N6qWW79U6euS072qkK/q3dfgyHdd8a8MD5VLWbYR9ikhKwpXAmxcFn5aRllqXJ++QAW0NO78noI91ICRxpAuQSzgrntdwXdyFWiqyiD3AxK28qWZ arista@labaccess
+username cvpadmin privilege 15 secret sha512 $6$1uriyQ5wb28SvfQr$t8brpX6jlEF32Kcg5LwFGuXTyeePgAFOvPhQIdsIlzUePpdrEvU3Jii6uhdoIxhpTwRgrnuNwMJiluC.ikRa71
+username ec2-user nopassword
+username ec2-user sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCHEDh9HDGbWA58rkYi6M6RTgVeSQl1ilIBOIhzJy6QSevBHtUUDijGIlbBOoGZl5JHRn8UvmdKQBN5ygAUbGOE4sbh9n8BPrlsg1osaN2pwE73JWMSI50pSLCQO/3HBpwHyQ3bo5ZYLj0MzpKEMatMe7gy5pkjF4P0AKU0s9/qo9ixXlWHDw/9DJCfucUk6zwBiTUJxPKTskTFWvDRr/Yo+GUz5of9i/jIA37ux/20RjVuedqy3+LoYbwD7jYUJlq525g+OAZwIY+07Nz8alpBayW+asYKBosD5kMDrf+kLmFGbsNxYXJCEjEuEmDw7fQt5Gscos2BRG4Egcik1T0p
+!
+interface Port-Channel9
+   description PEs: EOS3,EOS4
+   no switchport
+   ip address 10.0.0.9/24
+!
+interface Ethernet1
+   description EOS4
+   no switchport
+   channel-group 9 mode active
+!
+interface Ethernet2
+   description EOS3
+   no switchport
+   channel-group 9 mode active
+!
+interface Ethernet3
+!
+interface Ethernet4
+!
+interface Ethernet5
+!
+interface Ethernet6
+!
+interface Ethernet7
+!
+interface Ethernet8
+!
+interface Ethernet9
+!
+interface Ethernet10
+!
+interface Ethernet11
+!
+interface Ethernet12
+!
+interface Ethernet13
+!
+interface Ethernet14
+!
+interface Ethernet15
+!
+interface Ethernet16
+!
+interface Ethernet17
+!
+interface Ethernet18
+!
+interface Ethernet19
+!
+interface Ethernet20
+!
+interface Ethernet21
+!
+interface Ethernet22
+!
+interface Ethernet23
+!
+interface Ethernet24
+!
+interface Ethernet25
+!
+interface Ethernet26
+!
+interface Ethernet27
+!
+interface Ethernet28
+!
+interface Ethernet29
+!
+interface Ethernet30
+!
+interface Ethernet31
+!
+interface Ethernet32
+!
+interface Loopback0
+   ip address 9.9.9.9/32
+!
+interface Management1
+   ip address 192.168.0.18/24
+   no lldp transmit
+!
+event-handler ovs-restart
+   trigger on-boot
+   action bash sudo systemctl restart openvswitch
+   delay 30
+   asynchronous
+!
+ip access-list ALL
+   10 permit ip any any
+!
+ip routing
+!
+control-plane
+   ip access-group ALL in
+!
+router ospf 200
+   network 0.0.0.0/0 area 0.0.0.0
+   max-lsa 12000
+!
+management api http-commands
+   no shutdown
+!
+end
