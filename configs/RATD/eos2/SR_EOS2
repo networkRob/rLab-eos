@@ -1,8 +1,4 @@
 !
-!
-   no shutdown
-!
-!
 service routing protocols model multi-agent
 !
 !
@@ -55,60 +51,6 @@ interface Ethernet5
    isis enable 100
    isis circuit-type level-2
    isis network point-to-point
-!
-interface Ethernet6
-!
-interface Ethernet7
-!
-interface Ethernet8
-!
-interface Ethernet9
-!
-interface Ethernet10
-!
-interface Ethernet11
-!
-interface Ethernet12
-!
-interface Ethernet13
-!
-interface Ethernet14
-!
-interface Ethernet15
-!
-interface Ethernet16
-!
-interface Ethernet17
-!
-interface Ethernet18
-!
-interface Ethernet19
-!
-interface Ethernet20
-!
-interface Ethernet21
-!
-interface Ethernet22
-!
-interface Ethernet23
-!
-interface Ethernet24
-!
-interface Ethernet25
-!
-interface Ethernet26
-!
-interface Ethernet27
-!
-interface Ethernet28
-!
-interface Ethernet29
-!
-interface Ethernet30
-!
-interface Ethernet31
-!
-interface Ethernet32
 !
 interface Loopback0
    ip address 2.2.2.2/32
