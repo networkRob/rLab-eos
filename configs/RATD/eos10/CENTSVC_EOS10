@@ -1,0 +1,39 @@
+!
+service routing protocols model multi-agent
+!
+!
+hostname eos10
+!
+spanning-tree mode mstp
+!
+!
+aaa authorization exec default local
+!
+!
+username arista privilege 15 role network-admin secret sha512 $6$EFqaYi9loVKyfH9Y$BMaXecaM5mMMUrKU57Ih8kBCbDkH17jdfl3goaDzpJrveHjSBwIzvcHWM6oppnt0z7qvOoCgdzZYpGL.8pyIt/
+!
+interface Ethernet1
+   description EOS7
+   mac-address 00:00:00:00:10:10
+   no switchport
+   ip address 10.0.0.10/24
+!
+interface Loopback0
+   ip address 10.10.10.10/32
+!
+interface Management0
+   ip address 192.168.0.19/24
+!
+!
+!
+ip routing
+!
+!
+router ospf 200
+   network 0.0.0.0/0 area 0.0.0.0
+   max-lsa 12000
+!
+management api http-commands
+   no shutdown
+!
+end
