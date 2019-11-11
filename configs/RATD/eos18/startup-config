@@ -1,19 +1,13 @@
-terminal length 0
 service routing protocols model multi-agent
 hostname eos18
-aaa authentication policy on-success log
-aaa authentication policy on-failure log
-aaa root secret sha512 $6$bFpZILywUe8GZHcY$E13qqobixVRPYAV2sMoiFVyqk/SebBZZgiNV.k/aTDYJA4pICBeV5lBpAr6x/oCL9BiXmxxuKBpkAdfEsvGFP1
-username admin privilege 15 role network-admin secret sha512 $6$pHGyTERKw7xnFm2.$sn2J5EOnNUBY0ZydHGgO24be6pD0VauO90crwHsjfJpY4pLLN/yBv0mzZ6pWsl5UpF6SHyQH0cI0iiMPJayt5.
 username arista privilege 15 role network-admin secret sha512 $6$RtWKDuUSAE6cXJ9P$Hb/taFbosUEgcnSoCPRTqBnwuqXGt./WjekWyGBuEkh6q61McD5TrRC0AH8sSiIx3ucR1D2HtwUK0T6lyyfQz0
-username cvpadmin privilege 15 secret sha512 $6$0hYZxo7igfW6b8x9$JiCEjQwMMjppDXUWfzOrGkGsWzzDZzGfT01EFTJqYY7CMdObF9k1ANjC7TyeR2YXuGqVbNTWXbxbEeZaWIji51
 interface Ethernet1
    description EOS8
    no switchport
    ip address 10.8.18.18/24
 interface Loopback0
    ip address 18.18.18.18/32
-interface Management1
+interface Management0
    ip address 192.168.0.27/24
    no lldp transmit
 ip routing

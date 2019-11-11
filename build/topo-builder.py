@@ -113,7 +113,6 @@ def main(args):
         CMDS_DESTROY.append("docker stop {}".format(_hname))
         CMDS_DESTROY.append("docker rm {}".format(_hname))
         CMDS_STOP.append("docker stop {}".format(_hname))
-        CMDS_DESTROY.append("docker volume rm {}".format(_hname))
 
     # Check and create topo commands
     if topo_yaml['commands']:

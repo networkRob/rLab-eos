@@ -1,12 +1,6 @@
-terminal length 0
 service routing protocols model multi-agent
 hostname eos5
-aaa authentication policy on-success log
-aaa authentication policy on-failure log
-aaa root secret sha512 $6$Yzu.V9t074LAUeXx$6sBnN0WCzbKM8jkEutd30Qv1A78AWPdJdiX/msIif70s0Tk8YV/ONFf1aq.yj124gFq/XUKdZMdusXeynntyk1
-username admin privilege 15 role network-admin secret sha512 $6$dgfORfgY7VR0nh5o$Soo5k/cRrpeBm1NYe4CHCd5n4OJlLuo/Y1Mb/nHlz5Eq43RGPiSYeh8/vOOdxOGYlozBCAFSOBpNlPX9gQj6N0
 username arista privilege 15 role network-admin secret sha512 $6$d/1TRCTkSg2KEVpF$IxcP9Vgu01D.V2gFHI.WUwZhbCkXE.R5DONOOB7f2iuFROjDvDtGFU762nJHlkiLSEdWGrJjMY.qarpkDZNTP/
-username cvpadmin privilege 15 secret sha512 $6$A6RbaVFGGOG2aLOs$Vbdz3q/0F.7iAfemPMakg8LZ8vL4KEiVYk8ud/oCiazQiLIa/1C/2ajGBAWTD/C67doPezflAlVNrMxwPvkJE1
 interface Ethernet1
    description EOS4
    no switchport
@@ -29,7 +23,7 @@ interface Ethernet5
    ip address 10.5.6.5/24
 interface Loopback0
    ip address 5.5.5.5/32
-interface Management1
+interface Management0
    ip address 192.168.0.14/24
    no lldp transmit
 ip routing
