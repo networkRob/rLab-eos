@@ -1,21 +1,21 @@
 #!/bin/bash
-docker exec -it ratdeos1 Cli -c "configure replace flash:/SR_EOS1"
-docker exec -it ratdeos2 Cli -c "configure replace flash:/SR_EOS2"
-docker exec -it ratdeos3 Cli -c "configure replace flash:/SR_EOS3"
-docker exec -it ratdeos4 Cli -c "configure replace flash:/SR_EOS4"
-docker exec -it ratdeos5 Cli -c "configure replace flash:/SR_EOS5"
-docker exec -it ratdeos6 Cli -c "configure replace flash:/SR_EOS6"
-docker exec -it ratdeos7 Cli -c "configure replace flash:/SR_EOS7"
-docker exec -it ratdeos8 Cli -c "configure replace flash:/SR_EOS8"
-docker exec -it ratdeos9 Cli -c "configure replace flash:/SR_EOS9"
-docker exec -it ratdeos10 Cli -c "configure replace flash:/SR_EOS10"
-docker exec -it ratdeos11 Cli -c "configure replace flash:/SR_EOS11"
-docker exec -it ratdeos12 Cli -c "configure replace flash:/SR_EOS12"
-docker exec -it ratdeos13 Cli -c "configure replace flash:/SR_EOS13"
-docker exec -it ratdeos14 Cli -c "configure replace flash:/SR_EOS14"
-docker exec -it ratdeos15 Cli -c "configure replace flash:/SR_EOS15"
-docker exec -it ratdeos16 Cli -c "configure replace flash:/SR_EOS16"
-docker exec -it ratdeos17 Cli -c "configure replace flash:/SR_EOS17"
-docker exec -it ratdeos18 Cli -c "configure replace flash:/SR_EOS18"
-docker exec -it ratdeos19 Cli -c "configure replace flash:/SR_EOS19"
-docker exec -it ratdeos20 Cli -c "configure replace flash:/SR_EOS20"
+docker exec -it ratdeos1 Cli -p 15 -c "configure replace flash:/SR_EOS1" ignore-errors
+docker exec -it ratdeos2 Cli -p 15 -c "configure replace flash:/SR_EOS2" ignore-errors
+docker exec -it ratdeos3 Cli -p 15 -c "configure replace flash:/SR_EOS3" ignore-errors
+docker exec -it ratdeos4 Cli -p 15 -c "configure replace flash:/SR_EOS4" ignore-errors
+docker exec -it ratdeos5 Cli -p 15 -c "configure replace flash:/SR_EOS5" ignore-errors
+docker exec -it ratdeos6 Cli -p 15 -c "configure replace flash:/SR_EOS6" ignore-errors
+docker exec -it ratdeos7 Cli -p 15 -c "configure replace flash:/SR_EOS7" ignore-errors
+docker exec -it ratdeos8 Cli -p 15 -c "configure replace flash:/SR_EOS8" ignore-errors
+docker exec -it ratdeos9 Cli -p 15 -c "configure replace flash:/SR_EOS9" ignore-errors
+docker exec -it ratdeos10 Cli -p 15 -c "configure replace flash:/SR_EOS10" ignore-errors
+docker exec -it ratdeos11 Cli -p 15 -c "configure replace flash:/SR_EOS11" ignore-errors
+docker exec -it ratdeos12 Cli -p 15 -c "configure replace flash:/SR_EOS12" ignore-errors
+docker exec -it ratdeos13 Cli -p 15 -c "configure replace flash:/SR_EOS13" ignore-errors
+docker exec -it ratdeos14 Cli -p 15 -c "configure replace flash:/SR_EOS14" ignore-errors
+docker exec -it ratdeos15 Cli -p 15 -c "configure replace flash:/SR_EOS15" ignore-errors
+docker exec -it ratdeos16 Cli -p 15 -c "configure replace flash:/SR_EOS16" ignore-errors
+docker exec -it ratdeos17 Cli -p 15 -c "configure replace flash:/SR_EOS17" ignore-errors
+docker exec -it ratdeos18 Cli -p 15 -c "configure replace flash:/SR_EOS18" ignore-errors
+docker exec -it ratdeos19 Cli -p 15 -c "configure replace flash:/SR_EOS19" ignore-errors
+docker exec -it ratdeos20 Cli -p 15 -c "configure replace flash:/SR_EOS20" ignore-errors
