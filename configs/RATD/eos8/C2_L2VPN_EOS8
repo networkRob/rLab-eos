@@ -12,7 +12,7 @@ aaa authorization exec default local
 !
 username arista privilege 15 role network-admin secret sha512 $6$4yJ3sA4vNih54XZy$ShdE7OWrFSETgj92OOzpSbHpODYc/uEUEsmu1Sx6KZ41fCjltt6DvwiaInsoVBSZ/g6ysz7Npkyw6Lw4XJGTq/
 !
-vrf definition A
+vrf instance A
 !
 interface Ethernet1
    description EOS4
@@ -25,7 +25,7 @@ interface Ethernet1
 interface Ethernet2
    description EOS15
    no switchport
-   vrf forwarding A
+   vrf A
    ip address 10.8.15.8/24
 !
 interface Ethernet3

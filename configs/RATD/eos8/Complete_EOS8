@@ -15,9 +15,9 @@ username arista privilege 15 role network-admin secret sha512 $6$4yJ3sA4vNih54XZ
 vlan 20
    name Customer2_E-LAN
 !
-vrf definition A
+vrf instance A
 !
-vrf definition B
+vrf instance B
 !
 interface Port-Channel14
    description CE-EOS14
@@ -40,7 +40,7 @@ interface Ethernet1
 interface Ethernet2
    description EOS15
    no switchport
-   vrf forwarding A
+   vrf A
    ip address 10.8.15.8/24
 !
 interface Ethernet3
@@ -59,7 +59,7 @@ interface Ethernet4
 interface Ethernet5
    description EOS18
    no switchport
-   vrf forwarding B
+   vrf B
    ip address 10.8.18.8/24
 !
 interface Loopback0

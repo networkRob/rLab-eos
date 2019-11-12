@@ -15,7 +15,7 @@ username arista privilege 15 role network-admin secret sha512 $6$gaMxkkkbDKIkxm3
 vlan 20
    name Customer2_E-LAN
 !
-vrf definition SVC
+vrf instance SVC
 !
 interface Port-Channel9
    description CE-EOS9
@@ -66,7 +66,7 @@ interface Ethernet5
 interface Ethernet6
    description EOS20
    no switchport
-   vrf forwarding SVC
+   vrf SVC
    ip address 10.3.20.3/24
 !
 interface Loopback0
