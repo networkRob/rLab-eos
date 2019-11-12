@@ -120,7 +120,7 @@ def main(args):
             CMDS[_cmd] = []
             if topo_yaml['nodes']:
                 for _node in topo_yaml['nodes']:
-                    CMDS[_cmd].append("docker exec -it ratd{0} Cli -p 15 -c \"configure replace flash:/{1}_{2} ignore-errors\" >> logs/ratd/{3}.log".format(_node, topo_yaml['commands'][_cmd]['pre'], _node.upper(),_cmd))
+                    CMDS[_cmd].append("docker exec -it ratd{0} Cli -p 15 -c \"configure replace flash:/{1}_{2} ignore-errors\" >> logs/{3}/{4}.log".format(_node, topo_yaml['commands'][_cmd]['pre'], _node.upper(), _tag, _cmd))
 
     # Check to see if dest dir is created
     if not isdir(BASE_PATH + "/cnt/{0}".format(_tag)):
