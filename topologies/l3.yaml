@@ -29,6 +29,7 @@ nodes:
       - spine1
       - spine2
       - host11
+      - host12
   leaf12:
     mac: 00:1c:73:c3:c6:01
     links:
@@ -54,6 +55,8 @@ nodes:
       - leaf32
       - spine1
       - spine2
+      - host31
+      - host32
   leaf32:
     mac: 00:1c:73:c7:c6:01
     links:
@@ -66,9 +69,24 @@ hosts:
     gateway: 192.168.12.1
     links:
       - leaf11
+  host12:
+    ipaddress: 192.168.13.11/24
+    gateway: 192.168.13.1
+    links:
+      - leaf11
   host21:
     ipaddress: 192.168.12.21/24
     gateway: 192.168.12.1
     links:
       - leaf21
+  host31:
+    ipaddress: 192.168.12.31/24
+    gateway: 192.168.12.1
+    links:
+      - leaf31
+  host32:
+    ipaddress: 192.168.13.31/24
+    gateway: 192.168.13.1
+    links:
+      - leaf31
 commands:
