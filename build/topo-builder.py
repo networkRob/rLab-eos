@@ -118,8 +118,11 @@ def main(args):
     if topo_yaml['commands']:
         for _cmd in topo_yaml['commands']:
             CMDS[_cmd] = []
-            for _node in topo_yaml['commands'][_cmd]:
-                CMDS[_cmd].append("docker exec -it ratd{0} Cli -c \"$(sudo cat $(docker volume inspect --format ".format(_node) + r"'{{ .Mountpoint }}'" + " ratd{0})/cfgs/IS-IS_{1})\"".format(_node, _node.upper()))
+            if topo_yaml['nodes']:
+                for _node in topo_yaml['nodes']:
+                    CMDS[_cmd].append("docker exec -it ratd{0} Cli -c \"configure replace flash:/{1}_{2}\"".format(_node, topo_yaml['commands'][_cmd]['pre'], _node.upper()))
+            # for _node in topo_yaml['commands'][_cmd]:
+                # CMDS[_cmd].append("docker exec -it ratd{0} Cli -c \"$(sudo cat $(docker volume inspect --format ".format(_node) + r"'{{ .Mountpoint }}'" + " ratd{0})/cfgs/IS-IS_{1})\"".format(_node, _node.upper()))
 
     # Check to see if dest dir is created
     if not isdir(BASE_PATH + "/cnt/{0}".format(_tag)):
