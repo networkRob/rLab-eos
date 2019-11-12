@@ -127,6 +127,11 @@ router bgp 65003
    neighbor 10.0.254.2 peer-group SPINE-EVPN
    redistribute connected
    !
+   vlan 12
+      rd 10.0.254.7:12
+      route-target both 1:12
+      redistribute learned
+   !
    address-family evpn
       neighbor SPINE-EVPN activate
    !
