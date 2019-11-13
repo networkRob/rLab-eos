@@ -1,4 +1,4 @@
-alias findmac bash sudo ip netns exec ns-MGMT /mnt/flash/locateMac.py %1
+alias findmac bash sudo ip netns exec ns-MGMT /mnt/flash/Scripts/locateMac.py %1
 !
 event-monitor
 agent Bfd shutdown
