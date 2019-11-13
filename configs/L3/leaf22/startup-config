@@ -1,4 +1,5 @@
 event-monitor
+agent Bfd shutdown
 !
 service routing protocols model multi-agent
 !

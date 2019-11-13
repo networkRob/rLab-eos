@@ -1,6 +1,7 @@
-event-monitor
+alias findmac bash sudo ip netns exec ns-MGMT /mnt/flash/locateMac.py %1
 !
-logging buffered 200
+event-monitor
+agent Bfd shutdown
 !
 hostname L2-S1
 !
@@ -23,10 +24,6 @@ vlan 13
 vlan 4094
    name MLAG
    trunk group MLAGPEER
-!
-vrf instance LAB
-   description LAB-VRF
-   rd 100:101
 !
 vrf instance MGMT
    description MGMT-VRF
@@ -92,7 +89,6 @@ interface Vlan4094
 ip virtual-router mac-address 00:1c:73:00:00:99
 !
 ip routing
-ip routing vrf LAB
 ip routing vrf MGMT
 !
 mlag configuration

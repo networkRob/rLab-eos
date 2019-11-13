@@ -1,16 +1,12 @@
-
 !
 event-monitor
-!
-transceiver qsfp default-mode 4x10G
-!
-logging buffered 200
+agent Bfd shutdown
+alias findmac bash sudo ip netns exec ns-MGMT /mnt/flash/locateMac.py %1
+
 !
 hostname L2-L1
 !
 spanning-tree mode mstp
-!
-service unsupported-transceiver systest 975ba0e1
 !
 aaa authentication login default local
 aaa authentication login console local
@@ -28,10 +24,6 @@ vlan 12
 !
 vlan 13
    name Network-13
-!
-vrf definition LAB
-   description LAB-VRF
-   rd 100:101
 !
 vrf definition MGMT
    description MGMT-VRF
@@ -71,7 +63,6 @@ interface Vlan13
    ip address 10.0.13.10/24
 !
 ip routing
-ip routing vrf LAB
 ip routing vrf MGMT
 !
 management api http-commands
