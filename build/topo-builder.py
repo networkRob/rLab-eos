@@ -99,7 +99,7 @@ def main(args):
         CMDS_DESTROY.append("docker stop {}".format(_name))
         CMDS_STOP.append("docker stop {}".format(_name))
         CMDS_DESTROY.append("docker rm {}".format(_name))
-        CMDS_DESTROY.append("docker volume rm {}".format(_name))
+        # CMDS_DESTROY.append("docker volume rm {}".format(_name))
     # Create commands to create host containers
     for _host in HOSTS:
         _hname = HOSTS[_host]['name']
@@ -121,7 +121,7 @@ def main(args):
             CMDS[_cmd] = []
             if topo_yaml['nodes']:
                 for _node in topo_yaml['nodes']:
-                    CMDS[_cmd].append("docker exec -it ratd{0} Cli -p 15 -c \"configure replace flash:/{1}_{2} ignore-errors\" > /dev/null 2>&1".format(_node, topo_yaml['commands'][_cmd]['pre'], _node.upper()))
+                    CMDS[_cmd].append("docker exec -it ratd{0} Cli -p 15 -c \"configure replace flash:/cfgs/{1}_{2} ignore-errors\" > /dev/null 2>&1".format(_node, topo_yaml['commands'][_cmd]['pre'], _node.upper()))
 
     # Check to see if dest dir is created
     if not isdir(BASE_PATH + "/cnt/{0}".format(_tag)):
