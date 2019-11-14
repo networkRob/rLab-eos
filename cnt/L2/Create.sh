@@ -73,9 +73,9 @@ sudo ovs-docker add-port l2leaf1host11 eth0 l2host11 --ipaddress=10.0.13.11/24 -
 docker create --name=l2host10 --hostname=l2host10 --net=none chost:0.2
 docker start l2host10
 sudo ovs-docker add-port l2leaf1host10 eth0 l2host10 --ipaddress=10.0.12.11/24 --gateway=10.0.12.1
-docker exec l2host10 iperf3 -s -p 5010
-docker exec l2host30 iperf3 -s -p 5010
-docker exec l2host31 iperf3 -s -p 5010
+docker exec -d l2host10 iperf3 -s -p 5010
+docker exec -d l2host30 iperf3 -s -p 5010
+docker exec -d l2host31 iperf3 -s -p 5010
 docker exec -d l2host11 while true; do iperf3 -c 10.0.12.31/24 -p 5010 -b 10000000; done
 docker exec -d l2host20 while true; do iperf3 -c 10.0.12.11/24 -p 5010 -b 10000000; done
 docker exec -d l2host21 while true; do iperf3 -c 10.0.13.31/24 -p 5010 -b 10000000; done
