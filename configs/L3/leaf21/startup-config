@@ -23,6 +23,9 @@ clock timezone CST6CDT
 vlan 12
    name VLAN-12
 !
+vlan 13
+   name VLAN-13
+!
 vlan 4093
    name iBGP-PEER
 !
@@ -55,6 +58,7 @@ interface Ethernet3
    ip address 10.0.2.5/31
 !
 interface Ethernet4
+   description Host21
    switchport access vlan 12
 !
 interface Loopback0
@@ -80,6 +84,7 @@ interface Vxlan1
    vxlan source-interface Loopback1
    vxlan udp-port 4789
    vxlan vlan 12 vni 100012
+   vxlan vlan 13 vni 100013
 !
 ip route vrf MGMT 0.0.0.0/0 192.168.50.1
 !
@@ -127,6 +132,11 @@ router bgp 65002
    vlan 12
       rd 10.0.254.5:12
       route-target both 1:12
+      redistribute learned
+   !
+   vlan 13
+      rd 10.0.254.5:13
+      route-target both 1:13
       redistribute learned
    !
    address-family evpn

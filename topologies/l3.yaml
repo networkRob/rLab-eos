@@ -2,7 +2,7 @@ topology:
   name: L3
 images:
   ceos: 4.22.1F.Trunk
-  host: chost:0.1
+  host: chost:0.5
 nodes:
   spine1:
     mac: 00:1c:73:c0:c6:01
@@ -49,6 +49,7 @@ nodes:
       - leaf21
       - spine1
       - spine2
+      - host22
   leaf31:
     mac: 00:1c:73:c6:c6:01
     links:
@@ -82,6 +83,12 @@ hosts:
     gateway: 192.168.12.1
     links:
       - leaf21
+  host22:
+    ipaddress: 192.168.13.21
+    mask: 24
+    gateway: 192.168.13.1
+    links:
+      - leaf22
   host31:
     ipaddress: 192.168.12.31
     mask: 24
@@ -95,4 +102,17 @@ hosts:
     links:
       - leaf31
 iperf:
+  port: 5010
+  brate: 1000000
+  servers:
+    - host11
+    - host12
+    - host31
+  clients:
+    - client: host21
+      target: host11
+    - client: host32
+      target: host12
+    - client: host22
+      target: host31
 commands:
