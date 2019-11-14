@@ -120,15 +120,14 @@ def main(args):
         _iperf = topo_yaml['iperf']
         _port = _iperf['port']
         _brate = _iperf['brate']
-        _total = _iperf['total_size']
         for _server in _iperf['servers']:
-            CMDS_CREATE.append("docker exec {0} iperf3 -s -p {1}".format(_server, _port))
-            CMDS_START.append("docker exec {0} iperf3 -s -p {1}".format(_server, _port))
+            CMDS_CREATE.append("docker exec {0} iperf3 -s -p {1}".format(HOSTS[_server]['name'], _port))
+            CMDS_START.append("docker exec {0} iperf3 -s -p {1}".format(HOSTS[_server]['name'], _port))
         for _client in _iperf['clients']:
             _target = topo_yaml['hosts'][_client['target']]['ipaddress']
-            CMDS_CREATE.append("docker exec {0} iperf3 -c {1} -p {2} -b {3} -n {4}".format(HOSTS[_client['client']]['name'], _target, _port, _brate, _total))
-            CMDS_START.append("docker exec {0} iperf3 -c {1} -p {2} -b {3} -n {4}".format(HOSTS[_client['client']]['name'], _target, _port, _brate, _total))
-            
+            CMDS_CREATE.append("docker exec -d {0} while true; do iperf3 -c {1} -p {2} -b {3}; done".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
+            CMDS_START.append("docker exec -d {0} while true; do iperf3 -c {1} -p {2} -b {3}; done".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
+
     # Check and create topo commands
     if topo_yaml['commands']:
         for _cmd in topo_yaml['commands']:

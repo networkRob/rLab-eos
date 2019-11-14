@@ -73,7 +73,6 @@ hosts:
 iperf:
   port: 5010
   brate: 10000000
-  total_size: 1000000000
   servers:
     - host10
     - host30
