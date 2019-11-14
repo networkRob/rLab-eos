@@ -55,21 +55,27 @@ sudo ovs-docker add-port l2spine1leaf2 eth1 l2leaf2 --macaddress=00:1c:73:c3:c6:
 sudo ovs-docker add-port l2spine2leaf2 eth2 l2leaf2
 sudo ovs-docker add-port l2leaf2host20 eth3 l2leaf2
 sudo ovs-docker add-port l2leaf2host21 eth4 l2leaf2
-docker create --name=l2host31 --hostname=l2host31 --net=none chost:0.1
+docker create --name=l2host31 --hostname=l2host31 --net=none chost:0.2
 docker start l2host31
 sudo ovs-docker add-port l2leaf3host31 eth0 l2host31 --ipaddress=10.0.13.31/24 --gateway=10.0.13.1
-docker create --name=l2host30 --hostname=l2host30 --net=none chost:0.1
+docker create --name=l2host30 --hostname=l2host30 --net=none chost:0.2
 docker start l2host30
 sudo ovs-docker add-port l2leaf3host30 eth0 l2host30 --ipaddress=10.0.12.31/24 --gateway=10.0.12.1
-docker create --name=l2host20 --hostname=l2host20 --net=none chost:0.1
+docker create --name=l2host20 --hostname=l2host20 --net=none chost:0.2
 docker start l2host20
 sudo ovs-docker add-port l2leaf2host20 eth0 l2host20 --ipaddress=10.0.12.21/24 --gateway=10.0.12.1
-docker create --name=l2host21 --hostname=l2host21 --net=none chost:0.1
+docker create --name=l2host21 --hostname=l2host21 --net=none chost:0.2
 docker start l2host21
 sudo ovs-docker add-port l2leaf2host21 eth0 l2host21 --ipaddress=10.0.13.21/24 --gateway=10.0.13.1
-docker create --name=l2host11 --hostname=l2host11 --net=none chost:0.1
+docker create --name=l2host11 --hostname=l2host11 --net=none chost:0.2
 docker start l2host11
 sudo ovs-docker add-port l2leaf1host11 eth0 l2host11 --ipaddress=10.0.13.11/24 --gateway=10.0.13.1
-docker create --name=l2host10 --hostname=l2host10 --net=none chost:0.1
+docker create --name=l2host10 --hostname=l2host10 --net=none chost:0.2
 docker start l2host10
 sudo ovs-docker add-port l2leaf1host10 eth0 l2host10 --ipaddress=10.0.12.11/24 --gateway=10.0.12.1
+docker exec host10 iperf3 -s -p 5010
+docker exec host30 iperf3 -s -p 5010
+docker exec host31 iperf3 -s -p 5010
+docker exec host11 iperf3 -c 10.0.12.31/24 -p 5010 -b 10000000 -n 1000000000
+docker exec host20 iperf3 -c 10.0.12.11/24 -p 5010 -b 10000000 -n 1000000000
+docker exec host21 iperf3 -c 10.0.13.31/24 -p 5010 -b 10000000 -n 1000000000
