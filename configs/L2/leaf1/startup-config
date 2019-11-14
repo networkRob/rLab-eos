@@ -1,14 +1,18 @@
+! Startup-config last modified at  Thu Nov 14 16:20:04 2019 by root
+! device: L2-L1 (cEOSLab, EOS-4.22.1F-13254911.regmiceoslab40 (engineering build))
+!
+alias findmac bash sudo ip netns exec ns-MGMT /mnt/flash/Scripts/locateMac.py %1
 !
 event-monitor
+!
+transceiver qsfp default-mode 4x10G
+!
 agent Bfd shutdown
-alias findmac bash sudo ip netns exec ns-MGMT /mnt/flash/Scripts/locateMac.py %1
-
 !
 hostname L2-L1
 !
 spanning-tree mode mstp
 !
-aaa authentication login default local
 aaa authentication login console local
 aaa authorization exec default local
 aaa authorization commands all default local
@@ -25,7 +29,7 @@ vlan 12
 vlan 13
    name Network-13
 !
-vrf definition MGMT
+vrf instance MGMT
    description MGMT-VRF
    rd 100:100
 !
@@ -51,7 +55,7 @@ interface Ethernet4
 !
 interface Management1
    description Management
-   vrf forwarding MGMT
+   vrf MGMT
    ip address 192.168.50.207/24
 !
 interface Vlan12
