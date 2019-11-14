@@ -39,6 +39,6 @@ sudo ovs-docker add-port l2leaf1host10 eth0 l2host10 --ipaddress=10.0.12.11/24 -
 docker exec -d l2host10 iperf3 -s -p 5010
 docker exec -d l2host30 iperf3 -s -p 5010
 docker exec -d l2host31 iperf3 -s -p 5010
-docker exec -d l2host11 iperf3client 10.0.12.31 5010 10000000
-docker exec -d l2host20 iperf3client 10.0.12.11 5010 10000000
-docker exec -d l2host21 iperf3client 10.0.13.31 5010 10000000
+docker exec -d l2host11 iperf3client 10.0.12.31 5010 1000000
+docker exec -d l2host20 iperf3client 10.0.12.11 5010 1000000
+docker exec -d l2host21 iperf3client 10.0.13.31 5010 1000000

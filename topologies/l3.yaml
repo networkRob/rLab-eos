@@ -65,28 +65,34 @@ nodes:
       - spine2
 hosts:
   host11:
-    ipaddress: 192.168.12.11/24
+    ipaddress: 192.168.12.11
+    mask: 24
     gateway: 192.168.12.1
     links:
       - leaf11
   host12:
-    ipaddress: 192.168.13.11/24
+    ipaddress: 192.168.13.11
+    mask: 24
     gateway: 192.168.13.1
     links:
       - leaf11
   host21:
-    ipaddress: 192.168.12.21/24
+    ipaddress: 192.168.12.21
+    mask: 24
     gateway: 192.168.12.1
     links:
       - leaf21
   host31:
-    ipaddress: 192.168.12.31/24
+    ipaddress: 192.168.12.31
+    mask: 24
     gateway: 192.168.12.1
     links:
       - leaf31
   host32:
-    ipaddress: 192.168.13.31/24
+    ipaddress: 192.168.13.31
+    mask: 24
     gateway: 192.168.13.1
     links:
       - leaf31
+iperf:
 commands:

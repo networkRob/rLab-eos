@@ -127,6 +127,7 @@ nodes:
     links:
       - eos3
 hosts:
+iperf:
 commands:
   sr:
     pre: 'SR'

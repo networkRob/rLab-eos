@@ -2,7 +2,7 @@ topology:
   name: L2
 images:
   ceos: 4.22.1F.Trunk
-  host: chost:0.4
+  host: chost:0.5
 nodes:
   spine1:
     mac: 00:1c:73:c0:c6:01
@@ -78,7 +78,7 @@ hosts:
       - leaf3
 iperf:
   port: 5010
-  brate: 10000000
+  brate: 1000000
   servers:
     - host10
     - host30

@@ -116,7 +116,7 @@ def main(args):
         CMDS_STOP.append("docker stop {}".format(_hname))
     
     # Check for iPerf3 configurations
-    if 'iperf' in topo_yaml:
+    if topo_yaml['iperf']:
         _iperf = topo_yaml['iperf']
         _port = _iperf['port']
         _brate = _iperf['brate']
