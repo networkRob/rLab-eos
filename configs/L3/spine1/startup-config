@@ -1,13 +1,18 @@
+! Startup-config last modified at  Thu Nov 14 16:18:59 2019 by root
+! device: L3-S1 (cEOSLab, EOS-4.22.1F-13254911.regmiceoslab40 (engineering build))
+!
 event-monitor
-agent Bfd shutdown
+!
+transceiver qsfp default-mode 4x10G
 !
 service routing protocols model multi-agent
 !
+agent Bfd shutdown
+!
 hostname L3-S1
+!
 spanning-tree mode mstp
 !
-!
-aaa authentication login default local
 aaa authentication login console local
 aaa authorization exec default local
 aaa authorization commands all default local
@@ -15,14 +20,15 @@ aaa authorization commands all default local
 no aaa root
 !
 username arista privilege 15 role network-admin secret sha512 $6$1WX5awmOhAFOXqKe$QGxPTq59tg4eu5BbTlOe9QuJYVnq6.9CbzG45g1yXKWS5zUOwGXGrvE249Lf9VXZ4MctVGZfXxy5RKTXIG/Xw/
-username arista sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDS0+bGs8XOLIWKGNwbnWmU/U/O1niUDrWCjnx6DciSS416nyturioQlpNLCeRe8CZDwYz9Q3WO0oaK9cig5KhYHzKUOGJWhmYqMR18j/0X03ealkaG7Uu8LR3hDNdaDm5shcyhp2WBKSw1e5bToXF0zEOXp4c6Np4eTM8oyFyp2XgrB3jGKiBenFycWFgwS9mS3xUpupyIHT+VMLrbOLL38gGEpESgGOKdGa/KEwk83TQzOCAR2fvJ/Hj+26KMPLtveRTVJvkweIh7iP6PkBAXFMFctwoozZJDGiXL7os1MSArncb7QXIR7EHbQ76gaHFoBNaI6/d1s15symv5MBoF
+username arista ssh-key ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDS0+bGs8XOLIWKGNwbnWmU/U/O1niUDrWCjnx6DciSS416nyturioQlpNLCeRe8CZDwYz9Q3WO0oaK9cig5KhYHzKUOGJWhmYqMR18j/0X03ealkaG7Uu8LR3hDNdaDm5shcyhp2WBKSw1e5bToXF0zEOXp4c6Np4eTM8oyFyp2XgrB3jGKiBenFycWFgwS9mS3xUpupyIHT+VMLrbOLL38gGEpESgGOKdGa/KEwk83TQzOCAR2fvJ/Hj+26KMPLtveRTVJvkweIh7iP6PkBAXFMFctwoozZJDGiXL7os1MSArncb7QXIR7EHbQ76gaHFoBNaI6/d1s15symv5MBoF
+!
 clock timezone CST6CDT
 !
-vrf definition LAB
+vrf instance LAB
    description LAB-VRF
    rd 100:101
 !
-vrf definition MGMT
+vrf instance MGMT
    description MGMT-VRF
    rd 100:100
 !
@@ -50,6 +56,14 @@ interface Ethernet6
    no switchport
    ip address 10.0.1.10/31
 !
+interface Ethernet7
+   no switchport
+   ip address 10.0.1.12/31
+!
+interface Ethernet8
+   no switchport
+   ip address 10.0.1.14/31
+!
 interface Loopback0
    ip address 10.0.254.1/32
 !
@@ -58,7 +72,7 @@ interface Loopback1
 !
 interface Management1
    description Management
-   vrf forwarding MGMT
+   vrf MGMT
    ip address 192.168.50.130/24
 !
 ip route vrf MGMT 0.0.0.0/0 192.168.50.1
@@ -71,56 +85,72 @@ ip radius vrf MGMT source-interface Management1
 !
 router bgp 65000
    router-id 10.0.254.1
-   neighbor RACK1-EVPN peer-group
+   neighbor BRDR peer group
+   neighbor BRDR remote-as 65004
+   neighbor BRDR bfd
+   neighbor BRDR maximum-routes 12000
+   neighbor BRDR-EVPN peer group
+   neighbor BRDR-EVPN remote-as 65004
+   neighbor BRDR-EVPN update-source Loopback0
+   neighbor BRDR-EVPN ebgp-multihop
+   neighbor BRDR-EVPN send-community extended
+   neighbor BRDR-EVPN maximum-routes 12000
+   neighbor RACK1-EVPN peer group
    neighbor RACK1-EVPN remote-as 65001
    neighbor RACK1-EVPN update-source Loopback0
    neighbor RACK1-EVPN ebgp-multihop
    neighbor RACK1-EVPN send-community extended
-   neighbor RACK1-EVPN maximum-routes 12000 
-   neighbor RACK2-EVPN peer-group
+   neighbor RACK1-EVPN maximum-routes 12000
+   neighbor RACK2-EVPN peer group
    neighbor RACK2-EVPN remote-as 65002
    neighbor RACK2-EVPN update-source Loopback0
    neighbor RACK2-EVPN ebgp-multihop
    neighbor RACK2-EVPN send-community extended
-   neighbor RACK2-EVPN maximum-routes 12000 
-   neighbor RACK3-EVPN peer-group
+   neighbor RACK2-EVPN maximum-routes 12000
+   neighbor RACK3-EVPN peer group
    neighbor RACK3-EVPN remote-as 65003
    neighbor RACK3-EVPN update-source Loopback0
    neighbor RACK3-EVPN ebgp-multihop
    neighbor RACK3-EVPN send-community extended
-   neighbor RACK3-EVPN maximum-routes 12000 
-   neighbor Rack1 peer-group
+   neighbor RACK3-EVPN maximum-routes 12000
+   neighbor Rack1 peer group
    neighbor Rack1 remote-as 65001
-   neighbor Rack1 fall-over bfd
-   neighbor Rack1 maximum-routes 12000 
-   neighbor Rack2 peer-group
+   neighbor Rack1 bfd
+   neighbor Rack1 maximum-routes 12000
+   neighbor Rack2 peer group
    neighbor Rack2 remote-as 65002
-   neighbor Rack2 fall-over bfd
-   neighbor Rack2 maximum-routes 12000 
-   neighbor Rack3 peer-group
+   neighbor Rack2 bfd
+   neighbor Rack2 maximum-routes 12000
+   neighbor Rack3 peer group
    neighbor Rack3 remote-as 65003
-   neighbor Rack3 fall-over bfd
-   neighbor Rack3 maximum-routes 12000 
-   neighbor 10.0.1.1 peer-group Rack1
-   neighbor 10.0.1.3 peer-group Rack1
-   neighbor 10.0.1.5 peer-group Rack2
-   neighbor 10.0.1.7 peer-group Rack2
-   neighbor 10.0.1.9 peer-group Rack3
-   neighbor 10.0.1.11 peer-group Rack3
-   neighbor 10.0.254.3 peer-group RACK1-EVPN
-   neighbor 10.0.254.4 peer-group RACK1-EVPN
-   neighbor 10.0.254.5 peer-group RACK2-EVPN
-   neighbor 10.0.254.6 peer-group RACK2-EVPN
-   neighbor 10.0.254.7 peer-group RACK3-EVPN
-   neighbor 10.0.254.8 peer-group RACK3-EVPN
+   neighbor Rack3 bfd
+   neighbor Rack3 maximum-routes 12000
+   neighbor 10.0.1.1 peer group Rack1
+   neighbor 10.0.1.3 peer group Rack1
+   neighbor 10.0.1.5 peer group Rack2
+   neighbor 10.0.1.7 peer group Rack2
+   neighbor 10.0.1.9 peer group Rack3
+   neighbor 10.0.1.11 peer group Rack3
+   neighbor 10.0.1.13 peer group BRDR
+   neighbor 10.0.1.15 peer group BRDR
+   neighbor 10.0.254.3 peer group RACK1-EVPN
+   neighbor 10.0.254.4 peer group RACK1-EVPN
+   neighbor 10.0.254.5 peer group RACK2-EVPN
+   neighbor 10.0.254.6 peer group RACK2-EVPN
+   neighbor 10.0.254.7 peer group RACK3-EVPN
+   neighbor 10.0.254.8 peer group RACK3-EVPN
+   neighbor 10.0.254.9 peer group BRDR-EVPN
+   neighbor 10.0.254.10 peer group BRDR-EVPN
    redistribute connected
    !
    address-family evpn
+      neighbor BRDR-EVPN activate
       neighbor RACK1-EVPN activate
       neighbor RACK2-EVPN activate
       neighbor RACK3-EVPN activate
    !
    address-family ipv4
+      no neighbor BRDR-EVPN activate
       no neighbor RACK1-EVPN activate
       no neighbor RACK2-EVPN activate
       no neighbor RACK3-EVPN activate

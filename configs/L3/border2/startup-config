@@ -1,5 +1,5 @@
-! Startup-config last modified at  Thu Nov 14 16:19:44 2019 by root
-! device: L3-L32 (cEOSLab, EOS-4.22.1F-13254911.regmiceoslab40 (engineering build))
+! Startup-config last modified at  Thu Nov 14 16:18:37 2019 by root
+! device: L3-BRDR2 (cEOSLab, EOS-4.22.1F-13254911.regmiceoslab40 (engineering build))
 !
 event-monitor
 !
@@ -9,12 +9,10 @@ service routing protocols model multi-agent
 !
 agent Bfd shutdown
 !
-hostname L3-L32
+hostname L3-BRDR2
 !
 spanning-tree mode mstp
 no spanning-tree vlan-id 4094
-!
-service unsupported-transceiver systest 975ba0e1
 !
 aaa authentication login console local
 aaa authorization exec default local
@@ -58,27 +56,37 @@ interface Ethernet1
 !
 interface Ethernet2
    no switchport
-   ip address 10.0.1.11/31
+   ip address 10.0.1.15/31
 !
 interface Ethernet3
    no switchport
-   ip address 10.0.2.11/31
+   ip address 10.0.2.15/31
 !
 interface Ethernet4
+   description LinkOut
+   shutdown
 !
 interface Loopback0
-   ip address 10.0.254.8/32
+   ip address 10.0.254.10/32
 !
 interface Loopback1
-   ip address 10.0.255.4/32
+   ip address 10.0.255.5/32
 !
 interface Management1
    description Management
    vrf MGMT
-   ip address 192.168.50.83/24
+   ip address 192.168.50.110/24
+!
+interface Vlan12
+   ip address 192.168.12.3/24
+   ip virtual-router address 192.168.12.1
+!
+interface Vlan13
+   ip address 192.168.13.3/24
+   ip virtual-router address 192.168.13.1
 !
 interface Vlan4093
-   ip address 10.0.253.5/31
+   ip address 10.0.253.7/31
 !
 interface Vlan4094
    description MLAG
@@ -91,6 +99,8 @@ interface Vxlan1
    vxlan vlan 12 vni 100012
    vxlan vlan 13 vni 100013
 !
+ip virtual-router mac-address 00:1c:73:00:00:99
+!
 ip route vrf MGMT 0.0.0.0/0 192.168.50.1
 !
 ip routing
@@ -102,7 +112,7 @@ ip prefix-list underlay-out
    seq 20 permit 10.0.254.0/24 le 32
 !
 mlag configuration
-   domain-id L31-L32
+   domain-id BRDR1-BRDR2
    local-interface Vlan4094
    peer-address 10.0.0.1
    peer-link Port-Channel1
@@ -112,8 +122,8 @@ ip radius vrf MGMT source-interface Management1
 route-map rm-underlay-out permit 10
    match ip address prefix-list underlay-out
 !
-router bgp 65003
-   router-id 10.0.254.8
+router bgp 65004
+   router-id 10.0.254.10
    maximum-paths 2 ecmp 2
    neighbor SPINE peer group
    neighbor SPINE remote-as 65000
@@ -126,21 +136,21 @@ router bgp 65003
    neighbor SPINE-EVPN ebgp-multihop
    neighbor SPINE-EVPN send-community extended
    neighbor SPINE-EVPN maximum-routes 0
-   neighbor 10.0.0.1 remote-as 65003
-   neighbor 10.0.0.1 maximum-routes 12000
-   neighbor 10.0.1.10 peer group SPINE
-   neighbor 10.0.2.10 peer group SPINE
+   neighbor 10.0.1.14 peer group SPINE
+   neighbor 10.0.2.14 peer group SPINE
+   neighbor 10.0.253.6 remote-as 65004
+   neighbor 10.0.253.6 maximum-routes 12000
    neighbor 10.0.254.1 peer group SPINE-EVPN
    neighbor 10.0.254.2 peer group SPINE-EVPN
    redistribute connected
    !
    vlan 12
-      rd 10.0.254.8:12
+      rd 10.0.254.10:12
       route-target both 1:12
       redistribute learned
    !
    vlan 13
-      rd 10.0.254.8:13
+      rd 10.0.254.10:13
       route-target both 1:13
       redistribute learned
    !
