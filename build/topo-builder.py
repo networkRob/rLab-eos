@@ -107,10 +107,10 @@ def main(args):
         CMDS_CREATE.append("docker start {}".format(_hname))
         CMDS_START.append("docker start {}".format(_hname))
         for eindex in range(0, len(HOSTS[_host]['intfs'])):
-            CMDS_CREATE.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
-            CMDS_DESTROY.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
-            CMDS_START.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
-            CMDS_STOP.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
+            CMDS_CREATE.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
+            CMDS_DESTROY.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
+            CMDS_START.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
+            CMDS_STOP.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
         CMDS_DESTROY.append("docker stop {}".format(_hname))
         CMDS_DESTROY.append("docker rm {}".format(_hname))
         CMDS_STOP.append("docker stop {}".format(_hname))
@@ -125,8 +125,8 @@ def main(args):
             CMDS_START.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server]['name'], _port))
         for _client in _iperf['clients']:
             _target = topo_yaml['hosts'][_client['target']]['ipaddress']
-            CMDS_CREATE.append("docker exec -d {0} bash iperf3client.sh {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
-            CMDS_START.append("docker exec -d {0} bash iperf3client.sh {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
+            CMDS_CREATE.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
+            CMDS_START.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
 
     # Check and create topo commands
     if topo_yaml['commands']:
