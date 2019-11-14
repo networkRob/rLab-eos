@@ -125,8 +125,8 @@ def main(args):
             CMDS_START.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server]['name'], _port))
         for _client in _iperf['clients']:
             _target = topo_yaml['hosts'][_client['target']]['ipaddress']
-            CMDS_CREATE.append("docker exec -d {0} while true; do iperf3 -c {1} -p {2} -b {3}; done".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
-            CMDS_START.append("docker exec -d {0} while true; do iperf3 -c {1} -p {2} -b {3}; done".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
+            CMDS_CREATE.append("docker exec -d {0} bash iperf3client.sh {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
+            CMDS_START.append("docker exec -d {0} bash iperf3client.sh {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
 
     # Check and create topo commands
     if topo_yaml['commands']:
