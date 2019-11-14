@@ -71,11 +71,13 @@ nodes:
   border1:
     mac: 00:1c:73:c8:c6:01
     links:
+      - border2
       - spine1
       - spine2
   border2:
     mac: 00:1c:73:c9:c6:01
     links:
+      - border1
       - spine1
       - spine2
 hosts:

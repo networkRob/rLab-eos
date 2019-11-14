@@ -49,6 +49,8 @@ sudo ovs-vsctl add-br l3leaf31host31
 sudo ovs-vsctl set bridge l3leaf31host31 other-config:forward-bpdu=true
 sudo ovs-vsctl add-br l3leaf31host32
 sudo ovs-vsctl set bridge l3leaf31host32 other-config:forward-bpdu=true
+sudo ovs-vsctl add-br l3border1border2
+sudo ovs-vsctl set bridge l3border1border2 other-config:forward-bpdu=true
 docker create --name=l3leaf21 --net=none --privileged -v $(pwd)/configs/L3/leaf21/:/mnt/flash:Z -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.22.1F.Trunk /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 docker start l3leaf21
 sudo ovs-docker add-port l3leaf21leaf22 eth1 l3leaf21 --macaddress=00:1c:73:c4:c6:01
@@ -107,12 +109,14 @@ sudo ovs-docker add-port l3spine2border1 eth7 l3spine2
 sudo ovs-docker add-port l3spine2border2 eth8 l3spine2
 docker create --name=l3border1 --net=none --privileged -v $(pwd)/configs/L3/border1/:/mnt/flash:Z -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.22.1F.Trunk /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 docker start l3border1
-sudo ovs-docker add-port l3spine1border1 eth1 l3border1 --macaddress=00:1c:73:c8:c6:01
-sudo ovs-docker add-port l3spine2border1 eth2 l3border1
+sudo ovs-docker add-port l3border1border2 eth1 l3border1 --macaddress=00:1c:73:c8:c6:01
+sudo ovs-docker add-port l3spine1border1 eth2 l3border1
+sudo ovs-docker add-port l3spine2border1 eth3 l3border1
 docker create --name=l3border2 --net=none --privileged -v $(pwd)/configs/L3/border2/:/mnt/flash:Z -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.22.1F.Trunk /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 docker start l3border2
-sudo ovs-docker add-port l3spine1border2 eth1 l3border2 --macaddress=00:1c:73:c9:c6:01
-sudo ovs-docker add-port l3spine2border2 eth2 l3border2
+sudo ovs-docker add-port l3border1border2 eth1 l3border2 --macaddress=00:1c:73:c9:c6:01
+sudo ovs-docker add-port l3spine1border2 eth2 l3border2
+sudo ovs-docker add-port l3spine2border2 eth3 l3border2
 docker create --name=l3host31 --hostname=l3host31 --net=none chost:0.5
 docker start l3host31
 sudo ovs-docker add-port l3leaf31host31 eth0 l3host31 --ipaddress=192.168.12.31/24 --gateway=192.168.12.1

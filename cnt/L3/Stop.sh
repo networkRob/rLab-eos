@@ -47,11 +47,13 @@ sudo ovs-docker del-port l3spine2leaf32 eth6 l3spine2
 sudo ovs-docker del-port l3spine2border1 eth7 l3spine2
 sudo ovs-docker del-port l3spine2border2 eth8 l3spine2
 docker stop l3spine2
-sudo ovs-docker del-port l3spine1border1 eth1 l3border1
-sudo ovs-docker del-port l3spine2border1 eth2 l3border1
+sudo ovs-docker del-port l3border1border2 eth1 l3border1
+sudo ovs-docker del-port l3spine1border1 eth2 l3border1
+sudo ovs-docker del-port l3spine2border1 eth3 l3border1
 docker stop l3border1
-sudo ovs-docker del-port l3spine1border2 eth1 l3border2
-sudo ovs-docker del-port l3spine2border2 eth2 l3border2
+sudo ovs-docker del-port l3border1border2 eth1 l3border2
+sudo ovs-docker del-port l3spine1border2 eth2 l3border2
+sudo ovs-docker del-port l3spine2border2 eth3 l3border2
 docker stop l3border2
 sudo ovs-docker del-port l3leaf31host31 eth0 l3host31 --ipaddress=192.168.12.31/24 --gateway=192.168.12.1
 docker stop l3host31
