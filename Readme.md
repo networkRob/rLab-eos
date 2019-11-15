@@ -10,7 +10,9 @@ To build a new topology, the following files/data structures need to be created.
 The Following Python package libraries need to be loaded on the machine that will run `topo-builder.py`:
 - ruamel.yaml
 
-To run the network topology on a container host machine, you can leverage the following Ansible-Playbook to build the environment.  This will install all necessary software to run cEOS-lab. 
+To run the network topology on a container host machine, you can leverage the following cEOS_host_build Ansible-Playbook to build the environment.  This will install all necessary software to run cEOS-lab. It is located in the following repo:
+
+https://github.com/networkRob/rLab-ansibleBuilds
 
 #### NOTE:
 To be able to run MLAG and dot1q, a special build is required for cEOS-Lab that will be availbe in upcoming releases of cEOS-Lab.
