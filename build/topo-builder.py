@@ -4,7 +4,6 @@ import argparse
 from ruamel.yaml import YAML
 from os import getcwd, mkdir
 from os.path import isdir
-from pprint import pprint as pp
 
 BASE_PATH = getcwd()
 CONFIGS = BASE_PATH + "/configs/"
