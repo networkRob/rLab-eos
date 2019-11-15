@@ -23,7 +23,6 @@ aaa authorization commands all default local
 no aaa root
 !
 username arista privilege 15 role network-admin secret sha512 $6$1WX5awmOhAFOXqKe$QGxPTq59tg4eu5BbTlOe9QuJYVnq6.9CbzG45g1yXKWS5zUOwGXGrvE249Lf9VXZ4MctVGZfXxy5RKTXIG/Xw/
-username arista ssh-key ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDS0+bGs8XOLIWKGNwbnWmU/U/O1niUDrWCjnx6DciSS416nyturioQlpNLCeRe8CZDwYz9Q3WO0oaK9cig5KhYHzKUOGJWhmYqMR18j/0X03ealkaG7Uu8LR3hDNdaDm5shcyhp2WBKSw1e5bToXF0zEOXp4c6Np4eTM8oyFyp2XgrB3jGKiBenFycWFgwS9mS3xUpupyIHT+VMLrbOLL38gGEpESgGOKdGa/KEwk83TQzOCAR2fvJ/Hj+26KMPLtveRTVJvkweIh7iP6PkBAXFMFctwoozZJDGiXL7os1MSArncb7QXIR7EHbQ76gaHFoBNaI6/d1s15symv5MBoF
 !
 clock timezone CST6CDT
 !
