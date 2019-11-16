@@ -8,6 +8,8 @@ spanning-tree mode mstp
 !
 aaa authorization exec default local
 !
+agent Bfd shutdown
+!
 !
 username arista privilege 15 role network-admin secret sha512 $6$xrL6GY1oa4J795Z4$KAjoa22OaA5i/BlZsuCy643CLV2/dkeFIHcgLUJuhv4DA6pP8DoyAqP7oBpZbVp5VB7GDmaI4LsNRS9SVP1ga0
 !
