@@ -1,7 +1,7 @@
 topology:
   name: RATD
 images:
-  ceos: 4.22.1F.Trunk
+  ceos: 4.23.1F.EFT
   host: chost:0.1
 nodes:
   eos1:
