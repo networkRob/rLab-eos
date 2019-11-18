@@ -35,8 +35,8 @@ sudo ovs-docker del-port l3spine1leaf21 eth3 l3spine1
 sudo ovs-docker del-port l3spine1leaf22 eth4 l3spine1
 sudo ovs-docker del-port l3spine1leaf31 eth5 l3spine1
 sudo ovs-docker del-port l3spine1leaf32 eth6 l3spine1
-sudo ovs-docker del-port l3spine1border1 eth7 l3spine1
-sudo ovs-docker del-port l3spine1border2 eth8 l3spine1
+sudo ovs-docker del-port l3spine1brdr1 eth7 l3spine1
+sudo ovs-docker del-port l3spine1brdr2 eth8 l3spine1
 docker stop l3spine1
 sudo ovs-docker del-port l3spine2leaf11 eth1 l3spine2
 sudo ovs-docker del-port l3spine2leaf12 eth2 l3spine2
@@ -44,17 +44,17 @@ sudo ovs-docker del-port l3spine2leaf21 eth3 l3spine2
 sudo ovs-docker del-port l3spine2leaf22 eth4 l3spine2
 sudo ovs-docker del-port l3spine2leaf31 eth5 l3spine2
 sudo ovs-docker del-port l3spine2leaf32 eth6 l3spine2
-sudo ovs-docker del-port l3spine2border1 eth7 l3spine2
-sudo ovs-docker del-port l3spine2border2 eth8 l3spine2
+sudo ovs-docker del-port l3spine2brdr1 eth7 l3spine2
+sudo ovs-docker del-port l3spine2brdr2 eth8 l3spine2
 docker stop l3spine2
-sudo ovs-docker del-port l3border1border2 eth1 l3border1
-sudo ovs-docker del-port l3spine1border1 eth2 l3border1
-sudo ovs-docker del-port l3spine2border1 eth3 l3border1
-docker stop l3border1
-sudo ovs-docker del-port l3border1border2 eth1 l3border2
-sudo ovs-docker del-port l3spine1border2 eth2 l3border2
-sudo ovs-docker del-port l3spine2border2 eth3 l3border2
-docker stop l3border2
+sudo ovs-docker del-port l3brdr1brdr2 eth1 l3brdr2
+sudo ovs-docker del-port l3spine1brdr2 eth2 l3brdr2
+sudo ovs-docker del-port l3spine2brdr2 eth3 l3brdr2
+docker stop l3brdr2
+sudo ovs-docker del-port l3brdr1brdr2 eth1 l3brdr1
+sudo ovs-docker del-port l3spine1brdr1 eth2 l3brdr1
+sudo ovs-docker del-port l3spine2brdr1 eth3 l3brdr1
+docker stop l3brdr1
 sudo ovs-docker del-port l3leaf31host31 eth0 l3host31 --ipaddress=192.168.12.31/24 --gateway=192.168.12.1
 docker stop l3host31
 sudo ovs-docker del-port l3leaf31host32 eth0 l3host32 --ipaddress=192.168.13.31/24 --gateway=192.168.13.1

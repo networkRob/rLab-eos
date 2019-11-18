@@ -36,6 +36,16 @@ def checkBridge(dev1, dev2, _tag):
             return({'status': _addBr, 'name': _br})
     return({'status': _addBr, 'name':''})
 
+def checkBridgeNameLength(brName):
+    """
+    Function to check if length of bridge name is over
+    characters.
+    """
+    if len(brName) <= 15:
+        return(True)
+    else:
+        return(False)
+
 
 def main(args):
     global OVS_BRIDGES, NODES
@@ -55,6 +65,8 @@ def main(args):
                 _brCheck = checkBridge(_node, _peer, _tag)
                 if _brCheck['status']:
                     _brName = _tag.lower() + _node + _peer
+                    if not checkBridgeNameLength(_brName):
+                        print("Alert! Bridge name {0} is longer than the allowed 15 characters.\nThere maybe ovs build errors.".format(_brName))
                     OVS_BRIDGES.append(_brName)
                     NODES[_node]['intfs']['eth{}'.format(intf)] = _brName
                 else:
