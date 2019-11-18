@@ -92,25 +92,21 @@ def main(args):
     # Create commands to create cEOS containers:
     for _node in NODES:
         _name = NODES[_node]['name']
-        CMDS_CREATE.append("docker create --name={0} --net=none --privileged -v $(pwd)/configs/{1}/{2}/:/mnt/flash:Z -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format( _name, topo_yaml['topology']['name'], _node, ceos_img))
-        # CMDS_CREATE.append("docker volume create {0}".format(_name))
-        # CMDS_CREATE.append("docker create --name={0} --net=none --privileged --mount source={0},target=/mnt/flash -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{1} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(_name, ceos_img))
-        # CMDS_CREATE.append("sudo cp -r $(pwd)/configs/{0}/{1}/* $(docker volume inspect --format ".format(topo_yaml['topology']['name'], _node) +  r"'{{ .Mountpoint }}'" + " {0})/".format(_name))
+        CMDS_CREATE.append("docker create --name={0} --net=none --privileged -v $(pwd)/configs/{1}/{2}/:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=et0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format( _name, topo_yaml['topology']['name'], _node, ceos_img))
         CMDS_CREATE.append("docker start {}".format(_name))
         CMDS_START.append("docker start {}".format(_name))
         for eindex in range(1, len(NODES[_node]['intfs']) + 1):
             if eindex == 1:
-                CMDS_CREATE.append("sudo ovs-docker add-port {0} eth{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
-                CMDS_START.append("sudo ovs-docker add-port {0} eth{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
+                CMDS_CREATE.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
+                CMDS_START.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
             else:
-                CMDS_CREATE.append("sudo ovs-docker add-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
-                CMDS_START.append("sudo ovs-docker add-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
-            CMDS_DESTROY.append("sudo ovs-docker del-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
-            CMDS_STOP.append("sudo ovs-docker del-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
+                CMDS_CREATE.append("sudo ovs-docker add-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
+                CMDS_START.append("sudo ovs-docker add-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
+            CMDS_DESTROY.append("sudo ovs-docker del-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
+            CMDS_STOP.append("sudo ovs-docker del-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
         CMDS_DESTROY.append("docker stop {}".format(_name))
         CMDS_STOP.append("docker stop {}".format(_name))
         CMDS_DESTROY.append("docker rm {}".format(_name))
-        # CMDS_DESTROY.append("docker volume rm {}".format(_name))
     # Create commands to create host containers
     for _host in HOSTS:
         _hname = HOSTS[_host]['name']
