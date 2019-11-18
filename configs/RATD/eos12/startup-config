@@ -5,6 +5,8 @@ hostname eos12
 !
 spanning-tree mode mstp
 !
+schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
+!
 !
 aaa authorization exec default local
 !

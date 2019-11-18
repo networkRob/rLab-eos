@@ -3,6 +3,8 @@
 !
 alias findmac bash sudo ip netns exec ns-MGMT /mnt/flash/Scripts/locateMac.py %1
 !
+schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
+!
 event-monitor
 !
 transceiver qsfp default-mode 4x10G

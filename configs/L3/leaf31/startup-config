@@ -3,6 +3,8 @@
 !
 event-monitor
 !
+schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
+!
 transceiver qsfp default-mode 4x10G
 !
 service routing protocols model multi-agent
