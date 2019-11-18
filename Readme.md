@@ -62,7 +62,7 @@ Here are the steps required to get it running for the first time.
 
 1. Import a cEOS-lab container archive:
 ```
-docker import cEOS-lab.tar.xz -t ceosimage:{ceosimage_tag}
+docker import  --change 'VOLUME /mnt/flash/' cEOS-lab.tar.xz ceosimage:{ceosimage_tag}
 ```
 {ceosimage_tag} = tag for the image, ie `4.22.1F.Trunk`
 
