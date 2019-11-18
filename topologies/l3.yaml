@@ -13,8 +13,8 @@ nodes:
       - leaf22
       - leaf31
       - leaf32
-      - border1
-      - border2
+      - brdr1
+      - brdr2
   spine2:
     mac: 00:1c:73:c1:c6:01
     links:
@@ -24,8 +24,8 @@ nodes:
       - leaf22
       - leaf31
       - leaf32
-      - border1
-      - border2
+      - brdr1
+      - brdr2
   leaf11:
     mac: 00:1c:73:c2:c6:01
     links:
@@ -68,16 +68,16 @@ nodes:
       - leaf31
       - spine1
       - spine2
-  border1:
+  brdr1:
     mac: 00:1c:73:c8:c6:01
     links:
-      - border2
+      - brdr2
       - spine1
       - spine2
-  border2:
+  brdr2:
     mac: 00:1c:73:c9:c6:01
     links:
-      - border1
+      - brdr1
       - spine1
       - spine2
 hosts:
