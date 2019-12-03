@@ -51,7 +51,7 @@ commands:
 
 - The `mac` section for each cEOS-lab node needs to be unique, this helps specify the correct system-id in cEOS so MLAG will function properly.  
 - The `links` section for eachc cEOS-lab node is an ordered list for the neighbor device.  Item #1 would referr to `Eth1` on that particular node.
-- If you do not want to run iperf on the host nodes, you can leave that sectiono empty and only set `iperf:`
+- If you do not want to run iperf on the host nodes, you can leave that section empty and only set `iperf:`
 - The `commands:` section can create additional bash scripts to load new configurations on the nodes.  The `topologies/ratd.yaml` file has examples for this.
 
 ## Creating a Topology

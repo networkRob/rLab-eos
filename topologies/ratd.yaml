@@ -2,7 +2,7 @@ topology:
   name: RATD
 images:
   ceos: 4.23.1F.EFT
-  host: chost:0.5
+  host: 0.5
 nodes:
   eos1:
     mac: 00:1c:73:c0:c6:01

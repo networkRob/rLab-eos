@@ -110,7 +110,7 @@ def main(args):
     # Create commands to create host containers
     for _host in HOSTS:
         _hname = HOSTS[_host]['name']
-        CMDS_CREATE.append("docker create --name={0} --hostname={0} --net=none {1}".format(_hname, host_img))
+        CMDS_CREATE.append("docker create --name={0} --hostname={0} --net=none chost:{1}".format(_hname, host_img))
         CMDS_CREATE.append("docker start {}".format(_hname))
         CMDS_START.append("docker start {}".format(_hname))
         for eindex in range(0, len(HOSTS[_host]['intfs'])):
