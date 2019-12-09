@@ -147,7 +147,7 @@ def main(args):
 
     # Check to see if dest dir is created
     if not isdir(BASE_PATH + "/cnt/{0}".format(_tag)):
-        mkdir(BASE_PATH + "/cnt/{0}".format(_tag))
+        makedirs(BASE_PATH + "/cnt/{0}".format(_tag))
     if CMDS_CREATE:
         with open(BASE_PATH + "/cnt/{0}/Create.sh".format(_tag), 'w') as fout:
             fout.write("#!/bin/bash\n")
