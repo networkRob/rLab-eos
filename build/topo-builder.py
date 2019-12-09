@@ -6,7 +6,7 @@ from os import getcwd, mkdir
 from os.path import isdir
 
 BASE_PATH = getcwd()
-CONFIGS = BASE_PATH + "/configs/"
+CONFIGS = BASE_PATH + "/configs"
 
 OVS_BRIDGES = []
 NODES = {}
