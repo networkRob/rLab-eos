@@ -96,17 +96,19 @@ def main(args):
         CMDS_CREATE.append("docker start {}".format(_name))
         CMDS_START.append("docker start {}".format(_name))
         for eindex in range(1, len(NODES[_node]['intfs']) + 1):
-            if eindex == 1:
-                CMDS_CREATE.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
-                CMDS_START.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
-            else:
-                CMDS_CREATE.append("sudo ovs-docker add-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
-                CMDS_START.append("sudo ovs-docker add-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
+            CMDS_CREATE.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
+            CMDS_START.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
             CMDS_DESTROY.append("sudo ovs-docker del-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
             CMDS_STOP.append("sudo ovs-docker del-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
         CMDS_DESTROY.append("docker stop {}".format(_name))
         CMDS_STOP.append("docker stop {}".format(_name))
         CMDS_DESTROY.append("docker rm {}".format(_name))
+        # Create a system_mac_address file in /mnt/flash
+        ceos_flash = CONFIGS + "/{0}/{1}".format(_tag, _node)
+        if not isdir(ceos_flash):
+            mkdir(ceos_flash)
+        with open(ceos_flash + '/system_mac_address', 'w') as cmac:
+            cmac.write(topo_yaml['nodes'][_node]['mac'])
     # Create commands to create host containers
     for _host in HOSTS:
         _hname = HOSTS[_host]['name']
