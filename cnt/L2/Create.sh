@@ -28,33 +28,33 @@ sudo ovs-vsctl set bridge l2leaf3host31 other-config:forward-bpdu=true
 docker create --name=l2spine1 --net=none --privileged -v $(pwd)/configs/L2/spine1/:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=et0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.23.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=et0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 docker start l2spine1
 sudo ovs-docker add-port l2spine1spine2 et1 l2spine1 --macaddress=00:1c:73:c0:c6:01
-sudo ovs-docker add-port l2spine1leaf1 et2 l2spine1
-sudo ovs-docker add-port l2spine1leaf2 et3 l2spine1
-sudo ovs-docker add-port l2spine1leaf3 et4 l2spine1
+sudo ovs-docker add-port l2spine1leaf1 et2 l2spine1 --macaddress=00:1c:73:c0:c6:01
+sudo ovs-docker add-port l2spine1leaf2 et3 l2spine1 --macaddress=00:1c:73:c0:c6:01
+sudo ovs-docker add-port l2spine1leaf3 et4 l2spine1 --macaddress=00:1c:73:c0:c6:01
 docker create --name=l2spine2 --net=none --privileged -v $(pwd)/configs/L2/spine2/:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=et0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.23.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=et0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 docker start l2spine2
 sudo ovs-docker add-port l2spine1spine2 et1 l2spine2 --macaddress=00:1c:73:c1:c6:01
-sudo ovs-docker add-port l2spine2leaf1 et2 l2spine2
-sudo ovs-docker add-port l2spine2leaf2 et3 l2spine2
-sudo ovs-docker add-port l2spine2leaf3 et4 l2spine2
+sudo ovs-docker add-port l2spine2leaf1 et2 l2spine2 --macaddress=00:1c:73:c1:c6:01
+sudo ovs-docker add-port l2spine2leaf2 et3 l2spine2 --macaddress=00:1c:73:c1:c6:01
+sudo ovs-docker add-port l2spine2leaf3 et4 l2spine2 --macaddress=00:1c:73:c1:c6:01
 docker create --name=l2leaf1 --net=none --privileged -v $(pwd)/configs/L2/leaf1/:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=et0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.23.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=et0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 docker start l2leaf1
 sudo ovs-docker add-port l2spine1leaf1 et1 l2leaf1 --macaddress=00:1c:73:c2:c6:01
-sudo ovs-docker add-port l2spine2leaf1 et2 l2leaf1
-sudo ovs-docker add-port l2leaf1host10 et3 l2leaf1
-sudo ovs-docker add-port l2leaf1host11 et4 l2leaf1
+sudo ovs-docker add-port l2spine2leaf1 et2 l2leaf1 --macaddress=00:1c:73:c2:c6:01
+sudo ovs-docker add-port l2leaf1host10 et3 l2leaf1 --macaddress=00:1c:73:c2:c6:01
+sudo ovs-docker add-port l2leaf1host11 et4 l2leaf1 --macaddress=00:1c:73:c2:c6:01
 docker create --name=l2leaf3 --net=none --privileged -v $(pwd)/configs/L2/leaf3/:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=et0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.23.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=et0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 docker start l2leaf3
 sudo ovs-docker add-port l2spine1leaf3 et1 l2leaf3 --macaddress=00:1c:73:c4:c6:01
-sudo ovs-docker add-port l2spine2leaf3 et2 l2leaf3
-sudo ovs-docker add-port l2leaf3host30 et3 l2leaf3
-sudo ovs-docker add-port l2leaf3host31 et4 l2leaf3
+sudo ovs-docker add-port l2spine2leaf3 et2 l2leaf3 --macaddress=00:1c:73:c4:c6:01
+sudo ovs-docker add-port l2leaf3host30 et3 l2leaf3 --macaddress=00:1c:73:c4:c6:01
+sudo ovs-docker add-port l2leaf3host31 et4 l2leaf3 --macaddress=00:1c:73:c4:c6:01
 docker create --name=l2leaf2 --net=none --privileged -v $(pwd)/configs/L2/leaf2/:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=et0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.23.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=et0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 docker start l2leaf2
 sudo ovs-docker add-port l2spine1leaf2 et1 l2leaf2 --macaddress=00:1c:73:c3:c6:01
-sudo ovs-docker add-port l2spine2leaf2 et2 l2leaf2
-sudo ovs-docker add-port l2leaf2host20 et3 l2leaf2
-sudo ovs-docker add-port l2leaf2host21 et4 l2leaf2
+sudo ovs-docker add-port l2spine2leaf2 et2 l2leaf2 --macaddress=00:1c:73:c3:c6:01
+sudo ovs-docker add-port l2leaf2host20 et3 l2leaf2 --macaddress=00:1c:73:c3:c6:01
+sudo ovs-docker add-port l2leaf2host21 et4 l2leaf2 --macaddress=00:1c:73:c3:c6:01
 docker create --name=l2host31 --hostname=l2host31 --net=none chost:0.5
 docker start l2host31
 sudo ovs-docker add-port l2leaf3host31 eth0 l2host31 --ipaddress=10.0.13.31/24 --gateway=10.0.13.1
