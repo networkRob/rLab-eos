@@ -1,7 +1,7 @@
 topology:
   name: L3
 images:
-  ceos: 4.23.1F.EFT
+  ceos: 4.23.1F
   host: 0.5
 nodes:
   spine1:
