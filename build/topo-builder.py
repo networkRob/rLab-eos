@@ -2,7 +2,7 @@
 
 import argparse
 from ruamel.yaml import YAML
-from os import getcwd, mkdir, makesdirs
+from os import getcwd, mkdir, makedirs
 from os.path import isdir
 
 BASE_PATH = getcwd()
@@ -106,7 +106,7 @@ def main(args):
         # Create a system_mac_address file in /mnt/flash
         ceos_flash = CONFIGS + "/{0}/{1}".format(_tag, _node)
         if not isdir(ceos_flash):
-            makesdirs(ceos_flash)
+            makedirs(ceos_flash)
         with open(ceos_flash + '/system_mac_address', 'w') as cmac:
             cmac.write(topo_yaml['nodes'][_node]['mac'])
     # Create commands to create host containers
