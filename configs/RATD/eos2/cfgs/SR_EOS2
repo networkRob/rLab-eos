@@ -6,6 +6,7 @@ hostname eos2
 !
 spanning-tree mode mstp
 !
+agent Bfd shutdown
 !
 aaa authorization exec default local
 !

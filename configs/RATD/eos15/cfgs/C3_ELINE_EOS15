@@ -6,6 +6,7 @@ hostname eos15
 !
 spanning-tree mode mstp
 !
+agent Bfd shutdown
 !
 aaa authorization exec default local
 !
