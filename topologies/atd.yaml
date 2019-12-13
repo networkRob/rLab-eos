@@ -70,7 +70,6 @@ commands:
     pre: 'BGP'
   vxlan:
     pre: 'VXLAN'
-    reboot: 
   l2evpn:
     pre: 'L2EVPN'
     reboot: 
