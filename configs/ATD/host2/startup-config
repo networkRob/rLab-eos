@@ -8,6 +8,26 @@ username arista privilege 15 secret 5 VjIjfd1.Tk1
 agent Bfd shutdown
 hostname host2
 !
+vlan 12
+vlan 16
+!
+interface Port-Channel1
+   switchport access vlan 12
+!
+interface Ethernet1
+   channel-group 1 mode active
+!
+interface Ethernet2
+   channel-group 1 mode active
+!
+interface Vlan12
+   ip address 172.16.112.202/24
+   no autostate
+!
+interface Vlan16
+   ip address 172.16.116.100/24
+   no autostate
+!
 interface Management0
    ip address 192.168.0.32/24
    no lldp transmit
@@ -15,7 +35,7 @@ interface Management0
 !
 dns domain arista.lab
 ip routing
- ip route 0.0.0.0/0 192.168.0.1
+!!ip route 0.0.0.0/0 192.168.0.1
 !
 management api http-commands
    no shutdown
