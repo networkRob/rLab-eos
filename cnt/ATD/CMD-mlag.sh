@@ -1,9 +1,9 @@
 #!/bin/bash
-docker exec -it ratdspine1 Cli -p 15 -c "configure replace flash:/cfgs/MLAG_SPINE1 ignore-errors" > /dev/null 2>&1
-docker exec -it ratdspine2 Cli -p 15 -c "configure replace flash:/cfgs/MLAG_SPINE2 ignore-errors" > /dev/null 2>&1
-docker exec -it ratdleaf1 Cli -p 15 -c "configure replace flash:/cfgs/MLAG_LEAF1 ignore-errors" > /dev/null 2>&1
-docker exec -it ratdleaf2 Cli -p 15 -c "configure replace flash:/cfgs/MLAG_LEAF2 ignore-errors" > /dev/null 2>&1
-docker exec -it ratdleaf3 Cli -p 15 -c "configure replace flash:/cfgs/MLAG_LEAF3 ignore-errors" > /dev/null 2>&1
-docker exec -it ratdleaf4 Cli -p 15 -c "configure replace flash:/cfgs/MLAG_LEAF4 ignore-errors" > /dev/null 2>&1
-docker exec -it ratdhost1 Cli -p 15 -c "configure replace flash:/cfgs/MLAG_HOST1 ignore-errors" > /dev/null 2>&1
-docker exec -it ratdhost2 Cli -p 15 -c "configure replace flash:/cfgs/MLAG_HOST2 ignore-errors" > /dev/null 2>&1
+docker exec -it atdspine1 Cli -p 15 -c "configure replace flash:/cfgs/MLAG-spine1 ignore-errors" > /dev/null 2>&1
+docker exec -it atdspine2 Cli -p 15 -c "configure replace flash:/cfgs/MLAG-spine2 ignore-errors" > /dev/null 2>&1
+docker exec -it atdleaf1 Cli -p 15 -c "configure replace flash:/cfgs/MLAG-leaf1 ignore-errors" > /dev/null 2>&1
+docker exec -it atdleaf2 Cli -p 15 -c "configure replace flash:/cfgs/MLAG-leaf2 ignore-errors" > /dev/null 2>&1
+docker exec -it atdleaf3 Cli -p 15 -c "configure replace flash:/cfgs/MLAG-leaf3 ignore-errors" > /dev/null 2>&1
+docker exec -it atdleaf4 Cli -p 15 -c "configure replace flash:/cfgs/MLAG-leaf4 ignore-errors" > /dev/null 2>&1
+docker exec -it atdhost1 Cli -p 15 -c "configure replace flash:/cfgs/MLAG-host1 ignore-errors" > /dev/null 2>&1
+docker exec -it atdhost2 Cli -p 15 -c "configure replace flash:/cfgs/MLAG-host2 ignore-errors" > /dev/null 2>&1
