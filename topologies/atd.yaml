@@ -1,8 +1,8 @@
 topology:
   name: ATD
 images:
-  ceos: 4.22.1F.Trunk
-  host: chost:0.1
+  ceos: 4.23.1F
+  host: chost:0.5
 nodes:
   spine1:
     mac: 00:1c:73:c0:c6:01
@@ -78,4 +78,3 @@ commands:
     pre: 'CVP'
   base:
     pre: 'BASE'
-    
