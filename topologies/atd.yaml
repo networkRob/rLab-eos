@@ -27,72 +27,59 @@ nodes:
       - spine1
       - spine2
       - host1
-      - eos4
-      - eos20
   leaf2:
     mac: 00:1c:73:c3:c6:01
     links:
-      - eos9
-      - eos8
-      - eos5
-      - eos2
-      - eos3
-      - eos16
+      - leaf1
+      - spine1
+      - spine1
+      - host1
   leaf3:
     mac: 00:1c:73:c4:c6:01
     links:
-      - eos4
-      - eos3
-      - eos2
-      - eos1
-      - eos6
+      - leaf4
+      - spine1
+      - spine2
+      - host2
   leaf4:
     mac: 00:1c:73:c5:c6:01
     links:
-      - eos5
-      - eos8
-      - eos13
-      - eos1
-      - eos2
-      - eos14
-  cvx:
-    mac: 00:1c:73:c6:c6:01
-    links:
-      - eos3
-      - eos10
-      - eos1
-      - eos19
+      - leaf3
+      - spine1
+      - spine2
+      - host2
+  # cvx:
+  #   mac: 00:1c:73:c6:c6:01
+  #   links:
   host1:
     mac: 00:1c:73:c7:c6:01
     links:
-      - eos4
-      - eos15
-      - eos6
-      - eos14
-      - eos18
+      - leaf1
+      - leaf2
   host2:
     mac: 00:1c:73:c8:c6:01
     links:
-      - eos4
-      - eos3
+      - leaf3
+      - leaf4
 hosts:
+iperf:
 commands:
-  sr:
-    pre: 'SR'
-  evpn:
-    pre: 'EVPN'
-  c1-l3vpn:
-    pre: 'C1_L3VPN'
-  c2-l2vpn:
-    pre: 'C2_L2VPN'
-  c3-eline:
-    pre: 'C3_ELINE'
-  c4-l3vpn:
-    pre: 'C4_L3VPN'
-  centsvc:
-    pre: 'CENTSVC'
-  complete:
-    pre: 'Complete'
-  base:
-    pre: 'BaseIPv4'
+  # sr:
+  #   pre: 'SR'
+  # evpn:
+  #   pre: 'EVPN'
+  # c1-l3vpn:
+  #   pre: 'C1_L3VPN'
+  # c2-l2vpn:
+  #   pre: 'C2_L2VPN'
+  # c3-eline:
+  #   pre: 'C3_ELINE'
+  # c4-l3vpn:
+  #   pre: 'C4_L3VPN'
+  # centsvc:
+  #   pre: 'CENTSVC'
+  # complete:
+  #   pre: 'Complete'
+  # base:
+  #   pre: 'BaseIPv4'
     
