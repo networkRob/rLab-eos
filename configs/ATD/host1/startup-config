@@ -16,11 +16,11 @@ interface Port-Channel1
 !
 interface Ethernet1
    channel-group 1 mode active
-   lacp rate fast
+   lacp timer fast
 !
 interface Ethernet2
    channel-group 1 mode active
-   lacp rate fast
+   lacp timer fast
 !
 interface Vlan12
    ip address 172.16.112.201/24
