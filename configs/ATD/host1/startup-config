@@ -2,8 +2,8 @@
 aaa authentication login default local
 aaa authorization exec default local
 !
-username admin privilege 15 role network-admin secret 5 O85YVVn.
-username arista privilege 15 secret 5 VjIjfd1.Tk1
+username admin privilege 15 role network-admin secret 5 $1$5O85YVVn$HrXcfOivJEnISTMb6xrJc.
+username arista privilege 15 secret 5 $1$4VjIjfd1$XkUVulbNDESHFzcxDU.Tk1
 !
 agent Bfd shutdown
 hostname host1
