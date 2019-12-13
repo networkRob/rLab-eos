@@ -38,6 +38,7 @@ interface Vlan34
    ip address 172.16.115.100/24
 !
 ip routing
+ip route 172.16.116.0/24 172.16.115.1
 !
 management api http-commands
    no shutdown
