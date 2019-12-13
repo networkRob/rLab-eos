@@ -2,12 +2,11 @@
 
 import argparse
 from ruamel.yaml import YAML
-from os import getcwd, mkdir
+from os import getcwd, mkdir, makedirs
 from os.path import isdir
-from pprint import pprint as pp
 
 BASE_PATH = getcwd()
-CONFIGS = BASE_PATH + "/configs/"
+CONFIGS = BASE_PATH + "/configs"
 
 OVS_BRIDGES = []
 NODES = {}
@@ -37,6 +36,16 @@ def checkBridge(dev1, dev2, _tag):
             return({'status': _addBr, 'name': _br})
     return({'status': _addBr, 'name':''})
 
+def checkBridgeNameLength(brName):
+    """
+    Function to check if length of bridge name is over
+    characters.
+    """
+    if len(brName) <= 15:
+        return(True)
+    else:
+        return(False)
+
 
 def main(args):
     global OVS_BRIDGES, NODES
@@ -56,6 +65,8 @@ def main(args):
                 _brCheck = checkBridge(_node, _peer, _tag)
                 if _brCheck['status']:
                     _brName = _tag.lower() + _node + _peer
+                    if not checkBridgeNameLength(_brName):
+                        print("Alert! Bridge name {0} is longer than the allowed 15 characters.\nThere maybe ovs build errors.".format(_brName))
                     OVS_BRIDGES.append(_brName)
                     NODES[_node]['intfs']['eth{}'.format(intf)] = _brName
                 else:
@@ -81,38 +92,50 @@ def main(args):
     # Create commands to create cEOS containers:
     for _node in NODES:
         _name = NODES[_node]['name']
-        CMDS_CREATE.append("docker volume create {0}".format(_name))
-        CMDS_CREATE.append("docker create --name={0} --net=none --privileged --mount source={0},target=/mnt/flash -e INTFTYPE=eth -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{1} /sbin/init systemd.setenv=INTFTYPE=eth systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format(_name, ceos_img))
-        CMDS_CREATE.append("sudo cp -r $(pwd)/configs/{0}/{1}/* $(docker volume inspect --format ".format(topo_yaml['topology']['name'], _node) +  r"'{{ .Mountpoint }}'" + " {0})/".format(_name))
+        CMDS_CREATE.append("docker create --name={0} --net=none --privileged -v $(pwd)/configs/{1}/{2}/:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=et0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=et0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format( _name, topo_yaml['topology']['name'], _node, ceos_img))
         CMDS_CREATE.append("docker start {}".format(_name))
         CMDS_START.append("docker start {}".format(_name))
         for eindex in range(1, len(NODES[_node]['intfs']) + 1):
-            if eindex == 1:
-                CMDS_CREATE.append("sudo ovs-docker add-port {0} eth{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
-                CMDS_START.append("sudo ovs-docker add-port {0} eth{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
-            else:
-                CMDS_CREATE.append("sudo ovs-docker add-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
-                CMDS_START.append("sudo ovs-docker add-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
-            CMDS_DESTROY.append("sudo ovs-docker del-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
-            CMDS_STOP.append("sudo ovs-docker del-port {0} eth{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
+            CMDS_CREATE.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
+            CMDS_START.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
+            CMDS_DESTROY.append("sudo ovs-docker del-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
+            CMDS_STOP.append("sudo ovs-docker del-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
         CMDS_DESTROY.append("docker stop {}".format(_name))
         CMDS_STOP.append("docker stop {}".format(_name))
         CMDS_DESTROY.append("docker rm {}".format(_name))
-        CMDS_DESTROY.append("docker volume rm {}".format(_name))
+        # Create a system_mac_address file in /mnt/flash
+        ceos_flash = CONFIGS + "/{0}/{1}".format(_tag, _node)
+        if not isdir(ceos_flash):
+            makedirs(ceos_flash)
+        with open(ceos_flash + '/system_mac_address', 'w') as cmac:
+            cmac.write(topo_yaml['nodes'][_node]['mac'])
     # Create commands to create host containers
     for _host in HOSTS:
         _hname = HOSTS[_host]['name']
-        CMDS_CREATE.append("docker create --name={0} --hostname={0} --net=none {1}".format(_hname, host_img))
+        CMDS_CREATE.append("docker create --name={0} --hostname={0} --net=none chost:{1}".format(_hname, host_img))
         CMDS_CREATE.append("docker start {}".format(_hname))
         CMDS_START.append("docker start {}".format(_hname))
         for eindex in range(0, len(HOSTS[_host]['intfs'])):
-            CMDS_CREATE.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
-            CMDS_DESTROY.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
-            CMDS_START.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
-            CMDS_STOP.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3} --gateway={4}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['gateway']))
+            CMDS_CREATE.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
+            CMDS_DESTROY.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
+            CMDS_START.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
+            CMDS_STOP.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
         CMDS_DESTROY.append("docker stop {}".format(_hname))
         CMDS_DESTROY.append("docker rm {}".format(_hname))
         CMDS_STOP.append("docker stop {}".format(_hname))
+    
+    # Check for iPerf3 configurations
+    if topo_yaml['iperf']:
+        _iperf = topo_yaml['iperf']
+        _port = _iperf['port']
+        _brate = _iperf['brate']
+        for _server in _iperf['servers']:
+            CMDS_CREATE.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server]['name'], _port))
+            CMDS_START.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server]['name'], _port))
+        for _client in _iperf['clients']:
+            _target = topo_yaml['hosts'][_client['target']]['ipaddress']
+            CMDS_CREATE.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
+            CMDS_START.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
 
     # Check and create topo commands
     if topo_yaml['commands']:
@@ -120,11 +143,11 @@ def main(args):
             CMDS[_cmd] = []
             if topo_yaml['nodes']:
                 for _node in topo_yaml['nodes']:
-                    CMDS[_cmd].append("docker exec -it ratd{0} Cli -p 15 -c \"configure replace flash:/{1}_{2} ignore-errors\" > /dev/null 2>&1".format(_node, topo_yaml['commands'][_cmd]['pre'], _node.upper()))
+                    CMDS[_cmd].append("docker exec -it ratd{0} Cli -p 15 -c \"configure replace flash:/cfgs/{1}_{2} ignore-errors\" > /dev/null 2>&1".format(_node, topo_yaml['commands'][_cmd]['pre'], _node.upper()))
 
     # Check to see if dest dir is created
     if not isdir(BASE_PATH + "/cnt/{0}".format(_tag)):
-        mkdir(BASE_PATH + "/cnt/{0}".format(_tag))
+        makedirs(BASE_PATH + "/cnt/{0}".format(_tag))
     if CMDS_CREATE:
         with open(BASE_PATH + "/cnt/{0}/Create.sh".format(_tag), 'w') as fout:
             fout.write("#!/bin/bash\n")

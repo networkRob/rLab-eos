@@ -1,0 +1,49 @@
+!
+service routing protocols model multi-agent
+!
+!
+hostname eos9
+!
+spanning-tree mode mstp
+!
+agent Bfd shutdown
+!
+aaa authorization exec default local
+!
+!
+username arista privilege 15 role network-admin secret sha512 $6$EoWo1xKgVqkLkfiG$Np7c6.pQZ/Z3i1Tw/Ph6VtjwJID63kb1RVeSzLi4EnfdAjo/9bKCT7Z7phcFcmVIiY3PAlW42z9L0GBPO8k56/
+!
+interface Port-Channel9
+   description PEs: EOS3,EOS4
+   no switchport
+   ip address 10.0.0.9/24
+!
+interface Ethernet1
+   description EOS4
+   no switchport
+   channel-group 9 mode active
+!
+interface Ethernet2
+   description EOS3
+   no switchport
+   channel-group 9 mode active
+!
+interface Loopback0
+   ip address 9.9.9.9/32
+!
+interface Management0
+   ip address 192.168.0.18/24
+!
+!
+!
+ip routing
+!
+!
+router ospf 200
+   network 0.0.0.0/0 area 0.0.0.0
+   max-lsa 12000
+!
+management api http-commands
+   no shutdown
+!
+end

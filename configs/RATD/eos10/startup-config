@@ -5,8 +5,12 @@ hostname eos10
 !
 spanning-tree mode mstp
 !
+schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
+!
 !
 aaa authorization exec default local
+!
+agent Bfd shutdown
 !
 !
 username arista privilege 15 role network-admin secret sha512 $6$EFqaYi9loVKyfH9Y$BMaXecaM5mMMUrKU57Ih8kBCbDkH17jdfl3goaDzpJrveHjSBwIzvcHWM6oppnt0z7qvOoCgdzZYpGL.8pyIt/

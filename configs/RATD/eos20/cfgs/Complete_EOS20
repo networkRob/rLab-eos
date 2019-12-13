@@ -1,0 +1,41 @@
+!
+service routing protocols model multi-agent
+!
+!
+hostname eos20
+!
+spanning-tree mode mstp
+!
+agent Bfd shutdown
+!
+aaa authorization exec default local
+!
+!
+username arista privilege 15 role network-admin secret sha512 $6$xrL6GY1oa4J795Z4$KAjoa22OaA5i/BlZsuCy643CLV2/dkeFIHcgLUJuhv4DA6pP8DoyAqP7oBpZbVp5VB7GDmaI4LsNRS9SVP1ga0
+!
+interface Ethernet1
+   description EOS3
+   no switchport
+   ip address 10.3.20.20/24
+!
+interface Loopback0
+   ip address 20.20.20.20/32
+!
+interface Management0
+   ip address 192.168.0.29/24
+!
+!
+!
+ip routing
+!
+!
+router bgp 500
+   router-id 20.20.20.20
+   neighbor 10.3.20.3 remote-as 100
+   neighbor 10.3.20.3 maximum-routes 12000 
+   network 20.20.20.20/32
+!
+management api http-commands
+   no shutdown
+!
+end

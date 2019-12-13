@@ -1,8 +1,8 @@
 topology:
   name: L3
 images:
-  ceos: 4.22.1F.Trunk
-  host: chost:0.1
+  ceos: 4.23.1F
+  host: 0.5
 nodes:
   spine1:
     mac: 00:1c:73:c0:c6:01
@@ -13,6 +13,8 @@ nodes:
       - leaf22
       - leaf31
       - leaf32
+      - brdr1
+      - brdr2
   spine2:
     mac: 00:1c:73:c1:c6:01
     links:
@@ -22,6 +24,8 @@ nodes:
       - leaf22
       - leaf31
       - leaf32
+      - brdr1
+      - brdr2
   leaf11:
     mac: 00:1c:73:c2:c6:01
     links:
@@ -29,6 +33,7 @@ nodes:
       - spine1
       - spine2
       - host11
+      - host12
   leaf12:
     mac: 00:1c:73:c3:c6:01
     links:
@@ -48,27 +53,82 @@ nodes:
       - leaf21
       - spine1
       - spine2
+      - host22
   leaf31:
     mac: 00:1c:73:c6:c6:01
     links:
       - leaf32
       - spine1
       - spine2
+      - host31
+      - host32
   leaf32:
     mac: 00:1c:73:c7:c6:01
     links:
       - leaf31
       - spine1
       - spine2
+  brdr1:
+    mac: 00:1c:73:c8:c6:01
+    links:
+      - brdr2
+      - spine1
+      - spine2
+  brdr2:
+    mac: 00:1c:73:c9:c6:01
+    links:
+      - brdr1
+      - spine1
+      - spine2
 hosts:
   host11:
-    ipaddress: 192.168.12.11/24
+    ipaddress: 192.168.12.11
+    mask: 24
     gateway: 192.168.12.1
     links:
       - leaf11
+  host12:
+    ipaddress: 192.168.13.11
+    mask: 24
+    gateway: 192.168.13.1
+    links:
+      - leaf11
   host21:
-    ipaddress: 192.168.12.21/24
+    ipaddress: 192.168.12.21
+    mask: 24
     gateway: 192.168.12.1
     links:
       - leaf21
+  host22:
+    ipaddress: 192.168.13.21
+    mask: 24
+    gateway: 192.168.13.1
+    links:
+      - leaf22
+  host31:
+    ipaddress: 192.168.12.31
+    mask: 24
+    gateway: 192.168.12.1
+    links:
+      - leaf31
+  host32:
+    ipaddress: 192.168.13.31
+    mask: 24
+    gateway: 192.168.13.1
+    links:
+      - leaf31
+iperf:
+  port: 5010
+  brate: 1000000
+  servers:
+    - host11
+    - host12
+    - host31
+  clients:
+    - client: host21
+      target: host11
+    - client: host32
+      target: host12
+    - client: host22
+      target: host31
 commands:
