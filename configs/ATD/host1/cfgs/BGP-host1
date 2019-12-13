@@ -7,7 +7,7 @@ aaa authorization exec default local
 username admin privilege 15 role network-admin secret 5 $1$5O85YVVn$HrXcfOivJEnISTMb6xrJc.
 username arista privilege 15 secret 5 $1$4VjIjfd1$XkUVulbNDESHFzcxDU.Tk1
 !
-vlan 12,15
+vlan 12,34
 !
 dns domain arista.lab
 !
@@ -33,7 +33,7 @@ interface Vlan12
    no autostate
    ip address 172.16.112.201/24
 !
-interface Vlan15
+interface Vlan34
    no autostate
    ip address 172.16.115.100/24
 !
