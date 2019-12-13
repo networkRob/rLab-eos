@@ -1,3 +1,20 @@
+!
+agent Bfd shutdown
+!
+aaa authentication login default local
+aaa authorization exec default local
+!
+username admin privilege 15 role network-admin secret 5 $1$5O85YVVn$HrXcfOivJEnISTMb6xrJc.
+username arista privilege 15 secret 5 $1$4VjIjfd1$XkUVulbNDESHFzcxDU.Tk1
+!
+vlan 12,34
+!
+dns domain arista.lab
+!
+spanning-tree mode mstp
+!
+hostname spine2
+!
 interface Ethernet1
    shutdown
 !
@@ -24,20 +41,28 @@ interface Ethernet5
 interface Loopback0
    ip address 172.16.0.2/32
 !
+interface Management0
+   ip address 192.168.0.11/24
+!
+ip routing
+!
 router bgp 65000
    router-id 172.16.0.2
    maximum-paths 4 ecmp 4
    neighbor 172.16.200.18 remote-as 65001
-   neighbor 172.16.200.18 maximum-routes 12000 
+   neighbor 172.16.200.18 maximum-routes 12000
    neighbor 172.16.200.18 send-community extended
    neighbor 172.16.200.22 remote-as 65001
-   neighbor 172.16.200.22 maximum-routes 12000 
+   neighbor 172.16.200.22 maximum-routes 12000
    neighbor 172.16.200.22 send-community extended
    neighbor 172.16.200.26 remote-as 65002
-   neighbor 172.16.200.26 maximum-routes 12000 
+   neighbor 172.16.200.26 maximum-routes 12000
    neighbor 172.16.200.26 send-community extended
    neighbor 172.16.200.30 remote-as 65002
-   neighbor 172.16.200.30 maximum-routes 12000 
+   neighbor 172.16.200.30 maximum-routes 12000
    neighbor 172.16.200.30 send-community extended
    network 172.16.0.2/32
 !
+management api http-commands
+   no shutdown
+   protocol http
