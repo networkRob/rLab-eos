@@ -64,22 +64,18 @@ nodes:
 hosts:
 iperf:
 commands:
-  # sr:
-  #   pre: 'SR'
-  # evpn:
-  #   pre: 'EVPN'
-  # c1-l3vpn:
-  #   pre: 'C1_L3VPN'
-  # c2-l2vpn:
-  #   pre: 'C2_L2VPN'
-  # c3-eline:
-  #   pre: 'C3_ELINE'
-  # c4-l3vpn:
-  #   pre: 'C4_L3VPN'
-  # centsvc:
-  #   pre: 'CENTSVC'
-  # complete:
-  #   pre: 'Complete'
-  # base:
-  #   pre: 'BaseIPv4'
+  mlag:
+    pre: 'MLAG'
+  bgp:
+    pre: 'BGP'
+  vxlan:
+    pre: 'VXLAN'
+  l2evpn:
+    pre: 'L2EVPN'
+  l3evpn:
+    pre: 'L3EVPN'
+  cvp:
+    pre: 'CVP'
+  base:
+    pre: 'BASE'
     
