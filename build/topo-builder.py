@@ -150,7 +150,7 @@ def main(args):
                         CMDS[_cmd].append("docker exec -it {0} Cli -p 15 -c \"configure replace flash:/cfgs/{1}-{2} ignore-errors\" > /dev/null 2>&1".format(_name, topo_yaml['commands'][_cmd]['pre'], _node))
                     if 'reboot' in topo_yaml['commands'][_cmd]:
                         CMDS[_cmd].append("docker exec -it {0} Cli -p 15 -c \"write\" > /dev/null 2>&1".format(_name))
-                        CMDS[_cmd].append("docker exec -it {0} bash pkill -9 Sysdb".format(_name))
+                        CMDS[_cmd].append("docker exec -it {0} bash -c 'pkill -9 Sysdb'".format(_name))
     # Check to see if dest dir is created
     if not isdir(BASE_PATH + "/cnt/{0}".format(_tag)):
         makedirs(BASE_PATH + "/cnt/{0}".format(_tag))
