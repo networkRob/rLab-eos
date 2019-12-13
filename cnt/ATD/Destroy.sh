@@ -41,7 +41,7 @@ docker stop atdleaf3
 docker rm atdleaf3
 sudo ovs-docker del-port atdleaf1leaf2 et1 atdleaf2
 sudo ovs-docker del-port atdspine1leaf2 et2 atdleaf2
-sudo ovs-docker del-port atdspine1leaf2 et3 atdleaf2
+sudo ovs-docker del-port atdspine2leaf2 et3 atdleaf2
 sudo ovs-docker del-port atdleaf2host1 et4 atdleaf2
 docker stop atdleaf2
 docker rm atdleaf2

@@ -35,5 +35,5 @@ sudo ovs-docker add-port atdleaf3host2 et4 atdleaf3 --macaddress=00:1c:73:c4:c6:
 docker start atdleaf2
 sudo ovs-docker add-port atdleaf1leaf2 et1 atdleaf2 --macaddress=00:1c:73:c3:c6:01
 sudo ovs-docker add-port atdspine1leaf2 et2 atdleaf2 --macaddress=00:1c:73:c3:c6:01
-sudo ovs-docker add-port atdspine1leaf2 et3 atdleaf2 --macaddress=00:1c:73:c3:c6:01
+sudo ovs-docker add-port atdspine2leaf2 et3 atdleaf2 --macaddress=00:1c:73:c3:c6:01
 sudo ovs-docker add-port atdleaf2host1 et4 atdleaf2 --macaddress=00:1c:73:c3:c6:01
