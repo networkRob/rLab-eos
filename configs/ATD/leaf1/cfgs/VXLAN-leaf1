@@ -1,0 +1,102 @@
+!
+agent Bfd shutdown
+service routing protocols model multi-agent
+!
+aaa authentication login default local
+aaa authorization exec default local
+!
+username admin privilege 15 role network-admin secret 5 $1$5O85YVVn$HrXcfOivJEnISTMb6xrJc.
+username arista privilege 15 secret 5 $1$4VjIjfd1$XkUVulbNDESHFzcxDU.Tk1
+!
+vlan 12,34
+!
+dns domain arista.lab
+!
+spanning-tree mode mstp
+!
+hostname leaf1
+!
+no spanning-tree vlan-id 4094
+!
+vlan 4094
+   trunk group MLAGPEER
+!
+interface Port-Channel4
+   description MLAG - HOST1
+   switchport mode access
+   switchport access vlan 12
+   mlag 4
+!
+interface Port-Channel10
+   description MLAG PEER LINK - LEAF2
+   switchport mode trunk
+   switchport trunk group MLAGPEER
+!
+interface Ethernet1
+   description MLAG PEER LINK - LEAF2
+   switchport mode trunk
+   channel-group 10 mode active
+!
+interface Ethernet2
+   description SPINE1
+   no switchport
+   ip address 172.16.200.2/30
+!
+interface Ethernet3
+   description SPINE2
+   no switchport
+   ip address 172.16.200.18/30
+!
+interface Ethernet4
+   description HOST1
+   channel-group 4 mode active
+   lacp timer fast
+!
+interface Loopback0
+   ip address 172.16.0.3/32
+!
+interface Loopback1
+   ip address 172.16.0.34/32
+!
+interface Vlan12
+   ip address 172.16.112.2/24
+   ip virtual-router address 172.16.112.1
+!
+interface Vlan4094
+   description MLAG PEER LINK - LEAF2
+   ip address 172.16.12.1/30
+!
+interface Vxlan1
+   vxlan source-interface loopback 1
+   vxlan flood vtep 172.16.0.56
+   vxlan vlan 12 vni 1212
+!
+interface Management0
+   ip address 192.168.0.14/24
+!
+mlag configuration
+   domain-id MLAG12
+   local-interface Vlan4094
+   peer-address 172.16.12.2
+   peer-link Port-Channel10
+!
+ip routing
+!
+ip virtual-router mac-address 00:1c:73:00:00:ff
+!
+router bgp 65001
+   router-id 172.16.0.3
+   maximum-paths 4 ecmp 4
+   neighbor 172.16.200.1 remote-as 65000
+   neighbor 172.16.200.1 maximum-routes 12000
+   neighbor 172.16.200.17 remote-as 65000
+   neighbor 172.16.200.17 maximum-routes 12000
+   neighbor 172.16.12.2 remote-as 65001
+   neighbor 172.16.12.2 next-hop-self
+   network 172.16.0.3/32
+   network 172.16.0.34/32
+   network 172.16.112.0/24
+!
+management api http-commands
+   no shutdown
+   protocol http
