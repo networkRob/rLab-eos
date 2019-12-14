@@ -1,5 +1,6 @@
 !
 agent Bfd shutdown
+service routing protocols model multi-agent
 !
 aaa authentication login default local
 aaa authorization exec default local

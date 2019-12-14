@@ -72,10 +72,8 @@ commands:
     pre: 'VXLAN'
   l2evpn:
     pre: 'L2EVPN'
-    reboot: 
   l3evpn:
     pre: 'L3EVPN'
-    reboot: 
   cvp:
     pre: 'CVP'
   base:
