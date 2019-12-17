@@ -1,10 +1,12 @@
 topology:
   name: ATD
+  mgmt: vmgmt
 images:
   ceos: 4.23.1F
   host: chost:0.5
 nodes:
   spine1:
+    ip: 192.168.0.10
     mac: 00:1c:73:c0:c6:01
     links:
       - spine2
@@ -13,6 +15,7 @@ nodes:
       - leaf3
       - leaf4
   spine2:
+    ip: 192.168.0.11
     mac: 00:1c:73:c1:c6:01
     links:
       - spine1
@@ -21,6 +24,7 @@ nodes:
       - leaf3
       - leaf4
   leaf1:
+    ip: 192.168.0.14
     mac: 00:1c:73:c2:c6:01
     links:
       - leaf2
@@ -28,6 +32,7 @@ nodes:
       - spine2
       - host1
   leaf2:
+    ip: 192.168.0.15
     mac: 00:1c:73:c3:c6:01
     links:
       - leaf1
@@ -35,6 +40,7 @@ nodes:
       - spine2
       - host1
   leaf3:
+    ip: 192.168.0.16
     mac: 00:1c:73:c4:c6:01
     links:
       - leaf4
@@ -42,6 +48,7 @@ nodes:
       - spine2
       - host2
   leaf4:
+    ip: 192.168.0.17
     mac: 00:1c:73:c5:c6:01
     links:
       - leaf3
@@ -52,11 +59,13 @@ nodes:
   #   mac: 00:1c:73:c6:c6:01
   #   links:
   host1:
+    ip: 192.168.0.31
     mac: 00:1c:73:c7:c6:01
     links:
       - leaf1
       - leaf2
   host2:
+    ip: 192.168.0.32
     mac: 00:1c:73:c8:c6:01
     links:
       - leaf3
