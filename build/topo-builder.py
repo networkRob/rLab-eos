@@ -98,6 +98,8 @@ def main(args):
         if 'mgmt' in topo_yaml['topology']:
             CMDS_CREATE.append('sudo ovs-docker add-port {0} et0 {1} --ipaddress={2}/24'.format(topo_yaml['topology']['mgmt'], _name, topo_yaml['nodes'][_node]['ip']))
             CMDS_START.append('sudo ovs-docker add-port {0} et0 {1} --ipaddress={2}/24'.format(topo_yaml['topology']['mgmt'], _name, topo_yaml['nodes'][_node]['ip']))
+            CMDS_STOP.append('sudo ovs-docker add-port {0} et0 {1} --ipaddress={2}/24'.format(topo_yaml['topology']['mgmt'], _name, topo_yaml['nodes'][_node]['ip']))
+            CMDS_DESTROY.append('sudo ovs-docker add-port {0} et0 {1} --ipaddress={2}/24'.format(topo_yaml['topology']['mgmt'], _name, topo_yaml['nodes'][_node]['ip']))
         for eindex in range(1, len(NODES[_node]['intfs']) + 1):
             CMDS_CREATE.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
             CMDS_START.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
