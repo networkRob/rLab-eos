@@ -1,6 +1,6 @@
 topology:
   name: ATD
-  mgmt: vmgmt
+  mgmt: bridge
 images:
   ceos: 4.23.1F
   host: chost:0.5
