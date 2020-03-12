@@ -1,17 +1,21 @@
+! Startup-config last modified at  Wed Nov 20 21:58:24 2019 by root
+! device: eos5 (cEOSLab, EOS-4.22.1F-13916651.helsinkirel (engineering build))
+!
+schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
+!
+transceiver qsfp default-mode 4x10G
 !
 service routing protocols model multi-agent
+!
+agent Bfd shutdown
 !
 hostname eos5
 !
 spanning-tree mode mstp
 !
-schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
-!
-!
 aaa authorization exec default local
 !
-agent Bfd shutdown
-!
+no aaa root
 !
 username arista privilege 15 role network-admin secret sha512 $6$d/1TRCTkSg2KEVpF$IxcP9Vgu01D.V2gFHI.WUwZhbCkXE.R5DONOOB7f2iuFROjDvDtGFU762nJHlkiLSEdWGrJjMY.qarpkDZNTP/
 !
@@ -19,37 +23,85 @@ interface Ethernet1
    description EOS4
    no switchport
    ip address 10.4.5.5/24
+   isis enable ratd
+   isis circuit-type level-2
+   isis network point-to-point
 !
 interface Ethernet2
    description EOS3
    no switchport
    ip address 10.3.5.5/24
+   isis enable ratd
+   isis circuit-type level-2
+   isis network point-to-point
 !
 interface Ethernet3
    description EOS2
    no switchport
    ip address 10.2.5.5/24
+   isis enable ratd
+   isis circuit-type level-2
+   isis network point-to-point
 !
 interface Ethernet4
    description EOS1
    no switchport
    ip address 10.1.5.5/24
+   isis enable ratd
+   isis circuit-type level-2
+   isis network point-to-point
 !
 interface Ethernet5
    description EOS6
    no switchport
    ip address 10.5.6.5/24
+   isis enable ratd
+   isis circuit-type level-2
+   isis network point-to-point
 !
 interface Loopback0
    ip address 5.5.5.5/32
+   node-segment ipv4 index 5
+   isis enable ratd
+   isis passive
 !
 interface Management0
    ip address 192.168.0.14/24
 !
-!
-!
 ip routing
 !
+mpls ip
+!
+router bgp 100
+   router-id 5.5.5.5
+   no bgp default ipv4-unicast
+   neighbor SPPEER peer group
+   neighbor SPPEER remote-as 100
+   neighbor SPPEER update-source Loopback0
+   neighbor SPPEER route-reflector-client
+   neighbor SPPEER send-community
+   neighbor SPPEER maximum-routes 12000
+   neighbor 1.1.1.1 peer group SPPEER
+   neighbor 3.3.3.3 peer group SPPEER
+   neighbor 4.4.4.4 peer group SPPEER
+   neighbor 6.6.6.6 peer group SPPEER
+   neighbor 7.7.7.7 peer group SPPEER
+   neighbor 8.8.8.8 peer group SPPEER
+   !
+   address-family evpn
+      neighbor default encapsulation mpls
+      neighbor SPPEER activate
+!
+router isis ratd
+   net 49.1111.0000.0005.00
+   is-type level-2
+   advertise passive-only
+   !
+   address-family ipv4 unicast
+   !
+   segment-routing mpls
+      router-id 5.5.5.5
+      no shutdown
 !
 management api http-commands
    no shutdown

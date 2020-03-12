@@ -1,26 +1,81 @@
+! Startup-config last modified at  Mon Dec 16 20:13:53 2019 by root
+! device: leaf1 (cEOSLab, EOS-4.23.1F)
 !
-agent Bfd shutdown
+transceiver qsfp default-mode 4x10G
+!
 service routing protocols model multi-agent
 !
-aaa authentication login default local
+agent Bfd shutdown
+!
+hostname leaf1
+dns domain arista.lab
+!
+spanning-tree mode mstp
+no spanning-tree vlan-id 4094
+!
 aaa authorization exec default local
+!
+no aaa root
 !
 username admin privilege 15 role network-admin secret 5 $1$5O85YVVn$HrXcfOivJEnISTMb6xrJc.
 username arista privilege 15 secret 5 $1$4VjIjfd1$XkUVulbNDESHFzcxDU.Tk1
 !
 vlan 12,34
 !
-dns domain arista.lab
+vlan 4094
+   trunk group MLAGPEER
 !
-spanning-tree mode mstp
+interface Port-Channel4
+   description MLAG - HOST1
+   switchport access vlan 12
+   mlag 4
 !
-hostname leaf1
+interface Port-Channel10
+   description MLAG PEER LINK - LEAF2
+   switchport mode trunk
+   switchport trunk group MLAGPEER
+!
+interface Port-Channel12
+   description MLAG - SPINE1 & 2
+   switchport mode trunk
+   mlag 12
+!
+interface Ethernet1
+   description MLAG PEER LINK - LEAF2
+   switchport mode trunk
+   channel-group 10 mode active
+!
+interface Ethernet2
+   description SPINE1
+   switchport mode trunk
+   channel-group 12 mode active
+!
+interface Ethernet3
+   description SPINE2
+   switchport mode trunk
+   channel-group 12 mode active
+!
+interface Ethernet4
+   description HOST1
+   channel-group 4 mode active
 !
 interface Management0
    ip address 192.168.0.14/24
 !
+interface Vlan4094
+   description MLAG PEER LINK
+   ip address 172.16.12.1/30
+!
 ip routing
 !
+mlag configuration
+   domain-id MLAG12
+   local-interface Vlan4094
+   peer-address 172.16.12.2
+   peer-link Port-Channel10
+!
 management api http-commands
-   no shutdown
    protocol http
+   no shutdown
+!
+end

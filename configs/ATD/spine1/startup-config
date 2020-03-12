@@ -1,26 +1,93 @@
+! Startup-config last modified at  Mon Dec 16 20:13:45 2019 by root
+! device: spine1 (cEOSLab, EOS-4.23.1F)
 !
-agent Bfd shutdown
+transceiver qsfp default-mode 4x10G
+!
 service routing protocols model multi-agent
 !
-aaa authentication login default local
+agent Bfd shutdown
+!
+hostname spine1
+dns domain arista.lab
+!
+spanning-tree mode mstp
+no spanning-tree vlan-id 4094
+!
 aaa authorization exec default local
+!
+no aaa root
 !
 username admin privilege 15 role network-admin secret 5 $1$5O85YVVn$HrXcfOivJEnISTMb6xrJc.
 username arista privilege 15 secret 5 $1$4VjIjfd1$XkUVulbNDESHFzcxDU.Tk1
 !
 vlan 12,34
 !
-dns domain arista.lab
+vlan 4094
+   trunk group MLAGPEER
 !
-spanning-tree mode mstp
+interface Port-Channel10
+   description MLAG PEER LINK - SPINE2
+   switchport mode trunk
+   switchport trunk group MLAGPEER
 !
-hostname spine1
+interface Port-Channel12
+   description MLAG - LEAF1 & 2
+   switchport mode trunk
+   mlag 12
+!
+interface Port-Channel34
+   description MLAG - LEAF3 & 4
+   switchport mode trunk
+   mlag 34
+!
+interface Ethernet1
+   description SPINE2
+   switchport mode trunk
+   channel-group 10 mode active
+!
+interface Ethernet2
+   description LEAF1
+   switchport mode trunk
+   channel-group 12 mode active
+!
+interface Ethernet3
+   description LEAF2
+   switchport mode trunk
+   channel-group 12 mode active
+!
+interface Ethernet4
+   description LEAF3
+   switchport mode trunk
+   channel-group 34 mode active
+!
+interface Ethernet5
+   description LEAF4
+   switchport mode trunk
+   channel-group 34 mode active
 !
 interface Management0
    ip address 192.168.0.10/24
 !
+interface Vlan12
+   ip address 172.16.112.2/24
+   ip virtual-router address 172.16.112.1
+!
+interface Vlan4094
+   description MLAG PEER LINK
+   ip address 172.16.11.1/30
+!
+ip virtual-router mac-address 00:1c:73:00:00:12
+!
 ip routing
 !
+mlag configuration
+   domain-id MLAG01
+   local-interface Vlan4094
+   peer-address 172.16.11.2
+   peer-link Port-Channel10
+!
 management api http-commands
-   no shutdown
    protocol http
+   no shutdown
+!
+end

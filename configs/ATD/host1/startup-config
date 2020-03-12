@@ -1,19 +1,23 @@
+! Startup-config last modified at  Mon Dec 16 20:14:09 2019 by root
+! device: host1 (cEOSLab, EOS-4.23.1F)
+!
+transceiver qsfp default-mode 4x10G
 !
 agent Bfd shutdown
 !
-aaa authentication login default local
+hostname host1
+dns domain arista.lab
+!
+spanning-tree mode mstp
+!
 aaa authorization exec default local
+!
+no aaa root
 !
 username admin privilege 15 role network-admin secret 5 $1$5O85YVVn$HrXcfOivJEnISTMb6xrJc.
 username arista privilege 15 secret 5 $1$4VjIjfd1$XkUVulbNDESHFzcxDU.Tk1
 !
 vlan 12,34
-!
-dns domain arista.lab
-!
-spanning-tree mode mstp
-!
-hostname host1
 !
 interface Port-Channel1
    switchport access vlan 12
@@ -40,5 +44,7 @@ interface Vlan34
 ip routing
 !
 management api http-commands
-   no shutdown
    protocol http
+   no shutdown
+!
+end

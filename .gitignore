@@ -1,0 +1,3 @@
+configs/*
+!configs/*/*/startup-config
+!configs/*/*/system_mac_address

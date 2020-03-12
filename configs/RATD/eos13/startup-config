@@ -1,17 +1,21 @@
+! Startup-config last modified at  Wed Nov 20 21:58:32 2019 by root
+! device: eos13 (cEOSLab, EOS-4.22.1F-13916651.helsinkirel (engineering build))
+!
+schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
+!
+transceiver qsfp default-mode 4x10G
 !
 service routing protocols model multi-agent
+!
+agent Bfd shutdown
 !
 hostname eos13
 !
 spanning-tree mode mstp
 !
-schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
-!
-!
 aaa authorization exec default local
 !
-agent Bfd shutdown
-!
+no aaa root
 !
 username arista privilege 15 role network-admin secret sha512 $6$lw1HTyM5Qt.a8rNY$uCKceWk8Vh0U1kCtdtWS3Av6Fq11j1ysCD4PWxrn89uXTNWUDWTuR6Lz7R8UoWgqS3orfHKD4hZgLoXtbtP9v0
 !
@@ -36,10 +40,20 @@ interface Loopback0
 interface Management0
    ip address 192.168.0.22/24
 !
-!
-!
 ip routing
 !
+router bgp 123
+   router-id 13.13.13.13
+   neighbor 10.6.13.6 remote-as 100
+   neighbor 10.6.13.6 maximum-routes 12000
+   network 11.11.11.11/32
+   network 12.12.12.12/32
+   network 13.13.13.13/32
+!
+router ospf 100
+   redistribute bgp
+   network 0.0.0.0/0 area 0.0.0.0
+   max-lsa 12000
 !
 management api http-commands
    no shutdown
