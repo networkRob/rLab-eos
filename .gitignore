@@ -2,5 +2,4 @@ configs/*
 !configs/*/*/startup-config
 !configs/*/*/system_mac_address
 !configs/*/*/Scripts
-.cmdhistory/*
-!.cmdhistory/place_holder
+.history

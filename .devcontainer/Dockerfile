@@ -8,6 +8,7 @@ RUN apt update \
 ARG USERNAME=dev
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
+ARG CONTAINERWS="/workspaces"
 
 # Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
@@ -30,14 +31,11 @@ RUN apt-add-repository https://cli.github.com/packages
 
 RUN apt update && apt install -y gh
 
-# Persist session history
-RUN mkdir /commandhistory \
-    && touch /commandhistory/.history \
-    && chown -R $USERNAME commandhistory
-
 USER $USERNAME
 
 RUN cd ~/ && wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh && sh install.sh --unattended && rm install.sh
 
-RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.history" \
+# Persist session history
+
+RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=$CONTAINERWS/.history" \
     && echo $SNIPPET >> "/home/$USERNAME/.zshrc"

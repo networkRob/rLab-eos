@@ -14,7 +14,11 @@
 	},
 	// "containerEnv": {
 	// },
-
+	"build": {
+		"args": {
+			"CONTAINERWS": "${containerWorkspaceFolder}",
+		},
+	},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"redhat.vscode-yaml",
@@ -24,10 +28,10 @@
 		"eamodio.gitlens",
 		"mutantdino.resourcemonitor"
 	],
+	"postCreateCommand": "touch ${containerWorkspaceFolder}/.history",
 	"mounts": [ 
 		"source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,consistency=cached",
 		"source=${localEnv:HOME}/.gitconfig,target=/home/dev/.gitconfig,type=bind,consistency=cached",
-		"source=${localWorkspaceFolder}/.cmdhistory,target=/commandhistory,type=bind,consistency=cached"
 	],
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "dev"
