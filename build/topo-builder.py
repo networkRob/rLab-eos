@@ -1,21 +1,80 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import argparse
 from ruamel.yaml import YAML
-from os import getcwd, mkdir, makedirs
-from os.path import isdir
+from time import sleep
+from os.path import exists
+from os import makedirs, getcwd
+import argparse
+
 
 BASE_PATH = getcwd()
 CONFIGS = BASE_PATH + "/configs"
-
-OVS_BRIDGES = []
-NODES = {}
+CEOS_NODES = BASE_PATH + "/nodes"
+CEOS_SCRIPTS = BASE_PATH + "/scripts"
+MGMT_BRIDGE = 'vmgmt'
+sleep_delay = 30
+CEOS_VERSION = '4.24.1.1F'
+VETH_PAIRS = []
+CEOS = {}
 HOSTS = {}
-CMDS_CREATE = []
-CMDS_START = []
-CMDS_STOP = []
-CMDS_DESTROY = []
-CMDS = {}
+
+
+class CEOS_NODE():
+    def __init__(self, node_name, node_ip, node_neighbors, _tag, image):
+        self.name = node_name
+        self.ip = node_ip
+        self.tag = _tag.lower()
+        self.image = image
+        self.ceos_name = self.tag + self.name
+        self.intfs = {}
+        self.portMappings(node_neighbors)
+
+    def portMappings(self, node_neighbors):
+        """
+        Function to create port mappings.
+        """
+        for intf in node_neighbors:
+            lport = parseNames(intf['port'])
+            rport = parseNames(intf['neighborPort'])
+            rneigh = parseNames(self.tag + intf['neighborDevice'])
+            _vethCheck = checkVETH('{0}{1}'.format(self.ceos_name, lport['code']), '{0}{1}'.format(rneigh['name'], rport['code']))
+            if _vethCheck['status']:
+                pS("OK", "VETH Pair {0} will be created.".format(_vethCheck['name']))
+                VETH_PAIRS.append(_vethCheck['name'])
+            self.intfs[intf['port']] = {
+                'veth': _vethCheck['name'],
+                'port': lport['code']
+            }
+
+class HOST_NODE():
+    def __init__(self, node_name, node_ip, node_mask, node_gw, node_neighbors, _tag, image):
+        self.name = node_name
+        self.ip = node_ip
+        self.mask = node_mask
+        self.gw = node_gw
+        self.tag = _tag.lower()
+        self.c_name = self.tag + self.name
+        self.image = image
+        self.ceos_name = self.tag + self.name
+        self.intfs = {}
+        self.portMappings(node_neighbors)
+
+    def portMappings(self, node_neighbors):
+        """
+        Function to create port mappings.
+        """
+        for intf in node_neighbors:
+            lport = parseNames(intf['port'])
+            rport = parseNames(intf['neighborPort'])
+            rneigh = parseNames(self.tag + intf['neighborDevice'])
+            _vethCheck = checkVETH('{0}{1}'.format(self.ceos_name, lport['code']), '{0}{1}'.format(rneigh['name'], rport['code']))
+            if _vethCheck['status']:
+                pS("OK", "VETH Pair {0} will be created.".format(_vethCheck['name']))
+                VETH_PAIRS.append(_vethCheck['name'])
+            self.intfs[intf['port']] = {
+                'veth': _vethCheck['name'],
+                'port': lport['code']
+            }
 
 def openTopo(topo):
     try:
@@ -26,162 +85,204 @@ def openTopo(topo):
     except:
         return(False)
 
-def checkBridge(dev1, dev2, _tag):
-    global OVS_BRIDGES
-    _addBr = True
-    name_len = len(dev1 + dev2 + _tag)
-    for _br in OVS_BRIDGES:
-        if dev1 in _br and dev2 in _br and len(_br) == name_len:
-            _addBr = False
-            return({'status': _addBr, 'name': _br})
-    return({'status': _addBr, 'name':''})
-
-def checkBridgeNameLength(brName):
+def parseNames(devName):
     """
-    Function to check if length of bridge name is over
-    characters.
+    Function to parse and consolidate name.
     """
-    if len(brName) <= 15:
-        return(True)
+    alpha = ''
+    numer = ''
+    for char in devName:
+        if char.isalpha():
+            alpha += char
+        elif char.isdigit():
+            numer += char
+    if 'ethernet'in devName.lower():
+        dev_name = 'et{0}'.format(numer)
     else:
-        return(False)
+        dev_name = devName
+    devInfo = {
+        'name': devName,
+        'code': dev_name
+    }
+    return(devInfo)
 
+def checkVETH(dev1, dev2):
+    """
+    Function to check veth pairs
+    """
+    global VETH_PAIRS
+    _addVETH = True
+    veth_name = '{0}-{1}'.format(dev1, dev2)
+    for _veth in VETH_PAIRS:
+        if dev1 in _veth and dev2 in _veth:
+            _addVETH = False
+            return({
+                'status': _addVETH,
+                'name': _veth
+            })
+    return({
+        'status': _addVETH,
+        'name': veth_name
+    })
+        
+def checkDir(path):
+    """
+    Function to check if a destination directory exists.
+    """
+    if not exists(path):
+        try:
+            makedirs(path)
+            return(True)
+        except:
+            return(False)
+    else:
+        return(True)
+
+
+def createMac(dev_id):
+    """
+    Function to build dev specific MAC Address.
+    """
+    if dev_id < 10:
+        return('b{0}'.format(dev_id))
+    elif dev_id >= 10 and dev_id < 20:
+        return('c{0}'.format(dev_id - 10))
+    elif dev_id >=20 and dev_id < 30:
+        return('d{0}'.format(dev_id - 20))
+
+def pS(mstat,mtype):
+    """
+    Function to send output from service file to Syslog
+    """
+    mmes = "\t" + mtype
+    print("[{0}] {1}".format(mstat,mmes.expandtabs(7 - len(mstat))))
 
 def main(args):
-    global OVS_BRIDGES, NODES
-    topo_yaml = openTopo(args.type)
-    ceos_img = topo_yaml['images']['ceos']
-    host_img = topo_yaml['images']['host']
-    if topo_yaml:
-        _tag = topo_yaml['topology']['name']
-        for _node in topo_yaml['nodes']:
-            intf = 0
-            NODES[_node] = {
-                "intfs": {},
-                "name": _tag.lower() + _node
-            }
-            for _peer in topo_yaml['nodes'][_node]['links']:
-                intf += 1
-                _brCheck = checkBridge(_node, _peer, _tag)
-                if _brCheck['status']:
-                    _brName = _tag.lower() + _node + _peer
-                    if not checkBridgeNameLength(_brName):
-                        print("Alert! Bridge name {0} is longer than the allowed 15 characters.\nThere maybe ovs build errors.".format(_brName))
-                    OVS_BRIDGES.append(_brName)
-                    NODES[_node]['intfs']['eth{}'.format(intf)] = _brName
-                else:
-                    NODES[_node]['intfs']['eth{}'.format(intf)] = _brCheck['name']
-        # Section to parse hosts
-        if topo_yaml['hosts']:
-            for _host in topo_yaml['hosts']:
-                intf = 0
-                HOSTS[_host] = {
-                    'intfs': {},
-                    'name': _tag.lower() + _host
-                }
-                for _peer in topo_yaml['hosts'][_host]['links']:
-                    _brCheck = checkBridge(_host, _peer, _tag)
-                    HOSTS[_host]['intfs']['eth{}'.format(intf)] = _brCheck['name']
-                    intf += 1
-            
-    # Create commands to create Open vSwitch bridges
-    for _br in OVS_BRIDGES:
-        CMDS_CREATE.append("sudo ovs-vsctl add-br {}".format(_br))
-        CMDS_CREATE.append("sudo ovs-vsctl set bridge {} other-config:forward-bpdu=true".format(_br))
-    
-    # Create commands to create cEOS containers:
-    for _node in NODES:
-        _name = NODES[_node]['name']
-        CMDS_CREATE.append("docker create --name={0} --net=none --privileged -v $(pwd)/configs/{1}/{2}/:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=et0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=et0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker".format( _name, topo_yaml['topology']['name'], _node, ceos_img))
-        CMDS_CREATE.append("docker start {}".format(_name))
-        CMDS_START.append("docker start {}".format(_name))
-        for eindex in range(1, len(NODES[_node]['intfs']) + 1):
-            CMDS_CREATE.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
-            CMDS_START.append("sudo ovs-docker add-port {0} et{1} {2} --macaddress={3}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name, topo_yaml['nodes'][_node]['mac']))
-            CMDS_DESTROY.append("sudo ovs-docker del-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
-            CMDS_STOP.append("sudo ovs-docker del-port {0} et{1} {2}".format(NODES[_node]['intfs']['eth{}'.format(eindex)], eindex, _name))
-        CMDS_DESTROY.append("docker stop {}".format(_name))
-        CMDS_STOP.append("docker stop {}".format(_name))
-        CMDS_DESTROY.append("docker rm {}".format(_name))
-        # Create a system_mac_address file in /mnt/flash
-        ceos_flash = CONFIGS + "/{0}/{1}".format(_tag, _node)
-        if not isdir(ceos_flash):
-            makedirs(ceos_flash)
-        with open(ceos_flash + '/system_mac_address', 'w') as cmac:
-            cmac.write(topo_yaml['nodes'][_node]['mac'])
-    # Create commands to create host containers
+    """
+    Main Function to build out cEOS files.
+    """
+    create_output = []
+    startup_output = []
+    topo_yaml = openTopo(args.topo)
+    ceos_image = topo_yaml['images']['ceos']
+    host_image = topo_yaml['images']['host']
+    _tag = topo_yaml['topology']['name']
+    nodes = topo_yaml['nodes']
+    hosts = topo_yaml['hosts']
+    _ceos_script_location = "{0}/{1}".format(CEOS_SCRIPTS, _tag)
+
+    # Check for mgmt Bridge
+    try:
+        mgmt_network = topo_yaml['infra']['bridge']
+    except KeyError:
+        pS("INFO", "No mgmt bridge specified. Creating isolated network.")
+        mgmt_network = False
+    # Load cEOS nodes specific information
+    for _node in nodes:
+        try:
+            _node_ip = nodes[_node]['ip']
+        except KeyError:
+            _node_ip = ""
+        CEOS[_node] = CEOS_NODE(_node, _node_ip, nodes[_node]['neighbors'], _tag, ceos_image)
+    # Load Host nodes specific information
+    if hosts:
+        for _host in hosts:
+            _tmp_host = hosts[_host]
+            HOSTS[_host] = HOST_NODE(_host, _tmp_host['ip'], _tmp_host['mask'], _tmp_host['gateway'], _tmp_host['neighbors'], _tag, host_image)
+    # Check for output directory
+    if checkDir(_ceos_script_location):
+        pS("OK", "Directory is present now.")
+    else:
+        pS("iBerg", "Error creating directory.")
+    create_output.append("#!/bin/bash\n")
+    create_output.append("ip netns add {0}\n".format(_tag))
+    startup_output.append("#!/bin/bash\n")
+    startup_output.append("ip netns add {0}\n".format(_tag))
+    # Get the veths created
+    create_output.append("# Creating veths\n")
+    for _veth in VETH_PAIRS:
+        _v1, _v2 = _veth.split("-")
+        create_output.append("ip link add {0} type veth peer name {1}\n".format(_v1, _v2))
+        startup_output.append("ip link add {0} type veth peer name {1}\n".format(_v1, _v2))
+    create_output.append("#\n#\n# Creating anchor containers\n#\n")
+    # Create initial cEOS anchor containers
+    for _node in CEOS:
+        create_output.append("# Getting {0} nodes plubming\n".format(_node))
+        create_output.append("docker run -d --restart=always --name={0}-net --net=none busybox /bin/init\n".format(CEOS[_node].ceos_name))
+        create_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(CEOS[_node].ceos_name))
+        create_output.append("ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(CEOS[_node].ceos_name))
+        startup_output.append("docker stop {0}\n".format(CEOS[_node].ceos_name))
+        startup_output.append("docker rm {0}\n".format(CEOS[_node].ceos_name))
+        startup_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(CEOS[_node].ceos_name))
+        startup_output.append("ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(CEOS[_node].ceos_name))
+        create_output.append("# Connecting cEOS containers together\n")
+        # Output veth commands
+        for _intf in CEOS[_node].intfs:
+            _tmp_intf = CEOS[_node].intfs[_intf]
+            if _node in  _tmp_intf['veth'].split('-')[0]:
+                create_output.append("ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[0], _node, _tmp_intf['port']))
+                startup_output.append("ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[0], _node, _tmp_intf['port']))
+            else:
+                create_output.append("ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], _node, _tmp_intf['port']))
+                startup_output.append("ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], _node, _tmp_intf['port']))
+            # Perform check if mgmt network is available
+        if mgmt_network:
+            # Get MGMT VETHS
+            create_output.append("ip link add {0}-eth0 type veth peer name {0}-mgmt\n".format(CEOS[_node].ceos_name))
+            create_output.append("brctl addif {0} {1}-mgmt\n".format(MGMT_BRIDGE, CEOS[_node].ceos_name))
+            create_output.append("ip link set {0}-eth0 netns {0} name eth0 up\n".format(CEOS[_node].ceos_name))
+            create_output.append("ip link set {0}-mgmt up\n".format(CEOS[_node].ceos_name))
+            create_output.append("sleep 1\n")
+            create_output.append("docker run -d --name={0} --net=container:{0}-net --ip {1} --privileged -v {2}/{4}/{5}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CEOS[_node].ip, CONFIGS, CEOS[_node].image, _tag, _node))
+            startup_output.append("ip link add {0}-eth0 type veth peer name {0}-mgmt\n".format(CEOS[_node].ceos_name))
+            startup_output.append("brctl addif {0} {1}-mgmt\n".format(MGMT_BRIDGE, CEOS[_node].ceos_name))
+            startup_output.append("ip link set {0}-eth0 netns {0} name eth0 up\n".format(CEOS[_node].ceos_name))
+            startup_output.append("ip link set {0}-mgmt up\n".format(CEOS[_node].ceos_name))
+            startup_output.append("sleep 1\n")
+            startup_output.append("docker run -d --name={0} --net=container:{0}-net --ip {1} --privileged -v {2}/{4}/{5}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CEOS[_node].ip, CONFIGS, CEOS[_node].image, _tag, _node))
+        else:
+            create_output.append("sleep 1\n")
+            create_output.append("docker run -d --name={0} --net=container:{0}-net --privileged -v {1}/{3}/{4}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CONFIGS, CEOS[_node].image, _tag, _node))
+            startup_output.append("sleep 1\n")
+            startup_output.append("docker run -d --name={0} --net=container:{0}-net --privileged -v {1}/{3}/{4}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CONFIGS, CEOS[_node].image, _tag, _node))
+    # Create initial host anchor containers
     for _host in HOSTS:
-        _hname = HOSTS[_host]['name']
-        CMDS_CREATE.append("docker create --name={0} --hostname={0} --net=none chost:{1}".format(_hname, host_img))
-        CMDS_CREATE.append("docker start {}".format(_hname))
-        CMDS_START.append("docker start {}".format(_hname))
-        for eindex in range(0, len(HOSTS[_host]['intfs'])):
-            CMDS_CREATE.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
-            CMDS_DESTROY.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
-            CMDS_START.append("sudo ovs-docker add-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
-            CMDS_STOP.append("sudo ovs-docker del-port {0} eth{1} {2} --ipaddress={3}/{4} --gateway={5}".format(HOSTS[_host]['intfs']['eth{}'.format(eindex)], eindex, _hname, topo_yaml['hosts'][_host]['ipaddress'], topo_yaml['hosts'][_host]['mask'], topo_yaml['hosts'][_host]['gateway']))
-        CMDS_DESTROY.append("docker stop {}".format(_hname))
-        CMDS_DESTROY.append("docker rm {}".format(_hname))
-        CMDS_STOP.append("docker stop {}".format(_hname))
-    
-    # Check for iPerf3 configurations
-    if topo_yaml['iperf']:
-        _iperf = topo_yaml['iperf']
-        _port = _iperf['port']
-        _brate = _iperf['brate']
-        for _server in _iperf['servers']:
-            CMDS_CREATE.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server]['name'], _port))
-            CMDS_START.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server]['name'], _port))
-        for _client in _iperf['clients']:
-            _target = topo_yaml['hosts'][_client['target']]['ipaddress']
-            CMDS_CREATE.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
-            CMDS_START.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client['client']]['name'], _target, _port, _brate))
+        create_output.append("# Getting {0} nodes plubming\n".format(_host))
+        create_output.append("docker run -d --restart=always --name={0}-net --net=none busybox /bin/init\n".format(HOSTS[_host].c_name))
+        create_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(HOSTS[_host].c_name))
+        create_output.append("ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(HOSTS[_host].c_name))
+        startup_output.append("docker stop {0}\n".format(HOSTS[_host].c_name))
+        startup_output.append("docker rm {0}\n".format(HOSTS[_host].c_name))
+        startup_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(HOSTS[_host].c_name))
+        startup_output.append("ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(HOSTS[_host].c_name))
+        create_output.append("# Connecting host containers together\n")
+        # Output veth commands
+        for _intf in HOSTS[_host].intfs:
+            _tmp_intf = HOSTS[_host].intfs[_intf]
+            if _node in  _tmp_intf['veth'].split('-')[0]:
+                create_output.append("ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[0], _host, _tmp_intf['port']))
+                startup_output.append("ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[0], _host, _tmp_intf['port']))
+            else:
+                create_output.append("ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], _host, _tmp_intf['port']))
+                startup_output.append("ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], _host, _tmp_intf['port']))
+        create_output.append("sleep 1\n")
+        create_output.append("docker create --name={0} --hostname={1} --net=container:{0}-net -e HOST_IP={2} -e HOST_MASK={4} -e HOST_GW={5} chost:{3} ipnet".format(HOSTS[_host].c_name, _host, HOSTS[_host].ip, HOSTS[_host].image, HOSTS[_host].mask, HOSTS[_host].gw))
+        startup_output.append("sleep 1\n")
+        startup_output.append("docker create --name={0} --hostname={1} --net=container:{0}-net -e HOST_IP={2} -e HOST_MASK={4} -e HOST_GW={5} chost:{3} ipnet".format(HOSTS[_host].c_name, _host, HOSTS[_host].ip, HOSTS[_host].image, HOSTS[_host].mask, HOSTS[_host].gw))
 
-    # Check and create topo commands
-    if topo_yaml['commands']:
-        for _cmd in topo_yaml['commands']:
-            CMDS[_cmd] = []
-            if topo_yaml['nodes']:
-                for _node in topo_yaml['nodes']:
-                    _name = NODES[_node]['name']
-                    if 'ratd' in _name:
-                        CMDS[_cmd].append("docker exec -it {0} Cli -p 15 -c \"configure replace flash:/cfgs/{1}_{2} ignore-errors\" > /dev/null 2>&1".format(_name, topo_yaml['commands'][_cmd]['pre'], _node.upper()))
-                    else:
-                        CMDS[_cmd].append("docker exec -it {0} Cli -p 15 -c \"configure replace flash:/cfgs/{1}-{2} ignore-errors\" > /dev/null 2>&1".format(_name, topo_yaml['commands'][_cmd]['pre'], _node))
-                    CMDS[_cmd].append("docker exec -it {0} Cli -p 15 -c \"write\" > /dev/null 2>&1".format(_name))
-    # Check to see if dest dir is created
-    if not isdir(BASE_PATH + "/cnt/{0}".format(_tag)):
-        makedirs(BASE_PATH + "/cnt/{0}".format(_tag))
-    if CMDS_CREATE:
-        with open(BASE_PATH + "/cnt/{0}/Create.sh".format(_tag), 'w') as fout:
-            fout.write("#!/bin/bash\n")
-            for _cmd in CMDS_CREATE:
-                fout.write(_cmd + "\n")
-        with open(BASE_PATH + "/cnt/{0}/Destroy.sh".format(_tag), 'w') as fout:
-            fout.write("#!/bin/bash\n")
-            for _cmd in CMDS_DESTROY:
-                fout.write(_cmd + "\n")
-            for _br in OVS_BRIDGES:
-                fout.write("sudo ovs-vsctl del-br {}\n".format(_br))
-        with open(BASE_PATH + "/cnt/{0}/Start.sh".format(_tag), 'w') as fout:
-            fout.write("#!/bin/bash\n")
-            for _cmd in CMDS_START:
-                fout.write(_cmd + "\n")
-        with open(BASE_PATH + "/cnt/{0}/Stop.sh".format(_tag), 'w') as fout:
-            fout.write("#!/bin/bash\n")
-            for _cmd in CMDS_STOP:
-                fout.write(_cmd + "\n")
-        if CMDS:
-            for _cmd in CMDS:
-                _tmp = CMDS[_cmd]
-                with open(BASE_PATH + "/cnt/{0}/CMD-{1}.sh".format(_tag, _cmd), 'w') as fout:
-                    fout.write("#!/bin/bash\n")
-                    for _ncmd in _tmp:
-                        fout.write(_ncmd + "\n")
-
+    # Create the initial deployment files
+    with open(CEOS_SCRIPTS + '/{0}/Create.sh'.format(_tag), 'w') as cout:
+        for _create in create_output:
+            cout.write(_create)
+    with open(CEOS_SCRIPTS + '/{0}/Startup.sh'.format(_tag), 'w') as cout:
+        for _start in startup_output:
+            cout.write(_start)
 
 if __name__ == '__main__':
+    pS('OK', 'Starting cEOS Builder')
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--type", type=str, help="Topology to build", default=None, required=True)
+    parser.add_argument("-t", "--topo", type=str, help="Topology to build", default=None, required=True)
     args = parser.parse_args()
+    #TODO add in logic to load custom build file. Default to tag's build file
     main(args)
+    pS('OK', 'Complete!')

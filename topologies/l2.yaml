@@ -6,76 +6,128 @@ images:
 nodes:
   spine1:
     mac: 00:1c:73:c0:c6:01
-    links:
-      - spine2
-      - leaf1
-      - leaf2
-      - leaf3
+    neighbors:
+      - neighborDevice: spine2
+        neighborPort: Ethernet1
+        port: Ethernet1
+      - neighborDevice: leaf1
+        neighborPort: Ethernet1
+        port: Ethernet2
+      - neighborDevice: leaf2
+        neighborPort: Ethernet1
+        port: Ethernet3
+      - neighborDevice: leaf3
+        neighborPort: Ethernet1
+        port: Ethernet4
   spine2:
     mac: 00:1c:73:c1:c6:01
-    links:
-      - spine1
-      - leaf1
-      - leaf2
-      - leaf3
+    neighbors:
+      - neighborDevice: spine1
+        neighborPort: Ethernet1
+        port: Ethernet1
+      - neighborDevice: leaf1
+        neighborPort: Ethernet2
+        port: Ethernet2
+      - neighborDevice: leaf2
+        neighborPort: Ethernet2
+        port: Ethernet3
+      - neighborDevice: leaf3
+        neighborPort: Ethernet2
+        port: Ethernet4
   leaf1:
     mac: 00:1c:73:c2:c6:01
-    links:
-      - spine1
-      - spine2
-      - host10
-      - host11
+    neighbors:
+      - neighborDevice: spine1
+        neighborPort: Ethernet2
+        port: Ethernet1
+      - neighborDevice: spine2
+        neighborPort: Ethernet2
+        port: Ethernet2
+      - neighborDevice: host10
+        neighborPort: Ethernet0
+        port: Ethernet3
+      - neighborDevice: host11
+        neighborPort: Ethernet0
+        port: Ethernet4
   leaf2:
     mac: 00:1c:73:c3:c6:01
-    links:
-      - spine1
-      - spine2
-      - host20
-      - host21
+    neighbors:
+      - neighborDevice: spine1
+        neighborPort: Ethernet3
+        port: Ethernet1
+      - neighborDevice: spine2
+        neighborPort: Ethernet3
+        port: Ethernet2
+      - neighborDevice: host20
+        neighborPort: Ethernet0
+        port: Ethernet3
+      - neighborDevice: host21
+        neighborPort: Ethernet0
+        port: Ethernet4
   leaf3:
     mac: 00:1c:73:c4:c6:01
-    links:
-      - spine1
-      - spine2
-      - host30
-      - host31
+    neighbors:
+      - neighborDevice: spine1
+        neighborPort: Ethernet4
+        port: Ethernet1
+      - neighborDevice: spine2
+        neighborPort: Ethernet4
+        port: Ethernet2
+      - neighborDevice: host30
+        neighborPort: Ethernet0
+        port: Ethernet3
+      - neighborDevice: host31
+        neighborPort: Ethernet0
+        port: Ethernet4
 hosts:
   host10:
     ipaddress: 10.0.12.11
     mask: 24
     gateway: 10.0.12.1
-    links:
-      - leaf1
+    neighbors:
+      - neighborDevice: leaf1
+        neighborPort: Ethernet3
+        port: Ethernet0
   host11:
     ipaddress: 10.0.13.11
     mask: 24
     gateway: 10.0.13.1
-    links:
-      - leaf1
+    neighbors:
+      - neighborDevice: leaf1
+        neighborPort: Ethernet4
+        port: Ethernet0
   host20:
     ipaddress: 10.0.12.21
     mask: 24
     gateway: 10.0.12.1
-    links:
-      - leaf2
+    neighbors:
+      - neighborDevice: leaf2
+        neighborPort: Ethernet3
+        port: Ethernet0
   host21:
     ipaddress: 10.0.13.21
     mask: 24
     gateway: 10.0.13.1
-    links:
-      - leaf2
+    neighbors:
+      - neighborDevice: leaf2
+        neighborPort: Ethernet4
+        port: Ethernet0
   host30:
     ipaddress: 10.0.12.31
     mask: 24
     gateway: 10.0.12.1
-    links:
-      - leaf3
+    neighbors:
+      - neighborDevice: leaf3
+        neighborPort: Ethernet3
+        port: Ethernet0
   host31:
     ipaddress: 10.0.13.31
     mask: 24
     gateway: 10.0.13.1
-    links:
-      - leaf3
+    neighbors:
+      - neighborDevice: leaf3
+        neighborPort: Ethernet4
+        port: Ethernet0
 iperf:
   port: 5010
   brate: 1000000
