@@ -1,131 +1,255 @@
 topology:
   name: RATD
 images:
-  ceos: 4.23.1F
+  ceos: 4.25.0F
   host: 0.5
 nodes:
   eos1:
     mac: 00:1c:73:c0:c6:01
-    links:
-      - eos2
-      - eos7
-      - eos11
-      - eos6
-      - eos5
-      - eos17
+    neighbors:
+      - neighborDevice: eos2
+        neighborPort: Ethernet5
+        port: Ethernet1
+      - neighborDevice: eos7
+        neighborPort: Ethernet3
+        port: Ethernet2
+      - neighborDevice: eos11
+        neighborPort: Ethernet1
+        port: Ethernet3
+      - neighborDevice: eos6
+        neighborPort: Ethernet4
+        port: Ethernet4
+      - neighborDevice: eos5
+        neighborPort: Ethernet4
+        port: Ethernet5
+      - neighborDevice: eos17
+        neighborPort: Ethernet1
+        port: Ethernet6
   eos2:
     mac: 00:1c:73:c1:c6:01
-    links:
-      - eos3
-      - eos4
-      - eos5
-      - eos6
-      - eos1
+    neighbors:
+      - neighborDevice: eos3
+        neighborPort: Ethernet3
+        port: Ethernet1
+      - neighborDevice: eos4
+        neighborPort: Ethernet4
+        port: Ethernet2
+      - neighborDevice: eos5
+        neighborPort: Ethernet3
+        port: Ethernet3
+      - neighborDevice: eos6
+        neighborPort: Ethernet5
+        port: Ethernet4
+      - neighborDevice: eos1
+        neighborPort: Ethernet1
+        port: Ethernet5
   eos3:
     mac: 00:1c:73:c2:c6:01
-    links:
-      - eos9
-      - eos7
-      - eos2
-      - eos5
-      - eos4
-      - eos20
+    neighbors:
+      - neighborDevice: eos9
+        neighborPort: Ethernet2
+        port: Ethernet1
+      - neighborDevice: eos7
+        neighborPort: Ethernet1
+        port: Ethernet2
+      - neighborDevice: eos2
+        neighborPort: Ethernet1
+        port: Ethernet3
+      - neighborDevice: eos5
+        neighborPort: Ethernet2
+        port: Ethernet4
+      - neighborDevice: eos4
+        neighborPort: Ethernet5
+        port: Ethernet5
+      - neighborDevice: eos20
+        neighborPort: Ethernet1
+        port: Ethernet6
   eos4:
     mac: 00:1c:73:c3:c6:01
-    links:
-      - eos9
-      - eos8
-      - eos5
-      - eos2
-      - eos3
-      - eos16
+    neighbors:
+      - neighborDevice: eos9
+        neighborPort: Ethernet1
+        port: Ethernet1
+      - neighborDevice: eos8
+        neighborPort: Ethernet1
+        port: Ethernet2
+      - neighborDevice: eos5
+        neighborPort: Ethernet1
+        port: Ethernet3
+      - neighborDevice: eos2
+        neighborPort: Ethernet2
+        port: Ethernet4
+      - neighborDevice: eos3
+        neighborPort: Ethernet5
+        port: Ethernet5
+      - neighborDevice: eos16
+        neighborPort: Ethernet1
+        port: Ethernet6
   eos5:
     mac: 00:1c:73:c4:c6:01
-    links:
-      - eos4
-      - eos3
-      - eos2
-      - eos1
-      - eos6
+    neighbors:
+      - neighborDevice: eos4
+        neighborPort: Ethernet3
+        port: Ethernet1
+      - neighborDevice: eos3
+        neighborPort: Ethernet4
+        port: Ethernet2
+      - neighborDevice: eos2
+        neighborPort: Ethernet3
+        port: Ethernet3
+      - neighborDevice: eos1
+        neighborPort: Ethernet5
+        port: Ethernet4
+      - neighborDevice: eos6
+        neighborPort: Ethernet1
+        port: Ethernet5
   eos6:
     mac: 00:1c:73:c5:c6:01
-    links:
-      - eos5
-      - eos8
-      - eos13
-      - eos1
-      - eos2
-      - eos14
+    neighbors:
+      - neighborDevice: eos5
+        neighborPort: Ethernet5
+        port: Ethernet1
+      - neighborDevice: eos8
+        neighborPort: Ethernet3
+        port: Ethernet2
+      - neighborDevice: eos13
+        neighborPort: Ethernet1
+        port: Ethernet3
+      - neighborDevice: eos1
+        neighborPort: Ethernet4
+        port: Ethernet4
+      - neighborDevice: eos2
+        neighborPort: Ethernet4
+        port: Ethernet5
+      - neighborDevice: eos14
+        neighborPort: Ethernet2
+        port: Ethernet6
   eos7:
     mac: 00:1c:73:c6:c6:01
-    links:
-      - eos3
-      - eos10
-      - eos1
-      - eos19
+    neighbors:
+      - neighborDevice: eos3
+        neighborPort: Ethernet2
+        port: Ethernet1
+      - neighborDevice: eos10
+        neighborPort: Ethernet1
+        port: Ethernet2
+      - neighborDevice: eos1
+        neighborPort: Ethernet2
+        port: Ethernet3
+      - neighborDevice: eos19
+        neighborPort: Ethernet1
+        port: Ethernet4
   eos8:
     mac: 00:1c:73:c7:c6:01
-    links:
-      - eos4
-      - eos15
-      - eos6
-      - eos14
-      - eos18
+    neighbors:
+      - neighborDevice: eos4
+        neighborPort: Ethernet2
+        port: Ethernet1
+      - neighborDevice: eos15
+        neighborPort: Ethernet1
+        port: Ethernet2
+      - neighborDevice: eos6
+        neighborPort: Ethernet2
+        port: Ethernet3
+      - neighborDevice: eos14
+        neighborPort: Ethernet1
+        port: Ethernet4
+      - neighborDevice: eos18
+        neighborPort: Ethernet1
+        port: Ethernet5
   eos9:
     mac: 00:1c:73:c8:c6:01
-    links:
-      - eos4
-      - eos3
+    neighbors:
+      - neighborDevice: eos4
+        neighborPort: Ethernet1
+        port: Ethernet1
+      - neighborDevice: eos3
+        neighborPort: Ethernet1
+        port: Ethernet2
   eos10:
     mac: 00:1c:73:c9:c6:01
-    links:
-      - eos7
+    neighbors:
+      - neighborDevice: eos7
+        neighborPort: Ethernet2
+        port: Ethernet1
   eos11:
     mac: 00:1c:73:d0:c6:01
-    links:
-      - eos1
-      - eos12
-      - eos13
+    neighbors:
+      - neighborDevice: eos1
+        neighborPort: Ethernet3
+        port: Ethernet1
+      - neighborDevice: eos12
+        neighborPort: Ethernet2
+        port: Ethernet2
+      - neighborDevice: eos13
+        neighborPort: Ethernet3
+        port: Ethernet3
   eos12:
     mac: 00:1c:73:d1:c6:01
-    links:
-      - eos13
-      - eos11
+    neighbors:
+      - neighborDevice: eos13
+        neighborPort: Ethernet2
+        port: Ethernet1
+      - neighborDevice: eos11
+        neighborPort: Ethernet2
+        port: Ethernet2
   eos13:
     mac: 00:1c:73:d2:c6:01
-    links:
-      - eos6
-      - eos12
-      - eos11
+    neighbors:
+      - neighborDevice: eos6
+        neighborPort: Ethernet3
+        port: Ethernet1
+      - neighborDevice: eos12
+        neighborPort: Ethernet1
+        port: Ethernet2
+      - neighborDevice: eos11
+        neighborPort: Ethernet3
+        port: Ethernet3
   eos14:
     mac: 00:1c:73:d3:c6:01
-    links:
-      - eos8
-      - eos6
+    neighbors:
+      - neighborDevice: eos8
+        neighborPort: Ethernet4
+        port: Ethernet1
+      - neighborDevice: eos6
+        neighborPort: Ethernet6
+        port: Ethernet2
   eos15:
     mac: 00:1c:73:d4:c6:01
-    links:
-      - eos8
+    neighbors:
+      - neighborDevice: eos8
+        neighborPort: Ethernet2
+        port: Ethernet1
   eos16:
     mac: 00:1c:73:d5:c6:01
-    links:
-      - eos4
+    neighbors:
+      - neighborDevice: eos4
+        neighborPort: Ethernet6
+        port: Ethernet1
   eos17:
     mac: 00:1c:73:d6:c6:01
-    links:
-      - eos1
+    neighbors:
+      - neighborDevice: eos1
+        neighborPort: Ethernet6
+        port: Ethernet1
   eos18:
     mac: 00:1c:73:d7:c6:01
-    links:
-      - eos8
+    neighbors:
+      - neighborDevice: eos8
+        neighborPort: Ethernet5
+        port: Ethernet1
   eos19:
     mac: 00:1c:73:d8:c6:01
-    links:
-      - eos7
+    neighbors:
+      - neighborDevice: eos7
+        neighborPort: Ethernet4
+        port: Ethernet1
   eos20:
     mac: 00:1c:73:d9:c6:01
-    links:
-      - eos3
+    neighbors:
+      - neighborDevice: eos3
+        neighborPort: Ethernet6
+        port: Ethernet1
 hosts:
 iperf:
 commands:

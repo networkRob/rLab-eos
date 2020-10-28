@@ -1,7 +1,9 @@
 topology:
   name: L2
+infra:
+  bridge:
 images:
-  ceos: 4.23.1F
+  ceos: 4.25.0F
   host: 0.5
 nodes:
   spine1:
@@ -82,7 +84,7 @@ nodes:
 hosts:
   host10:
     ipaddress: 10.0.12.11
-    mask: 24
+    mask: 255.255.255.0
     gateway: 10.0.12.1
     neighbors:
       - neighborDevice: leaf1
@@ -90,7 +92,7 @@ hosts:
         port: Ethernet0
   host11:
     ipaddress: 10.0.13.11
-    mask: 24
+    mask: 255.255.255.0
     gateway: 10.0.13.1
     neighbors:
       - neighborDevice: leaf1
@@ -98,7 +100,7 @@ hosts:
         port: Ethernet0
   host20:
     ipaddress: 10.0.12.21
-    mask: 24
+    mask: 255.255.255.0
     gateway: 10.0.12.1
     neighbors:
       - neighborDevice: leaf2
@@ -106,7 +108,7 @@ hosts:
         port: Ethernet0
   host21:
     ipaddress: 10.0.13.21
-    mask: 24
+    mask: 255.255.255.0
     gateway: 10.0.13.1
     neighbors:
       - neighborDevice: leaf2
@@ -114,7 +116,7 @@ hosts:
         port: Ethernet0
   host30:
     ipaddress: 10.0.12.31
-    mask: 24
+    mask: 255.255.255.0
     gateway: 10.0.12.1
     neighbors:
       - neighborDevice: leaf3
@@ -122,7 +124,7 @@ hosts:
         port: Ethernet0
   host31:
     ipaddress: 10.0.13.31
-    mask: 24
+    mask: 255.255.255.0
     gateway: 10.0.13.1
     neighbors:
       - neighborDevice: leaf3

@@ -22,22 +22,31 @@ There are some required fields to be specified in the topology files.  See the e
 ```
 topology:
   name: {TOPO_NAME}
+infra:
+  bridge: {MGMT_BRIDGE}
 images:
   ceos: {ceosimage_tag}
   host: {chostimage_tag}
 nodes:
   spine1:
     mac: 00:1c:73:c0:c6:01
-    links:
-      - leaf11
-      - leaf12
+    ipaddress: 192.168.0.10
+    neighbors:
+      - neighborDevice: spine2
+        neighborPort: Ethernet1
+        port: Ethernet1
+      - neighborDevice: leaf1
+        neighborPort: Ethernet1
+        port: Ethernet2
 hosts:
-  host11:
-    ipaddress: 192.168.12.11
-    mask: 24
-    gateway: 192.168.12.1
-    links:
-      - leaf11
+  host10:
+    ipaddress: 10.0.12.11
+    mask: 255.255.255.0
+    gateway: 10.0.12.1
+    neighbors:
+      - neighborDevice: leaf1
+        neighborPort: Ethernet3
+        port: Ethernet0
 iperf:
   port: 5010
   brate: 1000000
@@ -49,8 +58,9 @@ iperf:
 commands:
 ```
 
+- The `MGMT_BRIDGE` parameter is optional, this is if you wish to attach the cEOS containers Management0 Interface to this network.
 - The `mac` section for each cEOS-lab node needs to be unique, this helps specify the correct system-id in cEOS so MLAG will function properly.  
-- The `links` section for eachc cEOS-lab node is an ordered list for the neighbor device.  Item #1 would referr to `Eth1` on that particular node.
+- The `neighbors` section for each cEOS-lab node is a mapping to the remote peer and which interfaces to connect.
 - If you do not want to run iperf on the host nodes, you can leave that section empty and only set `iperf:`
 - The `commands:` section can create additional bash scripts to load new configurations on the nodes.  The `topologies/ratd.yaml` file has examples for this.
 
@@ -81,16 +91,16 @@ build/topo-builder.py -t {topo}
 build/topo-builder.py -t l2
 ```
 
-4. The `topo-builder.py` script will create a minimum of 4 bash scripts.  They are located in `cnt/{TOPO_NAME}/`.  It is important to run the commands for the project directories top-level directory.  
+4. The `topo-builder.py` script will create a minimum of 4 bash scripts.  They are located in `scripts/{TOPO_NAME}/`.  It is important to run the commands for the project directories top-level directory.  
 The four main scripts created are as follows with their description:
 - `Create.sh` - Creates all Open vSwitch bridges, containers, starts containers and links all containers together.
 - `Start.sh` - Starts all stopped containers and links all containers together.
 - `Stop.sh` - Disconnects all links between containers and stops running containers.
-- `Destroy.sh` - Disconnects all links between containeres, stops running containers, removes containers, and removes Open vSwitch bridges.
+- `Delete.sh` - Disconnects all links between containeres, stops running containers, removes containers, and removes Open vSwitch bridges.
 
 An example on creating and starting a new topology, use the following command:
 ```
-bash cnt/L2/Create.sh
+bash scripts/L2/Create.sh
 ```
 
 #### Using a Topology

@@ -1,7 +1,7 @@
 topology:
   name: ATD
 images:
-  ceos: 4.23.1F
+  ceos: 4.25.0F
   host: chost:0.5
 nodes:
   spine1:
