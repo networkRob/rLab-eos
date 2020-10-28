@@ -14,4 +14,4 @@ RUN chmod +x /usr/bin/iperf3client
 
 RUN chmod +x /usr/bin/ipnet
 
-CMD ["/sbin/init"]
+CMD ["ipnet"]

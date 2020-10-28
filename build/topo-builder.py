@@ -207,7 +207,7 @@ def main(args):
     create_output.append("#\n#\n# Creating anchor containers\n#\n")
     # Create initial cEOS anchor containers
     for _node in CEOS:
-        create_output.append("# Getting {0} nodes plubming\n".format(_node))
+        create_output.append("# Getting {0} nodes plumbing\n".format(_node))
         create_output.append("docker run -d --restart=always --name={0}-net --net=none busybox /bin/init\n".format(CEOS[_node].ceos_name))
         create_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(CEOS[_node].ceos_name))
         create_output.append("ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(CEOS[_node].ceos_name))
@@ -247,7 +247,7 @@ def main(args):
             startup_output.append("docker run -d --name={0} --net=container:{0}-net --privileged -v {1}/{3}/{4}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CONFIGS, CEOS[_node].image, _tag, _node))
     # Create initial host anchor containers
     for _host in HOSTS:
-        create_output.append("# Getting {0} nodes plubming\n".format(_host))
+        create_output.append("# Getting {0} nodes plumbing\n".format(_host))
         create_output.append("docker run -d --restart=always --name={0}-net --net=none busybox /bin/init\n".format(HOSTS[_host].c_name))
         create_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(HOSTS[_host].c_name))
         create_output.append("ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(HOSTS[_host].c_name))
