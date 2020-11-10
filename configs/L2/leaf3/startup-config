@@ -57,10 +57,10 @@ interface Ethernet4
    description Link to Host-31
    switchport access vlan 13
 !
-interface Management1
+interface Management0
    description Management
    vrf MGMT
-   ip address 192.168.50.169/24
+   ip address 192.168.50.24/24
 !
 interface Vlan12
    description L3 Intf for sourcing traffic

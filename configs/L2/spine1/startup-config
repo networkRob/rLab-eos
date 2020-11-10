@@ -74,7 +74,7 @@ interface Ethernet4
 interface Management0
    description Management
    vrf MGMT
-   ip address 192.168.60.11/24
+   ip address 192.168.50.20/24
 !
 interface Vlan12
    description Network-12
@@ -97,6 +97,7 @@ ip virtual-router mac-address 00:1c:73:00:00:99
 !
 ip routing
 ip routing vrf MGMT
+ip route vrf MGMT 0.0.0.0/0 192.168.50.1
 !
 mlag configuration
    domain-id l2s1s2

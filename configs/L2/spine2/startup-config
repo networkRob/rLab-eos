@@ -75,10 +75,10 @@ interface Ethernet4
    description Link to Leaf-03
    channel-group 4 mode active
 !
-interface Management1
+interface Management0
    description Management
    vrf MGMT
-   ip address 192.168.50.119/24
+   ip address 192.168.50.21/24
 !
 interface Vlan12
    description Network-12

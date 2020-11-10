@@ -1,13 +1,14 @@
 topology:
   name: L2
 infra:
-  bridge:
+  bridge: vmgmt
 images:
   ceos: 4.25.0F
   host: 0.5
 nodes:
   spine1:
     mac: 00:1c:73:c0:c6:01
+    ipaddress: 192.168.50.21
     neighbors:
       - neighborDevice: spine2
         neighborPort: Ethernet1
@@ -23,6 +24,7 @@ nodes:
         port: Ethernet4
   spine2:
     mac: 00:1c:73:c1:c6:01
+    ipaddress: 192.168.50.22
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet1
@@ -38,6 +40,7 @@ nodes:
         port: Ethernet4
   leaf1:
     mac: 00:1c:73:c2:c6:01
+    ipaddress: 192.168.50.23
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet2
@@ -53,6 +56,7 @@ nodes:
         port: Ethernet4
   leaf2:
     mac: 00:1c:73:c3:c6:01
+    ipaddress: 192.168.50.24
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet3
@@ -68,6 +72,7 @@ nodes:
         port: Ethernet4
   leaf3:
     mac: 00:1c:73:c4:c6:01
+    ipaddress: 192.168.50.25
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet4
