@@ -1,35 +1,35 @@
 #!/bin/bash
-ip link delete ratdeos1et1 type veth peer name ratdeos2et5
-ip link delete ratdeos1et2 type veth peer name ratdeos7et3
-ip link delete ratdeos1et3 type veth peer name ratdeos11et1
-ip link delete ratdeos1et4 type veth peer name ratdeos6et4
-ip link delete ratdeos1et5 type veth peer name ratdeos5et4
-ip link delete ratdeos1et6 type veth peer name ratdeos17et1
-ip link delete ratdeos2et1 type veth peer name ratdeos3et3
-ip link delete ratdeos2et2 type veth peer name ratdeos4et4
-ip link delete ratdeos2et3 type veth peer name ratdeos5et3
-ip link delete ratdeos2et4 type veth peer name ratdeos6et5
-ip link delete ratdeos3et1 type veth peer name ratdeos9et2
-ip link delete ratdeos3et2 type veth peer name ratdeos7et1
-ip link delete ratdeos3et4 type veth peer name ratdeos5et2
-ip link delete ratdeos3et5 type veth peer name ratdeos4et5
-ip link delete ratdeos3et6 type veth peer name ratdeos20et1
-ip link delete ratdeos4et1 type veth peer name ratdeos9et1
-ip link delete ratdeos4et2 type veth peer name ratdeos8et1
-ip link delete ratdeos4et3 type veth peer name ratdeos5et1
-ip link delete ratdeos4et6 type veth peer name ratdeos16et1
-ip link delete ratdeos5et5 type veth peer name ratdeos6et1
-ip link delete ratdeos6et2 type veth peer name ratdeos8et3
-ip link delete ratdeos6et3 type veth peer name ratdeos13et1
-ip link delete ratdeos6et6 type veth peer name ratdeos14et2
-ip link delete ratdeos7et2 type veth peer name ratdeos10et1
-ip link delete ratdeos7et4 type veth peer name ratdeos19et1
-ip link delete ratdeos8et2 type veth peer name ratdeos15et1
-ip link delete ratdeos8et4 type veth peer name ratdeos14et1
-ip link delete ratdeos8et5 type veth peer name ratdeos18et1
-ip link delete ratdeos11et2 type veth peer name ratdeos12et2
-ip link delete ratdeos11et3 type veth peer name ratdeos13et3
-ip link delete ratdeos12et1 type veth peer name ratdeos13et2
+sudo ip link delete ratdeos1et1 type veth peer name ratdeos2et5
+sudo ip link delete ratdeos1et2 type veth peer name ratdeos7et3
+sudo ip link delete ratdeos1et3 type veth peer name ratdeos11et1
+sudo ip link delete ratdeos1et4 type veth peer name ratdeos6et4
+sudo ip link delete ratdeos1et5 type veth peer name ratdeos5et4
+sudo ip link delete ratdeos1et6 type veth peer name ratdeos17et1
+sudo ip link delete ratdeos2et1 type veth peer name ratdeos3et3
+sudo ip link delete ratdeos2et2 type veth peer name ratdeos4et4
+sudo ip link delete ratdeos2et3 type veth peer name ratdeos5et3
+sudo ip link delete ratdeos2et4 type veth peer name ratdeos6et5
+sudo ip link delete ratdeos3et1 type veth peer name ratdeos9et2
+sudo ip link delete ratdeos3et2 type veth peer name ratdeos7et1
+sudo ip link delete ratdeos3et4 type veth peer name ratdeos5et2
+sudo ip link delete ratdeos3et5 type veth peer name ratdeos4et5
+sudo ip link delete ratdeos3et6 type veth peer name ratdeos20et1
+sudo ip link delete ratdeos4et1 type veth peer name ratdeos9et1
+sudo ip link delete ratdeos4et2 type veth peer name ratdeos8et1
+sudo ip link delete ratdeos4et3 type veth peer name ratdeos5et1
+sudo ip link delete ratdeos4et6 type veth peer name ratdeos16et1
+sudo ip link delete ratdeos5et5 type veth peer name ratdeos6et1
+sudo ip link delete ratdeos6et2 type veth peer name ratdeos8et3
+sudo ip link delete ratdeos6et3 type veth peer name ratdeos13et1
+sudo ip link delete ratdeos6et6 type veth peer name ratdeos14et2
+sudo ip link delete ratdeos7et2 type veth peer name ratdeos10et1
+sudo ip link delete ratdeos7et4 type veth peer name ratdeos19et1
+sudo ip link delete ratdeos8et2 type veth peer name ratdeos15et1
+sudo ip link delete ratdeos8et4 type veth peer name ratdeos14et1
+sudo ip link delete ratdeos8et5 type veth peer name ratdeos18et1
+sudo ip link delete ratdeos11et2 type veth peer name ratdeos12et2
+sudo ip link delete ratdeos11et3 type veth peer name ratdeos13et3
+sudo ip link delete ratdeos12et1 type veth peer name ratdeos13et2
 docker stop ratdeos1
 docker stop ratdeos1-net
 docker rm ratdeos1
@@ -110,24 +110,24 @@ docker stop ratdeos20
 docker stop ratdeos20-net
 docker rm ratdeos20
 docker rm ratdeos20-net
-ip netns delete RATD
-rm -rf /var/run/netns/ratdeos1
-rm -rf /var/run/netns/ratdeos2
-rm -rf /var/run/netns/ratdeos3
-rm -rf /var/run/netns/ratdeos4
-rm -rf /var/run/netns/ratdeos5
-rm -rf /var/run/netns/ratdeos6
-rm -rf /var/run/netns/ratdeos7
-rm -rf /var/run/netns/ratdeos8
-rm -rf /var/run/netns/ratdeos9
-rm -rf /var/run/netns/ratdeos10
-rm -rf /var/run/netns/ratdeos11
-rm -rf /var/run/netns/ratdeos12
-rm -rf /var/run/netns/ratdeos13
-rm -rf /var/run/netns/ratdeos14
-rm -rf /var/run/netns/ratdeos15
-rm -rf /var/run/netns/ratdeos16
-rm -rf /var/run/netns/ratdeos17
-rm -rf /var/run/netns/ratdeos18
-rm -rf /var/run/netns/ratdeos19
-rm -rf /var/run/netns/ratdeos20
+sudo ip netns delete RATD
+sudo rm -rf /var/run/netns/ratdeos1
+sudo rm -rf /var/run/netns/ratdeos2
+sudo rm -rf /var/run/netns/ratdeos3
+sudo rm -rf /var/run/netns/ratdeos4
+sudo rm -rf /var/run/netns/ratdeos5
+sudo rm -rf /var/run/netns/ratdeos6
+sudo rm -rf /var/run/netns/ratdeos7
+sudo rm -rf /var/run/netns/ratdeos8
+sudo rm -rf /var/run/netns/ratdeos9
+sudo rm -rf /var/run/netns/ratdeos10
+sudo rm -rf /var/run/netns/ratdeos11
+sudo rm -rf /var/run/netns/ratdeos12
+sudo rm -rf /var/run/netns/ratdeos13
+sudo rm -rf /var/run/netns/ratdeos14
+sudo rm -rf /var/run/netns/ratdeos15
+sudo rm -rf /var/run/netns/ratdeos16
+sudo rm -rf /var/run/netns/ratdeos17
+sudo rm -rf /var/run/netns/ratdeos18
+sudo rm -rf /var/run/netns/ratdeos19
+sudo rm -rf /var/run/netns/ratdeos20
