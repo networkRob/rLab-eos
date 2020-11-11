@@ -8,7 +8,9 @@ ifconfig et0 $HOST_IP netmask $HOST_MASK
 
 route add default gw $HOST_GW et0
 
-lldpap -d 
+echo "Starting lldp service"
+/usr/sbin/lldpap -d 
+
 for i in `ls /sys/class/net/ | grep et` ;
       do echo "enabling lldp for interface: $i" ;
       lldptool set-lldp -i $i adminStatus=rxtx  ;
