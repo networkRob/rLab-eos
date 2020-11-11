@@ -298,7 +298,18 @@ def main(args):
         create_output.append("docker run -d --name={0} --privileged --net=container:{0}-net -e HOSTNAME={0} -e HOST_IP={1} -e HOST_MASK={3} -e HOST_GW={4} chost:{2} ipnet\n".format(HOSTS[_host].c_name, HOSTS[_host].ip, HOSTS[_host].image, HOSTS[_host].mask, HOSTS[_host].gw))
         startup_output.append("sleep 1\n")
         startup_output.append("docker run -d --name={0} --privileged --net=container:{0}-net -e HOSTNAME={0} -e HOST_IP={1} -e HOST_MASK={3} -e HOST_GW={4} chost:{2} ipnet\n".format(HOSTS[_host].c_name, HOSTS[_host].ip, HOSTS[_host].image, HOSTS[_host].mask, HOSTS[_host].gw))
-
+    # Check for iPerf3 commands
+    if topo_yaml['iperf']:
+        _iperf = topo_yaml['iperf']
+        _port = _iperf['port']
+        _brate = _port['brate']
+        for _server in _iperf['servers']:
+            create_output.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server].c_name, _port))
+            start_output.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server].c_name, _port))
+        for _client in _iperf['clients']:
+            _target = topo_yaml['hosts'][_client['target']]['ipaddress']
+            create_output.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client].c_name, _target, _port, _brate))
+            start_output.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client].c_name, _target, _port, _brate))
     # Create the initial deployment files
     with open(CEOS_SCRIPTS + '/{0}/Create.sh'.format(_tag), 'w') as cout:
         for _create in create_output:
