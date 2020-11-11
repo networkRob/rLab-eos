@@ -304,12 +304,12 @@ def main(args):
         _port = _iperf['port']
         _brate = _iperf['brate']
         for _server in _iperf['servers']:
-            create_output.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server].c_name, _port))
-            startup_output.append("docker exec -d {0} iperf3 -s -p {1}".format(HOSTS[_server].c_name, _port))
+            create_output.append("docker exec -d {0} iperf3 -s -p {1}\n".format(HOSTS[_server].c_name, _port))
+            startup_output.append("docker exec -d {0} iperf3 -s -p {1}\n".format(HOSTS[_server].c_name, _port))
         for _client in _iperf['clients']:
             _target = topo_yaml['hosts'][_client['target']]['ipaddress']
-            create_output.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client['client']].c_name, _target, _port, _brate))
-            startup_output.append("docker exec -d {0} iperf3client {1} {2} {3}".format(HOSTS[_client['client']].c_name, _target, _port, _brate))
+            create_output.append("docker exec -d {0} iperf3client {1} {2} {3}\n".format(HOSTS[_client['client']].c_name, _target, _port, _brate))
+            startup_output.append("docker exec -d {0} iperf3client {1} {2} {3}\n".format(HOSTS[_client['client']].c_name, _target, _port, _brate))
     # Create the initial deployment files
     with open(CEOS_SCRIPTS + '/{0}/Create.sh'.format(_tag), 'w') as cout:
         for _create in create_output:
