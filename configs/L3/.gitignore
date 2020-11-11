@@ -1,0 +1,6 @@
+*
+!.gitignore
+!**/startup-config
+!**/Scripts
+!**/system_mac_address
+!**/ceos-config

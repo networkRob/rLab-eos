@@ -1,5 +1,1 @@
-configs/*
-!configs/*/*/startup-config
-!configs/*/*/system_mac_address
-!configs/*/*/Scripts
 .history
