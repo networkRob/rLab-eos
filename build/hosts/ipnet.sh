@@ -2,7 +2,7 @@
 
 echo "PS1=\"\u@$HOSTNAME# \"" >> ~/.bashrc
 
-echo "$HOSTNAME" > /etc/hostname
+hostname -b $HOSTNAME
 
 ifconfig et0 $HOST_IP netmask $HOST_MASK
 
