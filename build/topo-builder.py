@@ -18,7 +18,7 @@ HOSTS = {}
 
 
 class CEOS_NODE():
-    def __init__(self, node_name, node_ip, node_neighbors, _tag, image):
+    def __init__(self, node_name, node_ip, node_sys_mac, node_neighbors, _tag, image):
         self.name = node_name
         self.ip = node_ip
         self.tag = _tag.lower()
@@ -26,6 +26,8 @@ class CEOS_NODE():
         self.ceos_name = self.tag + self.name
         self.intfs = {}
         self.portMappings(node_neighbors)
+        self.system_mac = node_sys_mac
+
     def portMappings(self, node_neighbors):
         """
         Function to create port mappings.
@@ -163,13 +165,39 @@ def main(args):
     delete_output = []
     delete_net_output = []
     topo_yaml = openTopo(args.topo)
+    create_startup = args.startup
     ceos_image = topo_yaml['images']['ceos']
     host_image = topo_yaml['images']['host']
     _tag = topo_yaml['topology']['name']
     nodes = topo_yaml['nodes']
     hosts = topo_yaml['hosts']
     _ceos_script_location = "{0}/{1}".format(CEOS_SCRIPTS, _tag)
-
+    _tfa_version = 1
+    BASE_TERMINATTR = """
+daemon TerminAttr
+   exec /usr/bin/TerminAttr -cvaddr={0}:9910 -taillogs -cvcompression=gzip -cvauth=key,{1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
+   no shutdown
+!
+    """
+    BASE_MGMT = """
+interface Management0
+   description Management
+   ip address {0}/24
+!
+ip routing
+!
+ip route 0.0.0.0/0 {1}
+!
+management api http-commands
+   no shutdown
+!
+    """
+    BASE_STARTUP = """
+hostname {0}
+!
+    """
+    if create_startup:
+        pS("INFO", "Bare Startup config will be created for all cEOS nodes")
     # Check for mgmt Bridge
     try:
         mgmt_network = topo_yaml['infra']['bridge']
@@ -178,13 +206,23 @@ def main(args):
     except KeyError:
         pS("INFO", "No mgmt bridge specified. Creating isolated network.")
         mgmt_network = False
+    # Check for TFA Version
+    try:
+        _tfa_version = topo_yaml['topology']['vforward']
+        if _tfa_version > 1:
+            pS("INFO", "Leveraging ArFA forwarding agent")
+        else:
+            pS("INFO", "Leveraging default dataplane")
+    except:
+        pS("INFO", "Leveraging default dataplane")
+
     # Load cEOS nodes specific information
     for _node in nodes:
         try:
             _node_ip = nodes[_node]['ipaddress']
         except KeyError:
             _node_ip = ""
-        CEOS[_node] = CEOS_NODE(_node, _node_ip, nodes[_node]['neighbors'], _tag, ceos_image)
+        CEOS[_node] = CEOS_NODE(_node, _node_ip, nodes[_node]['mac'], nodes[_node]['neighbors'], _tag, ceos_image)
     # Load Host nodes specific information
     if hosts:
         for _host in hosts:
@@ -216,7 +254,28 @@ def main(args):
         delete_output.append("sudo ip link delete {0} type veth peer name {1}\n".format(_v1, _v2))
     create_output.append("#\n#\n# Creating anchor containers\n#\n")
     # Create initial cEOS anchor containers
+    create_output.append("# Checking to make sure topo config directory exists\n")
+    create_output.append('if ! [ -d "{0}/{1}" ]; then mkdir {0}/{1}; fi\n'.format(CONFIGS, _tag))
     for _node in CEOS:
+        # Add in code to perform check in configs directory and create a basis for ceos-config
+        create_output.append("# Checking for configs directory for each cEOS node\n")
+        create_output.append('if ! [ -d "{0}/{1}/{2}" ]; then mkdir {0}/{1}/{2}; fi\n'.format(CONFIGS, _tag, _node))
+        create_output.append("# Creating the ceos-config file.\n")
+        create_output.append('echo "SERIALNUMBER={0}" > {1}/{2}/{3}/ceos-config\n'.format(CEOS[_node].ceos_name, CONFIGS, _tag, _node))
+        create_output.append('echo "SYSTEMMACADDR={0}" >> {1}/{2}/{3}/ceos-config\n'.format(CEOS[_node].system_mac, CONFIGS, _tag, _node))
+        if _tfa_version > 1:
+            create_output.append('echo "TFA_VERSION={0}" >> {1}/{2}/{3}/ceos-config\n'.format(_tfa_version, CONFIGS, _tag, _node))
+        # Perform check to see if a bare startup-config needs to be created
+        if create_startup:
+            create_output.append("# Creating a bare startup configuration for {0}\n".format(_node))
+            _tmp_startup = []
+            _tmp_startup.append(BASE_STARTUP.format(CEOS[_node].ceos_name))
+            if mgmt_network:
+                _tmp_startup.append(BASE_MGMT.format(CEOS[_node].ip, topo_yaml['infra']['gateway']))
+                if 'cvpaddress' and 'cvp-key' in topo_yaml['topology']:
+                    _tmp_startup.append(BASE_TERMINATTR.format(topo_yaml['topology']['cvpaddress'], topo_yaml['topology']['cvp-key']))
+            create_output.append('echo "{0}" > {1}/{2}/{3}/startup-config\n'.format(''.join(_tmp_startup), CONFIGS, _tag, _node))
+        # Creating anchor containers
         create_output.append("# Getting {0} nodes plumbing\n".format(_node))
         create_output.append("docker run -d --restart=always --log-opt max-size=10k --name={0}-net --net=none busybox /bin/init\n".format(CEOS[_node].ceos_name))
         startup_output.append("docker start {0}-net\n".format(CEOS[_node].ceos_name))
@@ -330,6 +389,7 @@ if __name__ == '__main__':
     pS('OK', 'Starting cEOS Builder')
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--topo", type=str, help="Topology to build", default=None, required=True)
+    parser.add_argument("-s", "--startup", help="Create a bare startup-config for each node", action="store_true")
     args = parser.parse_args()
     #TODO add in logic to load custom build file. Default to tag's build file
     main(args)

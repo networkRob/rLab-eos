@@ -22,8 +22,12 @@ There are some required fields to be specified in the topology files.  See the e
 ```
 topology:
   name: {TOPO_NAME}
+  vforward: 1
+  cvpaddress: {CVP_IPADDRESS}
+  cvp-key: {CVP_KEY}
 infra:
   bridge: {MGMT_BRIDGE}
+  gateway: {MGMT_NETWORK_GATEWAY}
 images:
   ceos: {ceosimage_tag}
   host: {chostimage_tag}
@@ -58,7 +62,10 @@ iperf:
 commands:
 ```
 
+- The `CVP_IPADDRESS` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP.
+- The `CVP_KEY` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP.
 - The `MGMT_BRIDGE` parameter is optional, this is if you wish to attach the cEOS containers Management0 Interface to this network.
+- The `MGMT_NETWORK_GATEWAY` parameter is optional, this is if a bare startup-config is created, but should be specified if the `MGMT_BRIDGE` parameter is set.
 - The `mac` section for each cEOS-lab node needs to be unique, this helps specify the correct system-id in cEOS so MLAG will function properly.  
 - The `neighbors` section for each cEOS-lab node is a mapping to the remote peer and which interfaces to connect.
 - If you do not want to run iperf on the host nodes, you can leave that section empty and only set `iperf:`
@@ -83,8 +90,13 @@ docker build -t chost:{chostimage_tag} build/hosts/.
 {chostimage_tag} = tag for the image, ie `0.5`
 
 3. Create the topology scripts:
+To create the necessary scripts and leverage either no startup-configs or leverage already provided ones:
 ```
 build/topo-builder.py -t {topo}
+```
+To create the necessary scripts and create a bare startup-configuration:
+```
+build/topo-builder.py -t {topo} -s
 ```
 {topo} is the filename for the topology file located in `topologies/` without the `.yaml` extension. For the L2 topology, the command would look like:
 ```
