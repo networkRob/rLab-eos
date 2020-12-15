@@ -1,7 +1,11 @@
 topology:
   name: L2
+  vforward: 1
+  cvpaddress: 192.168.49.12
+  cvp-key: rob-lab
 infra:
   bridge: vmgmt
+  gateway: 192.168.50.1
 images:
   ceos: 4.25.0F
   host: 0.5
