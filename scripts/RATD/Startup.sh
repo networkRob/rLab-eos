@@ -1,4 +1,7 @@
 #!/bin/bash
+
+echo "fs.inotify.max_user_instances = 50000" > /etc/sysctl.d/99-zceos.conf
+sysctl -w fs.inotify.max_user_instances=50000
 sudo ip netns add RATD
 sudo ip link add ratdeos1et1 type veth peer name ratdeos2et5
 sudo ip link add ratdeos1et2 type veth peer name ratdeos7et3

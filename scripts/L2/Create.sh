@@ -1,4 +1,7 @@
 #!/bin/bash
+
+echo "fs.inotify.max_user_instances = 50000" > /etc/sysctl.d/99-zceos.conf
+sysctl -w fs.inotify.max_user_instances=50000
 if [ "$(docker image ls | grep ceosimage | grep -c 4.25.0F)" == 0 ]
 then
     echo "Docker image not found for ceosimage:4.25.0F, please build it first."
@@ -34,7 +37,7 @@ if ! [ -d "/workspaces/rLab-eos/configs/L2" ]; then mkdir /workspaces/rLab-eos/c
 if ! [ -d "/workspaces/rLab-eos/configs/L2/spine1" ]; then mkdir /workspaces/rLab-eos/configs/L2/spine1; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=l2spine1" > /workspaces/rLab-eos/configs/L2/spine1/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c0:c6:01" >> /workspaces/rLab-eos/configs/L2/spine1/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:b0:c6:01" >> /workspaces/rLab-eos/configs/L2/spine1/ceos-config
 # Getting spine1 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2spine1-net --net=none busybox /bin/init
 l2spine1pid=$(docker inspect --format '{{.State.Pid}}' l2spine1-net)
@@ -54,7 +57,7 @@ docker run -d --name=l2spine1 --log-opt max-size=1m --net=container:l2spine1-net
 if ! [ -d "/workspaces/rLab-eos/configs/L2/spine2" ]; then mkdir /workspaces/rLab-eos/configs/L2/spine2; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=l2spine2" > /workspaces/rLab-eos/configs/L2/spine2/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c1:c6:01" >> /workspaces/rLab-eos/configs/L2/spine2/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:b1:c6:01" >> /workspaces/rLab-eos/configs/L2/spine2/ceos-config
 # Getting spine2 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2spine2-net --net=none busybox /bin/init
 l2spine2pid=$(docker inspect --format '{{.State.Pid}}' l2spine2-net)
@@ -74,7 +77,7 @@ docker run -d --name=l2spine2 --log-opt max-size=1m --net=container:l2spine2-net
 if ! [ -d "/workspaces/rLab-eos/configs/L2/leaf1" ]; then mkdir /workspaces/rLab-eos/configs/L2/leaf1; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=l2leaf1" > /workspaces/rLab-eos/configs/L2/leaf1/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c2:c6:01" >> /workspaces/rLab-eos/configs/L2/leaf1/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:b2:c6:01" >> /workspaces/rLab-eos/configs/L2/leaf1/ceos-config
 # Getting leaf1 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2leaf1-net --net=none busybox /bin/init
 l2leaf1pid=$(docker inspect --format '{{.State.Pid}}' l2leaf1-net)
@@ -94,7 +97,7 @@ docker run -d --name=l2leaf1 --log-opt max-size=1m --net=container:l2leaf1-net -
 if ! [ -d "/workspaces/rLab-eos/configs/L2/leaf2" ]; then mkdir /workspaces/rLab-eos/configs/L2/leaf2; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=l2leaf2" > /workspaces/rLab-eos/configs/L2/leaf2/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c3:c6:01" >> /workspaces/rLab-eos/configs/L2/leaf2/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:b3:c6:01" >> /workspaces/rLab-eos/configs/L2/leaf2/ceos-config
 # Getting leaf2 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2leaf2-net --net=none busybox /bin/init
 l2leaf2pid=$(docker inspect --format '{{.State.Pid}}' l2leaf2-net)
@@ -114,7 +117,7 @@ docker run -d --name=l2leaf2 --log-opt max-size=1m --net=container:l2leaf2-net -
 if ! [ -d "/workspaces/rLab-eos/configs/L2/leaf3" ]; then mkdir /workspaces/rLab-eos/configs/L2/leaf3; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=l2leaf3" > /workspaces/rLab-eos/configs/L2/leaf3/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c4:c6:01" >> /workspaces/rLab-eos/configs/L2/leaf3/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:b4:c6:01" >> /workspaces/rLab-eos/configs/L2/leaf3/ceos-config
 # Getting leaf3 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2leaf3-net --net=none busybox /bin/init
 l2leaf3pid=$(docker inspect --format '{{.State.Pid}}' l2leaf3-net)

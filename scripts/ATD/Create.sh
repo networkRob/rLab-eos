@@ -1,4 +1,7 @@
 #!/bin/bash
+
+echo "fs.inotify.max_user_instances = 50000" > /etc/sysctl.d/99-zceos.conf
+sysctl -w fs.inotify.max_user_instances=50000
 if [ "$(docker image ls | grep ceosimage | grep -c 4.25.0F)" == 0 ]
 then
     echo "Docker image not found for ceosimage:4.25.0F, please build it first."
@@ -43,7 +46,7 @@ if ! [ -d "/workspaces/rLab-eos/configs/ATD" ]; then mkdir /workspaces/rLab-eos/
 if ! [ -d "/workspaces/rLab-eos/configs/ATD/spine1" ]; then mkdir /workspaces/rLab-eos/configs/ATD/spine1; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=atdspine1" > /workspaces/rLab-eos/configs/ATD/spine1/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c0:c6:01" >> /workspaces/rLab-eos/configs/ATD/spine1/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:f0:c6:01" >> /workspaces/rLab-eos/configs/ATD/spine1/ceos-config
 # Getting spine1 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=atdspine1-net --net=none busybox /bin/init
 atdspine1pid=$(docker inspect --format '{{.State.Pid}}' atdspine1-net)
@@ -56,12 +59,12 @@ sudo ip link set atdspine1et4 netns atdspine1 name et4 up
 sudo ip link set atdspine1et5 netns atdspine1 name et5 up
 sudo ip link set atdspine1et6 netns atdspine1 name et6 up
 sleep 1
-docker run -d --name=atdspine1 --log-opt max-size=1m --net=container:atdspine1-net --privileged -v /workspaces/rLab-eos/configs/ATD/spine1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=atdspine1 --log-opt max-size=1m --net=container:atdspine1-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/ATD/spine1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/ATD/spine2" ]; then mkdir /workspaces/rLab-eos/configs/ATD/spine2; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=atdspine2" > /workspaces/rLab-eos/configs/ATD/spine2/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c1:c6:01" >> /workspaces/rLab-eos/configs/ATD/spine2/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:f1:c6:01" >> /workspaces/rLab-eos/configs/ATD/spine2/ceos-config
 # Getting spine2 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=atdspine2-net --net=none busybox /bin/init
 atdspine2pid=$(docker inspect --format '{{.State.Pid}}' atdspine2-net)
@@ -74,12 +77,12 @@ sudo ip link set atdspine2et4 netns atdspine2 name et4 up
 sudo ip link set atdspine2et5 netns atdspine2 name et5 up
 sudo ip link set atdspine2et6 netns atdspine2 name et6 up
 sleep 1
-docker run -d --name=atdspine2 --log-opt max-size=1m --net=container:atdspine2-net --privileged -v /workspaces/rLab-eos/configs/ATD/spine2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=atdspine2 --log-opt max-size=1m --net=container:atdspine2-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/ATD/spine2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/ATD/leaf1" ]; then mkdir /workspaces/rLab-eos/configs/ATD/leaf1; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=atdleaf1" > /workspaces/rLab-eos/configs/ATD/leaf1/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c2:c6:01" >> /workspaces/rLab-eos/configs/ATD/leaf1/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:f2:c6:01" >> /workspaces/rLab-eos/configs/ATD/leaf1/ceos-config
 # Getting leaf1 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=atdleaf1-net --net=none busybox /bin/init
 atdleaf1pid=$(docker inspect --format '{{.State.Pid}}' atdleaf1-net)
@@ -92,12 +95,12 @@ sudo ip link set atdleaf1et4 netns atdleaf1 name et4 up
 sudo ip link set atdleaf1et5 netns atdleaf1 name et5 up
 sudo ip link set atdleaf1et6 netns atdleaf1 name et6 up
 sleep 1
-docker run -d --name=atdleaf1 --log-opt max-size=1m --net=container:atdleaf1-net --privileged -v /workspaces/rLab-eos/configs/ATD/leaf1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=atdleaf1 --log-opt max-size=1m --net=container:atdleaf1-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/ATD/leaf1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/ATD/leaf2" ]; then mkdir /workspaces/rLab-eos/configs/ATD/leaf2; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=atdleaf2" > /workspaces/rLab-eos/configs/ATD/leaf2/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c3:c6:01" >> /workspaces/rLab-eos/configs/ATD/leaf2/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:f3:c6:01" >> /workspaces/rLab-eos/configs/ATD/leaf2/ceos-config
 # Getting leaf2 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=atdleaf2-net --net=none busybox /bin/init
 atdleaf2pid=$(docker inspect --format '{{.State.Pid}}' atdleaf2-net)
@@ -110,12 +113,12 @@ sudo ip link set atdleaf2et4 netns atdleaf2 name et4 up
 sudo ip link set atdleaf2et5 netns atdleaf2 name et5 up
 sudo ip link set atdleaf2et6 netns atdleaf2 name et6 up
 sleep 1
-docker run -d --name=atdleaf2 --log-opt max-size=1m --net=container:atdleaf2-net --privileged -v /workspaces/rLab-eos/configs/ATD/leaf2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=atdleaf2 --log-opt max-size=1m --net=container:atdleaf2-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/ATD/leaf2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/ATD/leaf3" ]; then mkdir /workspaces/rLab-eos/configs/ATD/leaf3; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=atdleaf3" > /workspaces/rLab-eos/configs/ATD/leaf3/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c4:c6:01" >> /workspaces/rLab-eos/configs/ATD/leaf3/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:f4:c6:01" >> /workspaces/rLab-eos/configs/ATD/leaf3/ceos-config
 # Getting leaf3 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=atdleaf3-net --net=none busybox /bin/init
 atdleaf3pid=$(docker inspect --format '{{.State.Pid}}' atdleaf3-net)
@@ -128,12 +131,12 @@ sudo ip link set atdleaf3et4 netns atdleaf3 name et4 up
 sudo ip link set atdleaf3et5 netns atdleaf3 name et5 up
 sudo ip link set atdleaf3et6 netns atdleaf3 name et6 up
 sleep 1
-docker run -d --name=atdleaf3 --log-opt max-size=1m --net=container:atdleaf3-net --privileged -v /workspaces/rLab-eos/configs/ATD/leaf3:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=atdleaf3 --log-opt max-size=1m --net=container:atdleaf3-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/ATD/leaf3:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/ATD/leaf4" ]; then mkdir /workspaces/rLab-eos/configs/ATD/leaf4; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=atdleaf4" > /workspaces/rLab-eos/configs/ATD/leaf4/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c5:c6:01" >> /workspaces/rLab-eos/configs/ATD/leaf4/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:f5:c6:01" >> /workspaces/rLab-eos/configs/ATD/leaf4/ceos-config
 # Getting leaf4 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=atdleaf4-net --net=none busybox /bin/init
 atdleaf4pid=$(docker inspect --format '{{.State.Pid}}' atdleaf4-net)
@@ -146,12 +149,12 @@ sudo ip link set atdleaf4et4 netns atdleaf4 name et4 up
 sudo ip link set atdleaf4et5 netns atdleaf4 name et5 up
 sudo ip link set atdleaf4et6 netns atdleaf4 name et6 up
 sleep 1
-docker run -d --name=atdleaf4 --log-opt max-size=1m --net=container:atdleaf4-net --privileged -v /workspaces/rLab-eos/configs/ATD/leaf4:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=atdleaf4 --log-opt max-size=1m --net=container:atdleaf4-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/ATD/leaf4:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/ATD/host1" ]; then mkdir /workspaces/rLab-eos/configs/ATD/host1; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=atdhost1" > /workspaces/rLab-eos/configs/ATD/host1/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c7:c6:01" >> /workspaces/rLab-eos/configs/ATD/host1/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:f7:c6:01" >> /workspaces/rLab-eos/configs/ATD/host1/ceos-config
 # Getting host1 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=atdhost1-net --net=none busybox /bin/init
 atdhost1pid=$(docker inspect --format '{{.State.Pid}}' atdhost1-net)
@@ -162,12 +165,12 @@ sudo ip link set atdhost1et2 netns atdhost1 name et2 up
 sudo ip link set atdhost1et3 netns atdhost1 name et3 up
 sudo ip link set atdhost1et4 netns atdhost1 name et4 up
 sleep 1
-docker run -d --name=atdhost1 --log-opt max-size=1m --net=container:atdhost1-net --privileged -v /workspaces/rLab-eos/configs/ATD/host1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=atdhost1 --log-opt max-size=1m --net=container:atdhost1-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/ATD/host1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/ATD/host2" ]; then mkdir /workspaces/rLab-eos/configs/ATD/host2; fi
 # Creating the ceos-config file.
 echo "SERIALNUMBER=atdhost2" > /workspaces/rLab-eos/configs/ATD/host2/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c8:c6:01" >> /workspaces/rLab-eos/configs/ATD/host2/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:f8:c6:01" >> /workspaces/rLab-eos/configs/ATD/host2/ceos-config
 # Getting host2 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=atdhost2-net --net=none busybox /bin/init
 atdhost2pid=$(docker inspect --format '{{.State.Pid}}' atdhost2-net)
@@ -178,4 +181,4 @@ sudo ip link set atdhost2et2 netns atdhost2 name et2 up
 sudo ip link set atdhost2et3 netns atdhost2 name et3 up
 sudo ip link set atdhost2et4 netns atdhost2 name et4 up
 sleep 1
-docker run -d --name=atdhost2 --log-opt max-size=1m --net=container:atdhost2-net --privileged -v /workspaces/rLab-eos/configs/ATD/host2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=atdhost2 --log-opt max-size=1m --net=container:atdhost2-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/ATD/host2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
