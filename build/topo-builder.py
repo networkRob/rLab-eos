@@ -12,10 +12,17 @@ CONFIGS = BASE_PATH + "/configs"
 CEOS_NODES = BASE_PATH + "/nodes"
 CEOS_SCRIPTS = BASE_PATH + "/scripts"
 sleep_delay = 30
+NOTIFY_BASE = 1250
 VETH_PAIRS = []
 CEOS = {}
 HOSTS = {}
-
+# Setting inotify value to 40 times EOS base value
+NOTIFY_ADJUST = """
+echo "fs.inotify.max_user_instances = {notify_instances}" > /etc/sysctl.d/99-zceos.conf
+sysctl -w fs.inotify.max_user_instances={notify_instances}
+""".format(
+    notify_instances = (NOTIFY_BASE * 40)
+)
 
 class CEOS_NODE():
     def __init__(self, node_name, node_ip, node_sys_mac, node_neighbors, _tag, image):
@@ -234,6 +241,7 @@ hostname {0}
     else:
         pS("iBerg", "Error creating directory.")
     create_output.append("#!/bin/bash\n")
+    create_output.append(NOTIFY_ADJUST)
     # Check for container images are present
     create_output.append("if [ \"$(docker image ls | grep ceosimage | grep -c {0})\" == 0 ]\n".format(ceos_image))
     create_output.append("then\n    echo \"Docker image not found for ceosimage:{0}, please build it first.\"\n    exit\nfi\n".format(ceos_image))
@@ -241,6 +249,7 @@ hostname {0}
     create_output.append("then\n    echo \"Docker image not found for chost:{0}, please build it first.\"\n    exit\nfi\n".format(host_image))
     create_output.append("sudo ip netns add {0}\n".format(_tag))
     startup_output.append("#!/bin/bash\n")
+    startup_output.append(NOTIFY_ADJUST)
     stop_output.append("#!/bin/bash\n")
     delete_output.append("#!/bin/bash\n")
     startup_output.append("sudo ip netns add {0}\n".format(_tag))
@@ -318,10 +327,10 @@ hostname {0}
             startup_output.append("sudo ip link set {0}-eth0 netns {0} name eth0 up\n".format(CEOS[_node].ceos_name))
             startup_output.append("sudo ip link set {0}-mgmt up\n".format(CEOS[_node].ceos_name))
             startup_output.append("sleep 1\n")
-            startup_output.append("docker run -d --name={0} --log-opt max-size=1m --net=container:{0}-net --ip {1} --privileged -v {2}/{4}/{5}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CEOS[_node].ip, CONFIGS, CEOS[_node].image, _tag, _node))
+            startup_output.append("docker run -d --name={0} --log-opt max-size=1m --net=container:{0}-net --ip {1} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {2}/{4}/{5}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CEOS[_node].ip, CONFIGS, CEOS[_node].image, _tag, _node))
         else:
             create_output.append("sleep 1\n")
-            create_output.append("docker run -d --name={0} --log-opt max-size=1m --net=container:{0}-net --privileged -v {1}/{3}/{4}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CONFIGS, CEOS[_node].image, _tag, _node))
+            create_output.append("docker run -d --name={0} --log-opt max-size=1m --net=container:{0}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {1}/{3}/{4}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CONFIGS, CEOS[_node].image, _tag, _node))
             startup_output.append("sleep 1\n")
             startup_output.append("docker run -d --name={0} --log-opt max-size=1m --net=container:{0}-net --privileged -v {1}/{3}/{4}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CONFIGS, CEOS[_node].image, _tag, _node))
     # Create initial host anchor containers
