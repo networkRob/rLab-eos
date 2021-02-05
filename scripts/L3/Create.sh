@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo echo "fs.inotify.max_user_instances = 50000" > /etc/sysctl.d/99-zceos.conf
+sudo sh -c 'echo "fs.inotify.max_user_instances = 50000" > /etc/sysctl.d/99-zceos.conf'
 sudo sysctl -w fs.inotify.max_user_instances=50000
 if [ "$(docker image ls | grep ceosimage | grep -c 4.25.0F)" == 0 ]
 then

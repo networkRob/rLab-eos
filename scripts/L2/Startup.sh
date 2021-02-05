@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo echo "fs.inotify.max_user_instances = 50000" > /etc/sysctl.d/99-zceos.conf
+sudo sh -c 'echo "fs.inotify.max_user_instances = 50000" > /etc/sysctl.d/99-zceos.conf'
 sudo sysctl -w fs.inotify.max_user_instances=50000
 sudo ip netns add L2
 sudo ip link add l2spine1et1 type veth peer name l2spine2et1

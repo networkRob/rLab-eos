@@ -18,7 +18,7 @@ CEOS = {}
 HOSTS = {}
 # Setting inotify value to 40 times EOS base value
 NOTIFY_ADJUST = """
-sudo echo "fs.inotify.max_user_instances = {notify_instances}" > /etc/sysctl.d/99-zceos.conf
+sudo sh -c 'echo "fs.inotify.max_user_instances = {notify_instances}" > /etc/sysctl.d/99-zceos.conf'
 sudo sysctl -w fs.inotify.max_user_instances={notify_instances}
 """.format(
     notify_instances = (NOTIFY_BASE * 40)
