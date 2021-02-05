@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "fs.inotify.max_user_instances = 50000" > /etc/sysctl.d/99-zceos.conf
-sysctl -w fs.inotify.max_user_instances=50000
+sudo echo "fs.inotify.max_user_instances = 50000" > /etc/sysctl.d/99-zceos.conf
+sudo sysctl -w fs.inotify.max_user_instances=50000
 if [ "$(docker image ls | grep ceosimage | grep -c 4.25.0F)" == 0 ]
 then
     echo "Docker image not found for ceosimage:4.25.0F, please build it first."
@@ -69,7 +69,7 @@ sudo brctl addif vmgmt l3spine1-mgmt
 sudo ip link set l3spine1-eth0 netns l3spine1 name eth0 up
 sudo ip link set l3spine1-mgmt up
 sleep 1
-docker run -d --name=l3spine1 --log-opt max-size=1m --net=container:l3spine1-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/spine1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3spine1 --log-opt max-size=1m --net=container:l3spine1-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/spine1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/L3/spine2" ]; then mkdir /workspaces/rLab-eos/configs/L3/spine2; fi
 # Creating the ceos-config file.
@@ -93,7 +93,7 @@ sudo brctl addif vmgmt l3spine2-mgmt
 sudo ip link set l3spine2-eth0 netns l3spine2 name eth0 up
 sudo ip link set l3spine2-mgmt up
 sleep 1
-docker run -d --name=l3spine2 --log-opt max-size=1m --net=container:l3spine2-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/spine2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3spine2 --log-opt max-size=1m --net=container:l3spine2-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/spine2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/L3/leaf11" ]; then mkdir /workspaces/rLab-eos/configs/L3/leaf11; fi
 # Creating the ceos-config file.
@@ -114,7 +114,7 @@ sudo brctl addif vmgmt l3leaf11-mgmt
 sudo ip link set l3leaf11-eth0 netns l3leaf11 name eth0 up
 sudo ip link set l3leaf11-mgmt up
 sleep 1
-docker run -d --name=l3leaf11 --log-opt max-size=1m --net=container:l3leaf11-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/leaf11:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3leaf11 --log-opt max-size=1m --net=container:l3leaf11-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/leaf11:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/L3/leaf12" ]; then mkdir /workspaces/rLab-eos/configs/L3/leaf12; fi
 # Creating the ceos-config file.
@@ -133,7 +133,7 @@ sudo brctl addif vmgmt l3leaf12-mgmt
 sudo ip link set l3leaf12-eth0 netns l3leaf12 name eth0 up
 sudo ip link set l3leaf12-mgmt up
 sleep 1
-docker run -d --name=l3leaf12 --log-opt max-size=1m --net=container:l3leaf12-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/leaf12:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3leaf12 --log-opt max-size=1m --net=container:l3leaf12-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/leaf12:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/L3/leaf21" ]; then mkdir /workspaces/rLab-eos/configs/L3/leaf21; fi
 # Creating the ceos-config file.
@@ -153,7 +153,7 @@ sudo brctl addif vmgmt l3leaf21-mgmt
 sudo ip link set l3leaf21-eth0 netns l3leaf21 name eth0 up
 sudo ip link set l3leaf21-mgmt up
 sleep 1
-docker run -d --name=l3leaf21 --log-opt max-size=1m --net=container:l3leaf21-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/leaf21:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3leaf21 --log-opt max-size=1m --net=container:l3leaf21-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/leaf21:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/L3/leaf22" ]; then mkdir /workspaces/rLab-eos/configs/L3/leaf22; fi
 # Creating the ceos-config file.
@@ -173,7 +173,7 @@ sudo brctl addif vmgmt l3leaf22-mgmt
 sudo ip link set l3leaf22-eth0 netns l3leaf22 name eth0 up
 sudo ip link set l3leaf22-mgmt up
 sleep 1
-docker run -d --name=l3leaf22 --log-opt max-size=1m --net=container:l3leaf22-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/leaf22:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3leaf22 --log-opt max-size=1m --net=container:l3leaf22-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/leaf22:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/L3/leaf31" ]; then mkdir /workspaces/rLab-eos/configs/L3/leaf31; fi
 # Creating the ceos-config file.
@@ -194,7 +194,7 @@ sudo brctl addif vmgmt l3leaf31-mgmt
 sudo ip link set l3leaf31-eth0 netns l3leaf31 name eth0 up
 sudo ip link set l3leaf31-mgmt up
 sleep 1
-docker run -d --name=l3leaf31 --log-opt max-size=1m --net=container:l3leaf31-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/leaf31:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3leaf31 --log-opt max-size=1m --net=container:l3leaf31-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/leaf31:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/L3/leaf32" ]; then mkdir /workspaces/rLab-eos/configs/L3/leaf32; fi
 # Creating the ceos-config file.
@@ -213,7 +213,7 @@ sudo brctl addif vmgmt l3leaf32-mgmt
 sudo ip link set l3leaf32-eth0 netns l3leaf32 name eth0 up
 sudo ip link set l3leaf32-mgmt up
 sleep 1
-docker run -d --name=l3leaf32 --log-opt max-size=1m --net=container:l3leaf32-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/leaf32:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3leaf32 --log-opt max-size=1m --net=container:l3leaf32-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/leaf32:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/L3/brdr1" ]; then mkdir /workspaces/rLab-eos/configs/L3/brdr1; fi
 # Creating the ceos-config file.
@@ -232,7 +232,7 @@ sudo brctl addif vmgmt l3brdr1-mgmt
 sudo ip link set l3brdr1-eth0 netns l3brdr1 name eth0 up
 sudo ip link set l3brdr1-mgmt up
 sleep 1
-docker run -d --name=l3brdr1 --log-opt max-size=1m --net=container:l3brdr1-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/brdr1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3brdr1 --log-opt max-size=1m --net=container:l3brdr1-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/brdr1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
 if ! [ -d "/workspaces/rLab-eos/configs/L3/brdr2" ]; then mkdir /workspaces/rLab-eos/configs/L3/brdr2; fi
 # Creating the ceos-config file.
@@ -251,7 +251,7 @@ sudo brctl addif vmgmt l3brdr2-mgmt
 sudo ip link set l3brdr2-eth0 netns l3brdr2 name eth0 up
 sudo ip link set l3brdr2-mgmt up
 sleep 1
-docker run -d --name=l3brdr2 --log-opt max-size=1m --net=container:l3brdr2-net --ip  --privileged -v /workspaces/rLab-eos/configs/L3/brdr2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l3brdr2 --log-opt max-size=1m --net=container:l3brdr2-net --ip  --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v /workspaces/rLab-eos/configs/L3/brdr2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Getting host11 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l3host11-net --net=none busybox /bin/init
 l3host11pid=$(docker inspect --format '{{.State.Pid}}' l3host11-net)
