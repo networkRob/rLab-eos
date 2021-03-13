@@ -1,10 +1,8 @@
-import csv
 import requests
 from getpass import getpass
 import json
 import urllib3
 import yaml
-import random
 import pprint
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
