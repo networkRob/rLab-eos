@@ -83,10 +83,10 @@ interface Management1
    ip address 192.168.50.231/24
 !
 interface Vlan12
-   ip address virtual 192.168.12.1
+   ip address virtual 192.168.12.1/24
 !
 interface Vlan13
-   ip address virtual 192.168.13.1
+   ip address virtual 192.168.13.1/24
 !
 interface Vlan4093
    ip address 10.0.253.4/31
