@@ -15,7 +15,7 @@ To run the network topology on a container host machine, you can leverage the fo
 https://github.com/networkRob/rLab-ansibleBuilds
 
 #### NOTE:
-To be able to run MLAG and dot1q, use the 4.23.1F release for cEOS-Lab.
+To be able to run MLAG and dot1q, use the 4.23.1F or later release for cEOS-Lab.
 
 #### Topology File Format
 There are some required fields to be specified in the topology files.  See the examples listed in the `topologies/` directory.  The required parameters are:
