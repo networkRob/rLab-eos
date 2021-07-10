@@ -6,6 +6,8 @@ topology:
 infra:
   bridge: vmgmt
   gateway: 192.168.50.1
+  username: arista
+  password: arista123
 images:
   ceos: 4.25.0F
   host: 0.5

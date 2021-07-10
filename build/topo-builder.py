@@ -198,6 +198,7 @@ ip route 0.0.0.0/0 {1}
 management api http-commands
    no shutdown
 !
+{2}
     """
     BASE_STARTUP = """
 hostname {0}
@@ -280,7 +281,12 @@ hostname {0}
             _tmp_startup = []
             _tmp_startup.append(BASE_STARTUP.format(CEOS[_node].ceos_name))
             if mgmt_network:
-                _tmp_startup.append(BASE_MGMT.format(CEOS[_node].ip, topo_yaml['infra']['gateway']))
+                # Create username command if username and password are provided
+                if 'username' in topo_yaml['infra'] and 'password' in topo_yaml['infra']:
+                    _username_create = 'username {0} secret 0 {1}'.format(topo_yaml['infra']['username'],topo_yaml['infra']['password'])
+                    _tmp_startup.append(BASE_MGMT.format(CEOS[_node].ip, topo_yaml['infra']['gateway'],_username_create))
+                else:
+                    _tmp_startup.append(BASE_MGMT.format(CEOS[_node].ip, topo_yaml['infra']['gateway'],''))
                 if 'cvpaddress' and 'cvp-key' in topo_yaml['topology']:
                     _tmp_startup.append(BASE_TERMINATTR.format(topo_yaml['topology']['cvpaddress'], topo_yaml['topology']['cvp-key']))
             create_output.append('echo "{0}" > {1}/{2}/{3}/startup-config\n'.format(''.join(_tmp_startup), CONFIGS, _tag, _node))

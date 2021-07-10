@@ -1,0 +1,493 @@
+images:
+  ceos: 4.25.0F
+infra:
+  bridge: vmgmt
+  gateway: 10.255.255.1
+  password: arista123
+  username: cvpadmin
+nodes:
+  Core1:
+    mac: 00:1c:73:c5:c6:020
+    neighbors:
+    - neighborDevice: DCA-Agg1
+      neighborPort: Ethernet1
+      port: Ethernet1
+    - neighborDevice: DCA-Agg2
+      neighborPort: Ethernet1
+      port: Ethernet2
+    - neighborDevice: DCB-Agg1
+      neighborPort: Ethernet1
+      port: Ethernet3
+    - neighborDevice: DCB-Agg2
+      neighborPort: Ethernet1
+      port: Ethernet4
+    - neighborDevice: Core2
+      neighborPort: Ethernet5
+      port: Ethernet5
+  Core2:
+    mac: 00:1c:73:c5:c6:021
+    neighbors:
+    - neighborDevice: DCA-Agg1
+      neighborPort: Ethernet2
+      port: Ethernet1
+    - neighborDevice: DCA-Agg2
+      neighborPort: Ethernet2
+      port: Ethernet2
+    - neighborDevice: DCB-Agg1
+      neighborPort: Ethernet2
+      port: Ethernet3
+    - neighborDevice: DCB-Agg2
+      neighborPort: Ethernet2
+      port: Ethernet4
+    - neighborDevice: Core1
+      neighborPort: Ethernet5
+      port: Ethernet5
+  DCA-Agg1:
+    mac: 00:1c:73:c5:c6:08
+    neighbors:
+    - neighborDevice: Core1
+      neighborPort: Ethernet1
+      port: Ethernet1
+    - neighborDevice: Core2
+      neighborPort: Ethernet1
+      port: Ethernet2
+    - neighborDevice: DCA-LeafBLa
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCA-LeafBLb
+      neighborPort: Ethernet3
+      port: Ethernet4
+    - neighborDevice: DCA-Agg2
+      neighborPort: Ethernet5
+      port: Ethernet5
+  DCA-Agg2:
+    mac: 00:1c:73:c5:c6:09
+    neighbors:
+    - neighborDevice: Core1
+      neighborPort: Ethernet2
+      port: Ethernet1
+    - neighborDevice: Core2
+      neighborPort: Ethernet2
+      port: Ethernet2
+    - neighborDevice: DCA-LeafBLa
+      neighborPort: Ethernet4
+      port: Ethernet3
+    - neighborDevice: DCA-LeafBLb
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: DCA-Agg1
+      neighborPort: Ethernet5
+      port: Ethernet5
+  DCA-Leaf1a:
+    mac: 00:1c:73:c5:c6:02
+    neighbors:
+    - neighborDevice: DCA-Spine1
+      neighborPort: Ethernet1
+      port: Ethernet1
+    - neighborDevice: DCA-Spine2
+      neighborPort: Ethernet1
+      port: Ethernet2
+    - neighborDevice: DCA-Leaf1b
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCA-Leaf1b
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: HostA
+      neighborPort: Ethernet1
+      port: Ethernet5
+    - neighborDevice: HostG
+      neighborPort: Ethernet1
+      port: Ethernet6
+  DCA-Leaf1b:
+    mac: 00:1c:73:c5:c6:03
+    neighbors:
+    - neighborDevice: DCA-Spine1
+      neighborPort: Ethernet2
+      port: Ethernet1
+    - neighborDevice: DCA-Spine2
+      neighborPort: Ethernet2
+      port: Ethernet2
+    - neighborDevice: DCA-Leaf1a
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCA-Leaf1a
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: HostA
+      neighborPort: Ethernet2
+      port: Ethernet5
+    - neighborDevice: HostG
+      neighborPort: Ethernet2
+      port: Ethernet6
+  DCA-Leaf2a:
+    mac: 00:1c:73:c5:c6:04
+    neighbors:
+    - neighborDevice: DCA-Spine1
+      neighborPort: Ethernet3
+      port: Ethernet1
+    - neighborDevice: DCA-Spine2
+      neighborPort: Ethernet3
+      port: Ethernet2
+    - neighborDevice: DCA-Leaf2b
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCA-Leaf2b
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: HostB
+      neighborPort: Ethernet1
+      port: Ethernet5
+    - neighborDevice: HostH
+      neighborPort: Ethernet1
+      port: Ethernet6
+  DCA-Leaf2b:
+    mac: 00:1c:73:c5:c6:05
+    neighbors:
+    - neighborDevice: DCA-Spine1
+      neighborPort: Ethernet4
+      port: Ethernet1
+    - neighborDevice: DCA-Spine2
+      neighborPort: Ethernet4
+      port: Ethernet2
+    - neighborDevice: DCA-Leaf2a
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCA-Leaf2a
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: HostB
+      neighborPort: Ethernet2
+      port: Ethernet5
+    - neighborDevice: HostH
+      neighborPort: Ethernet2
+      port: Ethernet6
+  DCA-LeafBLa:
+    mac: 00:1c:73:c5:c6:06
+    neighbors:
+    - neighborDevice: DCA-Spine1
+      neighborPort: Ethernet5
+      port: Ethernet1
+    - neighborDevice: DCA-Spine2
+      neighborPort: Ethernet5
+      port: Ethernet2
+    - neighborDevice: DCA-Agg1
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCA-Agg2
+      neighborPort: Ethernet3
+      port: Ethernet4
+    - neighborDevice: DCA-LeafBLb
+      neighborPort: Ethernet5
+      port: Ethernet5
+    - neighborDevice: DCA-LeafBLb
+      neighborPort: Ethernet6
+      port: Ethernet6
+    - neighborDevice: HostC
+      neighborPort: Ethernet1
+      port: Ethernet7
+  DCA-LeafBLb:
+    mac: 00:1c:73:c5:c6:07
+    neighbors:
+    - neighborDevice: DCA-Spine1
+      neighborPort: Ethernet6
+      port: Ethernet1
+    - neighborDevice: DCA-Spine2
+      neighborPort: Ethernet6
+      port: Ethernet2
+    - neighborDevice: DCA-Agg1
+      neighborPort: Ethernet4
+      port: Ethernet3
+    - neighborDevice: DCA-Agg2
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: DCA-LeafBLa
+      neighborPort: Ethernet5
+      port: Ethernet5
+    - neighborDevice: DCA-LeafBLa
+      neighborPort: Ethernet6
+      port: Ethernet6
+    - neighborDevice: HostC
+      neighborPort: Ethernet2
+      port: Ethernet7
+  DCA-Spine1:
+    mac: 00:1c:73:c5:c6:00
+    neighbors:
+    - neighborDevice: DCA-Leaf1a
+      neighborPort: Ethernet1
+      port: Ethernet1
+    - neighborDevice: DCA-Leaf1b
+      neighborPort: Ethernet1
+      port: Ethernet2
+    - neighborDevice: DCA-Leaf2a
+      neighborPort: Ethernet1
+      port: Ethernet3
+    - neighborDevice: DCA-Leaf2b
+      neighborPort: Ethernet1
+      port: Ethernet4
+    - neighborDevice: DCA-LeafBLa
+      neighborPort: Ethernet1
+      port: Ethernet5
+    - neighborDevice: DCA-LeafBLb
+      neighborPort: Ethernet1
+      port: Ethernet6
+    - neighborDevice: DCA-Spine2
+      neighborPort: Ethernet7
+      port: Ethernet7
+    - neighborDevice: DCA-Spine2
+      neighborPort: Ethernet8
+      port: Ethernet8
+  DCA-Spine2:
+    mac: 00:1c:73:c5:c6:01
+    neighbors:
+    - neighborDevice: DCA-Leaf1a
+      neighborPort: Ethernet2
+      port: Ethernet1
+    - neighborDevice: DCA-Leaf1b
+      neighborPort: Ethernet2
+      port: Ethernet2
+    - neighborDevice: DCA-Leaf2a
+      neighborPort: Ethernet2
+      port: Ethernet3
+    - neighborDevice: DCA-Leaf2b
+      neighborPort: Ethernet2
+      port: Ethernet4
+    - neighborDevice: DCA-LeafBLa
+      neighborPort: Ethernet2
+      port: Ethernet5
+    - neighborDevice: DCA-LeafBLb
+      neighborPort: Ethernet2
+      port: Ethernet6
+    - neighborDevice: DCA-Spine1
+      neighborPort: Ethernet7
+      port: Ethernet7
+    - neighborDevice: DCA-Spine1
+      neighborPort: Ethernet8
+      port: Ethernet8
+  DCB-Agg1:
+    mac: 00:1c:73:c5:c6:018
+    neighbors:
+    - neighborDevice: Core1
+      neighborPort: Ethernet3
+      port: Ethernet1
+    - neighborDevice: Core2
+      neighborPort: Ethernet3
+      port: Ethernet2
+    - neighborDevice: DCB-LeafBLa
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCB-LeafBLb
+      neighborPort: Ethernet3
+      port: Ethernet4
+    - neighborDevice: DCB-Agg2
+      neighborPort: Ethernet5
+      port: Ethernet5
+  DCB-Agg2:
+    mac: 00:1c:73:c5:c6:019
+    neighbors:
+    - neighborDevice: Core1
+      neighborPort: Ethernet4
+      port: Ethernet1
+    - neighborDevice: Core2
+      neighborPort: Ethernet4
+      port: Ethernet2
+    - neighborDevice: DCB-LeafBLa
+      neighborPort: Ethernet4
+      port: Ethernet3
+    - neighborDevice: DCB-LeafBLb
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: DCB-Agg1
+      neighborPort: Ethernet5
+      port: Ethernet5
+  DCB-Leaf1a:
+    mac: 00:1c:73:c5:c6:012
+    neighbors:
+    - neighborDevice: DCB-Spine1
+      neighborPort: Ethernet1
+      port: Ethernet1
+    - neighborDevice: DCB-Spine2
+      neighborPort: Ethernet1
+      port: Ethernet2
+    - neighborDevice: DCB-Leaf1b
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCB-Leaf1b
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: HostD
+      neighborPort: Ethernet1
+      port: Ethernet5
+    - neighborDevice: HostI
+      neighborPort: Ethernet1
+      port: Ethernet6
+  DCB-Leaf1b:
+    mac: 00:1c:73:c5:c6:013
+    neighbors:
+    - neighborDevice: DCB-Spine1
+      neighborPort: Ethernet2
+      port: Ethernet1
+    - neighborDevice: DCB-Spine2
+      neighborPort: Ethernet2
+      port: Ethernet2
+    - neighborDevice: DCB-Leaf1a
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCB-Leaf1a
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: HostD
+      neighborPort: Ethernet2
+      port: Ethernet5
+    - neighborDevice: HostI
+      neighborPort: Ethernet2
+      port: Ethernet6
+  DCB-Leaf2a:
+    mac: 00:1c:73:c5:c6:014
+    neighbors:
+    - neighborDevice: DCB-Spine1
+      neighborPort: Ethernet3
+      port: Ethernet1
+    - neighborDevice: DCB-Spine2
+      neighborPort: Ethernet3
+      port: Ethernet2
+    - neighborDevice: DCB-Leaf2b
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCB-Leaf2b
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: HostE
+      neighborPort: Ethernet1
+      port: Ethernet5
+    - neighborDevice: HostJ
+      neighborPort: Ethernet1
+      port: Ethernet6
+  DCB-Leaf2b:
+    mac: 00:1c:73:c5:c6:015
+    neighbors:
+    - neighborDevice: DCB-Spine1
+      neighborPort: Ethernet4
+      port: Ethernet1
+    - neighborDevice: DCB-Spine2
+      neighborPort: Ethernet4
+      port: Ethernet2
+    - neighborDevice: DCB-Leaf2a
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCB-Leaf2a
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: HostE
+      neighborPort: Ethernet2
+      port: Ethernet5
+    - neighborDevice: HostJ
+      neighborPort: Ethernet2
+      port: Ethernet6
+  DCB-LeafBLa:
+    mac: 00:1c:73:c5:c6:016
+    neighbors:
+    - neighborDevice: DCB-Spine1
+      neighborPort: Ethernet5
+      port: Ethernet1
+    - neighborDevice: DCB-Spine2
+      neighborPort: Ethernet5
+      port: Ethernet2
+    - neighborDevice: DCB-Agg1
+      neighborPort: Ethernet3
+      port: Ethernet3
+    - neighborDevice: DCB-Agg2
+      neighborPort: Ethernet3
+      port: Ethernet4
+    - neighborDevice: DCB-LeafBLb
+      neighborPort: Ethernet5
+      port: Ethernet5
+    - neighborDevice: DCB-LeafBLb
+      neighborPort: Ethernet6
+      port: Ethernet6
+    - neighborDevice: HostF
+      neighborPort: Ethernet1
+      port: Ethernet7
+  DCB-LeafBLb:
+    mac: 00:1c:73:c5:c6:017
+    neighbors:
+    - neighborDevice: DCB-Spine1
+      neighborPort: Ethernet6
+      port: Ethernet1
+    - neighborDevice: DCB-Spine2
+      neighborPort: Ethernet6
+      port: Ethernet2
+    - neighborDevice: DCB-Agg1
+      neighborPort: Ethernet4
+      port: Ethernet3
+    - neighborDevice: DCB-Agg2
+      neighborPort: Ethernet4
+      port: Ethernet4
+    - neighborDevice: DCB-LeafBLa
+      neighborPort: Ethernet5
+      port: Ethernet5
+    - neighborDevice: DCB-LeafBLa
+      neighborPort: Ethernet6
+      port: Ethernet6
+    - neighborDevice: HostF
+      neighborPort: Ethernet2
+      port: Ethernet7
+  DCB-Spine1:
+    mac: 00:1c:73:c5:c6:010
+    neighbors:
+    - neighborDevice: DCB-Leaf1a
+      neighborPort: Ethernet1
+      port: Ethernet1
+    - neighborDevice: DCB-Leaf1b
+      neighborPort: Ethernet1
+      port: Ethernet2
+    - neighborDevice: DCB-Leaf2a
+      neighborPort: Ethernet1
+      port: Ethernet3
+    - neighborDevice: DCB-Leaf2b
+      neighborPort: Ethernet1
+      port: Ethernet4
+    - neighborDevice: DCB-LeafBLa
+      neighborPort: Ethernet1
+      port: Ethernet5
+    - neighborDevice: DCB-LeafBLb
+      neighborPort: Ethernet1
+      port: Ethernet6
+    - neighborDevice: DCB-Spine2
+      neighborPort: Ethernet7
+      port: Ethernet7
+    - neighborDevice: DCB-Spine2
+      neighborPort: Ethernet8
+      port: Ethernet8
+  DCB-Spine2:
+    mac: 00:1c:73:c5:c6:011
+    neighbors:
+    - neighborDevice: DCB-Leaf1a
+      neighborPort: Ethernet2
+      port: Ethernet1
+    - neighborDevice: DCB-Leaf1b
+      neighborPort: Ethernet2
+      port: Ethernet2
+    - neighborDevice: DCB-Leaf2a
+      neighborPort: Ethernet2
+      port: Ethernet3
+    - neighborDevice: DCB-Leaf2b
+      neighborPort: Ethernet2
+      port: Ethernet4
+    - neighborDevice: DCB-LeafBLa
+      neighborPort: Ethernet2
+      port: Ethernet5
+    - neighborDevice: DCB-LeafBLb
+      neighborPort: Ethernet2
+      port: Ethernet6
+    - neighborDevice: DCB-Spine1
+      neighborPort: Ethernet7
+      port: Ethernet7
+    - neighborDevice: DCB-Spine1
+      neighborPort: Ethernet8
+      port: Ethernet8
+topology:
+  cvp-key: arista
+  cvpaddress: 10.0.0.32
+  name: test
+  vforward: 1
