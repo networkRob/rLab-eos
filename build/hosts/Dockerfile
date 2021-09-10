@@ -4,7 +4,7 @@ ENV container docker
 
 RUN yum update -y
 
-RUN yum install -y net-tools iperf3 vim lldpad
+RUN yum install -y net-tools iperf3 vim lldpad nmap
 
 COPY iperf3client.sh /usr/bin/iperf3client
 
