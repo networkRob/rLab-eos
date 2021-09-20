@@ -101,6 +101,8 @@ def parseNames(devName):
             alpha += char
         elif char.isdigit():
             numer += char
+        elif char == "/":
+            numer += "_"
     if 'ethernet'in devName.lower():
         dev_name = 'et{0}'.format(numer)
     else:
