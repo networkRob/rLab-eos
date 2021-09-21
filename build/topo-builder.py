@@ -202,6 +202,10 @@ management api http-commands
 !
     """
     BASE_STARTUP = """
+service routing protocols model multi-agent
+!
+schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
+!
 hostname {0}
 !
     """
