@@ -22,7 +22,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 RUN pip install --upgrade pip
 
-RUN pip install autopep8 ruamel.yaml pylint
+RUN pip install autopep8 ruamel.yaml pylint graphviz pydot jsonrpclib
 
 # Install GitHub CLI
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 from graphviz import Digraph
 import json
 from os import getcwd
