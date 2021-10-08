@@ -12,7 +12,22 @@ To build a new topology, the following files/data structures need to be created.
 The Following Python package libraries need to be loaded on the machine that will run `topo-builder.py`:
 - ruamel.yaml
 - graphviz
+- pydot
 - jsonrpclib
+
+To install the Python package libraries enter the command:
+
+pip3 install -r requirements.txt
+
+Note: The machine that will run `topo-builder.py` must also have the graphviz OS package installed.
+
+On Debian:
+
+apt install graphviz
+
+On Fedora and Redhat variants:
+
+yum install graphviz
 
 To run the network topology on a container host machine, you can leverage the following cEOS_host_build Ansible-Playbook to build the environment.  This will install all necessary software to run cEOS-lab. It is located in the following repo:
 

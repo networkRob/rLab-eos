@@ -3,7 +3,8 @@ FROM python:3.8
 RUN apt update \
     && apt install -y sudo vim git \
     zip cloc zsh zsh-syntax-highlighting  \
-    zsh-doc less software-properties-common
+    zsh-doc less software-properties-common \
+    graphviz
 
 ARG USERNAME=dev
 ARG USER_UID=1000
@@ -29,7 +30,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
 
 RUN apt-add-repository https://cli.github.com/packages
 
-RUN apt update && apt install -y gh graphviz
+RUN apt update && apt install -y gh
 
 USER $USERNAME
 
