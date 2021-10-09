@@ -3,7 +3,8 @@ FROM python:3.8
 RUN apt update \
     && apt install -y sudo vim git \
     zip cloc zsh zsh-syntax-highlighting  \
-    zsh-doc less software-properties-common
+    zsh-doc less software-properties-common \
+    graphviz
 
 ARG USERNAME=dev
 ARG USER_UID=1000
@@ -22,7 +23,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 RUN pip install --upgrade pip
 
-RUN pip install autopep8 ruamel.yaml pylint
+RUN pip install autopep8 ruamel.yaml pylint graphviz pydot jsonrpclib
 
 # Install GitHub CLI
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
