@@ -2,6 +2,30 @@
 
 This repo will contain the data models and configs to build different toplogies to run EOS as a container.
 
+### Requirements
+To run the network topology on a container host machine, there are a few requirements and tested software versions that are known to work.
+
+#### Distribution Testing
+- CentOS7 (Docker)
+- Fedora 34/35 (Docker, Podman)
+
+#### Container Runtimes
+- Docker >= 20.10
+- Podman >= 3.4
+
+#### Linux Packages
+- bridge-utils
+- net-tools
+- graphviz
+- Docker or Podman
+- python3-pip
+
+#### Python3 Packages
+- ruamel.yaml
+- graphviz
+- pydot
+- jsonrpclib
+
 ### Getting Started
 To build a new topology, the following files/data structures need to be created.
 - `topologies/{name}.yaml` - This file is leveraged by `build/topo-builder.py` to create the necessary commands to build the topology.
@@ -9,29 +33,13 @@ To build a new topology, the following files/data structures need to be created.
 - `build/topo-build.sh` This is a wrapper script that calls both `build/topo-builder.py` and `build/yamlviz.py`
 - `configs/{topo}/{device}` - This directory structure is were any files you want to be loaded into cEOS-lab's `/mnt/flash` should be loaded to.  Scripts, startup-config etc.
 
-The Following Python package libraries need to be loaded on the machine that will run `topo-builder.py`:
-- ruamel.yaml
-- graphviz
-- pydot
-- jsonrpclib
 
-To install the Python package libraries enter the command:
+To install the necessary packages and libraries enter the following commands: (Fedora example below)
 
+```
+sudo dnf install bridge-utils net-tools graphviz docker podman python3-pip
 pip3 install -r requirements.txt
-
-Note: The machine that will run `topo-builder.py` must also have the graphviz OS package installed.
-
-On Debian:
-
-apt install graphviz
-
-On Fedora and Redhat variants:
-
-yum install graphviz
-
-To run the network topology on a container host machine, you can leverage the following cEOS_host_build Ansible-Playbook to build the environment.  This will install all necessary software to run cEOS-lab. It is located in the following repo:
-
-https://github.com/networkRob/rLab-ansibleBuilds
+```
 
 #### NOTE:
 To be able to run MLAG and dot1q, use the 4.23.1F or newer release of cEOS-Lab.
@@ -94,17 +102,19 @@ commands:
 
 Clone this repo to your container host node and enter the main directory for this repo.
 
-Here are the steps required to get it running for the first time.
+Here are the steps required to get it running for the first time. Examples for both Docker and Podman are given.
 
 1. Import a cEOS-lab container archive:
 ```
 docker import  --change 'VOLUME /mnt/flash/' cEOS-lab.tar.xz ceosimage:{ceosimage_tag}
+sudo podman import  --change 'VOLUME /mnt/flash/' cEOS-lab.tar.xz ceosimage:{ceosimage_tag}
 ```
 {ceosimage_tag} = tag for the image, ie `4.23.1F`
 
 2. Build and tag the host node:
 ```
 docker build -t chost:{chostimage_tag} build/hosts/.
+sudo podman build -t chost:{chostimage_tag} build/hosts/.
 ```
 {chostimage_tag} = tag for the image, ie `0.5`
 
@@ -122,6 +132,18 @@ Note: `topo-build.sh` is a wrapper shell script that calls both `topo-builder.py
 ```
 build/topo-builder.py -t {topo}
 ```
+
+To update the container runtime (Docker is default) run with the `-r` flag:
+
+{runtime} is the container runtime options. Available options are: `docker` or `podman`
+```
+./topo-build.sh -t {topo} -r {runtime}
+```
+or
+```
+build/topo-builder.py -t {topo} -r {runtime}
+```
+
 To create the necessary scripts and create a bare startup-configuration:
 ```
 ./topo-build.sh -t {topo} -s
@@ -149,6 +171,7 @@ bash scripts/L2/Create.sh
 cEOS-Lab nodes do require CPU to get started, but once running CPU utilization will drop down.  Memory utilization for a cEOS-lab instance is anywhere from 300-500 MB.  Make sure your host node is sized appropriately.
 
 Use the following commands to view running containers, stats and connecting to a container.
+#### Docker Example
 ```
 # View running containers
 docker ps
@@ -167,4 +190,25 @@ docker exec -it l2leaf1 Cli -p 15
 
 # Connect to a host instance.
 docker exec -it l2host11 bash
+```
+
+#### Podman Example
+```
+# View running containers
+sudo podman ps
+
+# View running and stopped containers
+sudo podman ps -a
+
+# View stats of the containers one-time
+sudo podman stats --no-stream
+
+# View a continuous update for container stats. Stop with Ctrl + C
+sudo podman stats
+
+# Connect to a cEOS-Lab instance.
+sudo podman exec -it l2leaf1 Cli -p 15
+
+# Connect to a host instance.
+sudo podman exec -it l2host11 bash
 ```
