@@ -6,12 +6,16 @@ This repo will contain the data models and configs to build different toplogies 
 To run the network topology on a container host machine, there are a few requirements and tested software versions that are known to work.
 
 #### Distribution Testing
-- CentOS7 (Docker)
-- Fedora 34/35 (Docker, Podman)
+| Distro    | Version | Runtimes        |
+| --------- | ------- | --------------- |
+| CentOS    | 7       | Docker          |
+| Fedora    | >=34    | Docker, Podman  |
 
 #### Container Runtimes
-- Docker >= 20.10
-- Podman >= 3.4
+| Package   | Version   |
+| --------- | --------- |
+| Docker    | >= 20.10  |
+| Podman    | >= 3.4    |
 
 #### Linux Packages
 - bridge-utils
