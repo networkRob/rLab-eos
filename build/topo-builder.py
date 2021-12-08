@@ -301,22 +301,22 @@ hostname {0}
             create_output.append('echo "{0}" > {1}/{2}/{3}/startup-config\n'.format(''.join(_tmp_startup), CONFIGS, _tag, _node))
         # Creating anchor containers
         create_output.append("# Getting {0} nodes plumbing\n".format(_node))
-        create_output.append(f"docker run -d --restart=always --log-opt max-size=10k --name={CEOS[_node].ceos_name}-net --net=none busybox /bin/init\n")
-        startup_output.append(f"docker start {CEOS[_node].ceos_name}-net\n")
-        create_output.append(f"{CEOS[_node].ceos_name}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
+        create_output.append(f"{cnt_cmd} run -d --restart=always --log-opt max-size=10k --name={CEOS[_node].ceos_name}-net --net=none busybox /bin/init\n")
+        startup_output.append(f"{cnt_cmd} start {CEOS[_node].ceos_name}-net\n")
+        create_output.append(f"{CEOS[_node].ceos_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
         create_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].ceos_name}\n")
         # Stop cEOS containers
-        startup_output.append(f"docker stop {CEOS[_node].ceos_name}\n")
-        stop_output.append(f"docker stop {CEOS[_node].ceos_name}\n")
-        stop_output.append(f"docker stop {CEOS[_node].ceos_name}-net\n")
-        delete_output.append(f"docker stop {CEOS[_node].ceos_name}\n")
-        delete_output.append(f"docker stop {CEOS[_node].ceos_name}-net\n")
+        startup_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}\n")
+        stop_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}\n")
+        stop_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}-net\n")
+        delete_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}\n")
+        delete_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}-net\n")
         # Remove cEOS containers
-        startup_output.append(f"docker rm {CEOS[_node].ceos_name}\n")
-        delete_output.append(f"docker rm {CEOS[_node].ceos_name}\n")
-        delete_output.append(f"docker rm {CEOS[_node].ceos_name}-net\n")
+        startup_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}\n")
+        delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}\n")
+        delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}-net\n")
         delete_net_output.append(f"sudo rm -rf /var/run/netns/{CEOS[_node].ceos_name}\n")
-        startup_output.append(f"{CEOS[_node].ceos_name}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
+        startup_output.append(f"{CEOS[_node].ceos_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
         startup_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].ceos_name}\n")
         create_output.append(f"# Connecting cEOS containers together\n")
         # Output veth commands
@@ -336,36 +336,42 @@ hostname {0}
             create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
             create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
             create_output.append("sleep 1\n")
-            create_output.append(f"docker run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            if container_runtime == "docker":
+                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            else:
+                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             startup_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
             startup_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].ceos_name}-mgmt\n")
             startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
             startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
             startup_output.append("sleep 1\n")
-            startup_output.append(f"docker run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            if container_runtime == "docker":
+                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            else:
+                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
         else:
             create_output.append("sleep 1\n")
-            create_output.append(f"docker run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             startup_output.append("sleep 1\n")
-            startup_output.append(f"docker run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
     # Create initial host anchor containers
     for _host in HOSTS:
         create_output.append(f"# Getting {_host} nodes plumbing\n")
-        create_output.append(f"docker run -d --restart=always --log-opt max-size=10k --name={HOSTS[_host].c_name}-net --net=none busybox /bin/init\n")
-        startup_output.append(f"docker start {HOSTS[_host].c_name}-net\n")
-        create_output.append(f"{HOSTS[_host].c_name}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
+        create_output.append(f"{cnt_cmd} run -d --restart=always --log-opt max-size=10k --name={HOSTS[_host].c_name}-net --net=none busybox /bin/init\n")
+        startup_output.append(f"{cnt_cmd} start {HOSTS[_host].c_name}-net\n")
+        create_output.append(f"{HOSTS[_host].c_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
         create_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].c_name}\n")
         # Stop host containers
-        startup_output.append(f"docker stop {HOSTS[_host].c_name}\n")
-        stop_output.append(f"docker stop {HOSTS[_host].c_name}\n")
-        stop_output.append(f"docker stop {HOSTS[_host].c_name}-net\n")
-        delete_output.append(f"docker stop {HOSTS[_host].c_name}\n")
-        delete_output.append(f"docker stop {HOSTS[_host].c_name}-net\n")
+        startup_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}\n")
+        stop_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}\n")
+        stop_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}-net\n")
+        delete_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}\n")
+        delete_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}-net\n")
         # Remove host containers
-        startup_output.append(f"docker rm {HOSTS[_host].c_name}\n")
-        delete_output.append(f"docker rm {HOSTS[_host].c_name}\n")
-        delete_output.append(f"docker rm {HOSTS[_host].c_name}-net\n")
-        startup_output.append(f"{HOSTS[_host].c_name}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
+        startup_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}\n")
+        delete_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}\n")
+        delete_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}-net\n")
+        startup_output.append(f"{HOSTS[_host].c_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
         startup_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].c_name}\n")
         create_output.append("# Connecting host containers together\n")
         # Output veth commands
@@ -378,21 +384,21 @@ hostname {0}
                 create_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], HOSTS[_host].c_name, _tmp_intf['port']))
                 startup_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], HOSTS[_host].c_name, _tmp_intf['port']))
         create_output.append("sleep 1\n")
-        create_output.append(f"docker run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} chost:{HOSTS[_host].image} ipnet\n")
+        create_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} chost:{HOSTS[_host].image} ipnet\n")
         startup_output.append("sleep 1\n")
-        startup_output.append(f"docker run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} chost:{HOSTS[_host].image} ipnet\n")
+        startup_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} chost:{HOSTS[_host].image} ipnet\n")
     # Check for iPerf3 commands
     if topo_yaml['iperf']:
         _iperf = topo_yaml['iperf']
         _port = _iperf['port']
         _brate = _iperf['brate']
         for _server in _iperf['servers']:
-            create_output.append(f"docker exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
-            startup_output.append(f"docker exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
+            create_output.append(f"{cnt_cmd} exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
+            startup_output.append(f"{cnt_cmd} exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
         for _client in _iperf['clients']:
             _target = topo_yaml['hosts'][_client['target']]['ipaddress']
-            create_output.append(f"docker exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
-            startup_output.append(f"docker exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
+            create_output.append(f"{cnt_cmd} exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
+            startup_output.append(f"{cnt_cmd} exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
     # Create the initial deployment files
     with open(CEOS_SCRIPTS + '/{0}/Create.sh'.format(_tag), 'w') as cout:
         for _create in create_output:
