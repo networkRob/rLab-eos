@@ -25,70 +25,70 @@ sudo ip link delete l3leaf31et1 type veth peer name l3leaf32et1
 sudo ip link delete l3leaf31et4 type veth peer name l3host31et0
 sudo ip link delete l3leaf31et5 type veth peer name l3host32et0
 sudo ip link delete l3brdr1et1 type veth peer name l3brdr2et1
-docker stop l3spine1
-docker stop l3spine1-net
-docker rm l3spine1
-docker rm l3spine1-net
-docker stop l3spine2
-docker stop l3spine2-net
-docker rm l3spine2
-docker rm l3spine2-net
-docker stop l3leaf11
-docker stop l3leaf11-net
-docker rm l3leaf11
-docker rm l3leaf11-net
-docker stop l3leaf12
-docker stop l3leaf12-net
-docker rm l3leaf12
-docker rm l3leaf12-net
-docker stop l3leaf21
-docker stop l3leaf21-net
-docker rm l3leaf21
-docker rm l3leaf21-net
-docker stop l3leaf22
-docker stop l3leaf22-net
-docker rm l3leaf22
-docker rm l3leaf22-net
-docker stop l3leaf31
-docker stop l3leaf31-net
-docker rm l3leaf31
-docker rm l3leaf31-net
-docker stop l3leaf32
-docker stop l3leaf32-net
-docker rm l3leaf32
-docker rm l3leaf32-net
-docker stop l3brdr1
-docker stop l3brdr1-net
-docker rm l3brdr1
-docker rm l3brdr1-net
-docker stop l3brdr2
-docker stop l3brdr2-net
-docker rm l3brdr2
-docker rm l3brdr2-net
-docker stop l3host11
-docker stop l3host11-net
-docker rm l3host11
-docker rm l3host11-net
-docker stop l3host12
-docker stop l3host12-net
-docker rm l3host12
-docker rm l3host12-net
-docker stop l3host21
-docker stop l3host21-net
-docker rm l3host21
-docker rm l3host21-net
-docker stop l3host22
-docker stop l3host22-net
-docker rm l3host22
-docker rm l3host22-net
-docker stop l3host31
-docker stop l3host31-net
-docker rm l3host31
-docker rm l3host31-net
-docker stop l3host32
-docker stop l3host32-net
-docker rm l3host32
-docker rm l3host32-net
+sudo podman stop l3spine1
+sudo podman stop l3spine1-net
+sudo podman rm l3spine1
+sudo podman rm l3spine1-net
+sudo podman stop l3spine2
+sudo podman stop l3spine2-net
+sudo podman rm l3spine2
+sudo podman rm l3spine2-net
+sudo podman stop l3leaf11
+sudo podman stop l3leaf11-net
+sudo podman rm l3leaf11
+sudo podman rm l3leaf11-net
+sudo podman stop l3leaf12
+sudo podman stop l3leaf12-net
+sudo podman rm l3leaf12
+sudo podman rm l3leaf12-net
+sudo podman stop l3leaf21
+sudo podman stop l3leaf21-net
+sudo podman rm l3leaf21
+sudo podman rm l3leaf21-net
+sudo podman stop l3leaf22
+sudo podman stop l3leaf22-net
+sudo podman rm l3leaf22
+sudo podman rm l3leaf22-net
+sudo podman stop l3leaf31
+sudo podman stop l3leaf31-net
+sudo podman rm l3leaf31
+sudo podman rm l3leaf31-net
+sudo podman stop l3leaf32
+sudo podman stop l3leaf32-net
+sudo podman rm l3leaf32
+sudo podman rm l3leaf32-net
+sudo podman stop l3brdr1
+sudo podman stop l3brdr1-net
+sudo podman rm l3brdr1
+sudo podman rm l3brdr1-net
+sudo podman stop l3brdr2
+sudo podman stop l3brdr2-net
+sudo podman rm l3brdr2
+sudo podman rm l3brdr2-net
+sudo podman stop l3host11
+sudo podman stop l3host11-net
+sudo podman rm l3host11
+sudo podman rm l3host11-net
+sudo podman stop l3host12
+sudo podman stop l3host12-net
+sudo podman rm l3host12
+sudo podman rm l3host12-net
+sudo podman stop l3host21
+sudo podman stop l3host21-net
+sudo podman rm l3host21
+sudo podman rm l3host21-net
+sudo podman stop l3host22
+sudo podman stop l3host22-net
+sudo podman rm l3host22
+sudo podman rm l3host22-net
+sudo podman stop l3host31
+sudo podman stop l3host31-net
+sudo podman rm l3host31
+sudo podman rm l3host31-net
+sudo podman stop l3host32
+sudo podman stop l3host32-net
+sudo podman rm l3host32
+sudo podman rm l3host32-net
 sudo ip netns delete L3
 sudo rm -rf /var/run/netns/l3spine1
 sudo rm -rf /var/run/netns/l3spine2
