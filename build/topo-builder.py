@@ -173,6 +173,7 @@ def main(args):
     stop_output = []
     delete_output = []
     delete_net_output = []
+    container_runtime = args.runtime.lower()
     topo_yaml = openTopo(args.topo)
     create_startup = args.startup
     ceos_image = topo_yaml['images']['ceos']
@@ -209,6 +210,14 @@ schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-s
 hostname {0}
 !
     """
+    # Perform check on Container Runtime
+    if container_runtime == "docker":
+        pS("INFO", "Docker will be orchestrating the cEOS topology")
+        cnt_cmd = "docker"
+    else:
+        pS("INFO", "Podman will be orchestrating the cEOS topology")
+        cnt_cmd = "sudo podman"
+
     if create_startup:
         pS("INFO", "Bare Startup config will be created for all cEOS nodes")
     # Check for mgmt Bridge
@@ -249,40 +258,40 @@ hostname {0}
     create_output.append("#!/bin/bash\n")
     create_output.append(NOTIFY_ADJUST)
     # Check for container images are present
-    create_output.append("if [ \"$(docker image ls | grep ceosimage | grep -c {0})\" == 0 ]\n".format(ceos_image))
-    create_output.append("then\n    echo \"Docker image not found for ceosimage:{0}, please build it first.\"\n    exit\nfi\n".format(ceos_image))
-    create_output.append("if [ \"$(docker image ls | grep chost | grep -c {0})\" == 0 ]\n".format(host_image))
-    create_output.append("then\n    echo \"Docker image not found for chost:{0}, please build it first.\"\n    exit\nfi\n".format(host_image))
-    create_output.append("sudo ip netns add {0}\n".format(_tag))
+    create_output.append(f"if [ \"$({cnt_cmd} image ls | grep ceosimage | grep -c {ceos_image})\" == 0 ]\n")
+    create_output.append(f"then\n    echo \"{container_runtime.capitalize()} image not found for ceosimage:{ceos_image}, please build it first.\"\n    exit\nfi\n")
+    create_output.append(f"if [ \"$({cnt_cmd} image ls | grep chost | grep -c {host_image})\" == 0 ]\n")
+    create_output.append(f"then\n    echo \"{container_runtime.capitalize()} image not found for chost:{host_image}, please build it first.\"\n    exit\nfi\n")
+    create_output.append(f"sudo ip netns add {_tag}\n")
     startup_output.append("#!/bin/bash\n")
     startup_output.append(NOTIFY_ADJUST)
     stop_output.append("#!/bin/bash\n")
     delete_output.append("#!/bin/bash\n")
-    startup_output.append("sudo ip netns add {0}\n".format(_tag))
-    delete_net_output.append("sudo ip netns delete {0}\n".format(_tag))
+    startup_output.append(f"sudo ip netns add {_tag}\n")
+    delete_net_output.append(f"sudo ip netns delete {_tag}\n")
     # Get the veths created
     create_output.append("# Creating veths\n")
     for _veth in VETH_PAIRS:
         _v1, _v2 = _veth.split("-")
-        create_output.append("sudo ip link add {0} type veth peer name {1}\n".format(_v1, _v2))
-        startup_output.append("sudo ip link add {0} type veth peer name {1}\n".format(_v1, _v2))
-        delete_output.append("sudo ip link delete {0} type veth peer name {1}\n".format(_v1, _v2))
+        create_output.append(f"sudo ip link add {_v1} type veth peer name {_v2}\n")
+        startup_output.append(f"sudo ip link add {_v1} type veth peer name {_v2}\n")
+        delete_output.append(f"sudo ip link delete {_v1} type veth peer name {_v2}\n")
     create_output.append("#\n#\n# Creating anchor containers\n#\n")
     # Create initial cEOS anchor containers
     create_output.append("# Checking to make sure topo config directory exists\n")
-    create_output.append('if ! [ -d "{0}/{1}" ]; then mkdir {0}/{1}; fi\n'.format(CONFIGS, _tag))
+    create_output.append(f'if ! [ -d "{CONFIGS}/{_tag}" ]; then mkdir {CONFIGS}/{_tag}; fi\n')
     for _node in CEOS:
         # Add in code to perform check in configs directory and create a basis for ceos-config
         create_output.append("# Checking for configs directory for each cEOS node\n")
-        create_output.append('if ! [ -d "{0}/{1}/{2}" ]; then mkdir {0}/{1}/{2}; fi\n'.format(CONFIGS, _tag, _node))
+        create_output.append(f'if ! [ -d "{CONFIGS}/{_tag}/{_node}" ]; then mkdir {CONFIGS}/{_tag}/{_node}; fi\n')
         create_output.append("# Creating the ceos-config file.\n")
-        create_output.append('echo "SERIALNUMBER={0}" > {1}/{2}/{3}/ceos-config\n'.format(CEOS[_node].ceos_name, CONFIGS, _tag, _node))
-        create_output.append('echo "SYSTEMMACADDR={0}" >> {1}/{2}/{3}/ceos-config\n'.format(CEOS[_node].system_mac, CONFIGS, _tag, _node))
+        create_output.append(f'echo "SERIALNUMBER={CEOS[_node].ceos_name}" > {CONFIGS}/{_tag}/{_node}/ceos-config\n')
+        create_output.append(f'echo "SYSTEMMACADDR={CEOS[_node].system_mac}" >> {CONFIGS}/{_tag}/{_node}/ceos-config\n')
         if _tfa_version > 1:
             create_output.append('echo "TFA_VERSION={0}" >> {1}/{2}/{3}/ceos-config\n'.format(_tfa_version, CONFIGS, _tag, _node))
         # Perform check to see if a bare startup-config needs to be created
         if create_startup:
-            create_output.append("# Creating a bare startup configuration for {0}\n".format(_node))
+            create_output.append(f"# Creating a bare startup configuration for {_node}\n")
             _tmp_startup = []
             _tmp_startup.append(BASE_STARTUP.format(CEOS[_node].ceos_name))
             if mgmt_network:
@@ -292,98 +301,98 @@ hostname {0}
             create_output.append('echo "{0}" > {1}/{2}/{3}/startup-config\n'.format(''.join(_tmp_startup), CONFIGS, _tag, _node))
         # Creating anchor containers
         create_output.append("# Getting {0} nodes plumbing\n".format(_node))
-        create_output.append("docker run -d --restart=always --log-opt max-size=10k --name={0}-net --net=none busybox /bin/init\n".format(CEOS[_node].ceos_name))
-        startup_output.append("docker start {0}-net\n".format(CEOS[_node].ceos_name))
-        create_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(CEOS[_node].ceos_name))
-        create_output.append("sudo ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(CEOS[_node].ceos_name))
+        create_output.append(f"docker run -d --restart=always --log-opt max-size=10k --name={CEOS[_node].ceos_name}-net --net=none busybox /bin/init\n")
+        startup_output.append(f"docker start {CEOS[_node].ceos_name}-net\n")
+        create_output.append(f"{CEOS[_node].ceos_name}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
+        create_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].ceos_name}\n")
         # Stop cEOS containers
-        startup_output.append("docker stop {0}\n".format(CEOS[_node].ceos_name))
-        stop_output.append("docker stop {0}\n".format(CEOS[_node].ceos_name))
-        stop_output.append("docker stop {0}-net\n".format(CEOS[_node].ceos_name))
-        delete_output.append("docker stop {0}\n".format(CEOS[_node].ceos_name))
-        delete_output.append("docker stop {0}-net\n".format(CEOS[_node].ceos_name))
+        startup_output.append(f"docker stop {CEOS[_node].ceos_name}\n")
+        stop_output.append(f"docker stop {CEOS[_node].ceos_name}\n")
+        stop_output.append(f"docker stop {CEOS[_node].ceos_name}-net\n")
+        delete_output.append(f"docker stop {CEOS[_node].ceos_name}\n")
+        delete_output.append(f"docker stop {CEOS[_node].ceos_name}-net\n")
         # Remove cEOS containers
-        startup_output.append("docker rm {0}\n".format(CEOS[_node].ceos_name))
-        delete_output.append("docker rm {0}\n".format(CEOS[_node].ceos_name))
-        delete_output.append("docker rm {0}-net\n".format(CEOS[_node].ceos_name))
-        delete_net_output.append("sudo rm -rf /var/run/netns/{0}\n".format(CEOS[_node].ceos_name))
-        startup_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(CEOS[_node].ceos_name))
-        startup_output.append("sudo ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(CEOS[_node].ceos_name))
-        create_output.append("# Connecting cEOS containers together\n")
+        startup_output.append(f"docker rm {CEOS[_node].ceos_name}\n")
+        delete_output.append(f"docker rm {CEOS[_node].ceos_name}\n")
+        delete_output.append(f"docker rm {CEOS[_node].ceos_name}-net\n")
+        delete_net_output.append(f"sudo rm -rf /var/run/netns/{CEOS[_node].ceos_name}\n")
+        startup_output.append(f"{CEOS[_node].ceos_name}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
+        startup_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].ceos_name}\n")
+        create_output.append(f"# Connecting cEOS containers together\n")
         # Output veth commands
         for _intf in CEOS[_node].intfs:
             _tmp_intf = CEOS[_node].intfs[_intf]
             if _node in  _tmp_intf['veth'].split('-')[0]:
-                create_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[0], CEOS[_node].ceos_name, _tmp_intf['port']))
-                startup_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[0], CEOS[_node].ceos_name, _tmp_intf['port']))
+                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
+                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
             else:
-                create_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], CEOS[_node].ceos_name, _tmp_intf['port']))
-                startup_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], CEOS[_node].ceos_name, _tmp_intf['port']))
+                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
+                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
             # Perform check if mgmt network is available
         if mgmt_network:
             # Get MGMT VETHS
-            create_output.append("sudo ip link add {0}-eth0 type veth peer name {0}-mgmt\n".format(CEOS[_node].ceos_name))
-            create_output.append("sudo brctl addif {0} {1}-mgmt\n".format(mgmt_network, CEOS[_node].ceos_name))
-            create_output.append("sudo ip link set {0}-eth0 netns {0} name eth0 up\n".format(CEOS[_node].ceos_name))
-            create_output.append("sudo ip link set {0}-mgmt up\n".format(CEOS[_node].ceos_name))
+            create_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
+            create_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].ceos_name}-mgmt\n")
+            create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
+            create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
             create_output.append("sleep 1\n")
-            create_output.append("docker run -d --name={0} --log-opt max-size=1m --net=container:{0}-net --ip {1} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {2}/{4}/{5}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CEOS[_node].ip, CONFIGS, CEOS[_node].image, _tag, _node))
-            startup_output.append("sudo ip link add {0}-eth0 type veth peer name {0}-mgmt\n".format(CEOS[_node].ceos_name))
-            startup_output.append("sudo brctl addif {0} {1}-mgmt\n".format(mgmt_network, CEOS[_node].ceos_name))
-            startup_output.append("sudo ip link set {0}-eth0 netns {0} name eth0 up\n".format(CEOS[_node].ceos_name))
-            startup_output.append("sudo ip link set {0}-mgmt up\n".format(CEOS[_node].ceos_name))
+            create_output.append(f"docker run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            startup_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
+            startup_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].ceos_name}-mgmt\n")
+            startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
+            startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
             startup_output.append("sleep 1\n")
-            startup_output.append("docker run -d --name={0} --log-opt max-size=1m --net=container:{0}-net --ip {1} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {2}/{4}/{5}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{3} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CEOS[_node].ip, CONFIGS, CEOS[_node].image, _tag, _node))
+            startup_output.append(f"docker run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
         else:
             create_output.append("sleep 1\n")
-            create_output.append("docker run -d --name={0} --log-opt max-size=1m --net=container:{0}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {1}/{3}/{4}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CONFIGS, CEOS[_node].image, _tag, _node))
+            create_output.append(f"docker run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             startup_output.append("sleep 1\n")
-            startup_output.append("docker run -d --name={0} --log-opt max-size=1m --net=container:{0}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {1}/{3}/{4}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{2} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n".format(CEOS[_node].ceos_name, CONFIGS, CEOS[_node].image, _tag, _node))
+            startup_output.append(f"docker run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
     # Create initial host anchor containers
     for _host in HOSTS:
-        create_output.append("# Getting {0} nodes plumbing\n".format(_host))
-        create_output.append("docker run -d --restart=always --log-opt max-size=10k --name={0}-net --net=none busybox /bin/init\n".format(HOSTS[_host].c_name))
-        startup_output.append("docker start {0}-net\n".format(HOSTS[_host].c_name))
-        create_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(HOSTS[_host].c_name))
-        create_output.append("sudo ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(HOSTS[_host].c_name))
+        create_output.append(f"# Getting {_host} nodes plumbing\n")
+        create_output.append(f"docker run -d --restart=always --log-opt max-size=10k --name={HOSTS[_host].c_name}-net --net=none busybox /bin/init\n")
+        startup_output.append(f"docker start {HOSTS[_host].c_name}-net\n")
+        create_output.append(f"{HOSTS[_host].c_name}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
+        create_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].c_name}\n")
         # Stop host containers
-        startup_output.append("docker stop {0}\n".format(HOSTS[_host].c_name))
-        stop_output.append("docker stop {0}\n".format(HOSTS[_host].c_name))
-        stop_output.append("docker stop {0}-net\n".format(HOSTS[_host].c_name))
-        delete_output.append("docker stop {0}\n".format(HOSTS[_host].c_name))
-        delete_output.append("docker stop {0}-net\n".format(HOSTS[_host].c_name))
+        startup_output.append(f"docker stop {HOSTS[_host].c_name}\n")
+        stop_output.append(f"docker stop {HOSTS[_host].c_name}\n")
+        stop_output.append(f"docker stop {HOSTS[_host].c_name}-net\n")
+        delete_output.append(f"docker stop {HOSTS[_host].c_name}\n")
+        delete_output.append(f"docker stop {HOSTS[_host].c_name}-net\n")
         # Remove host containers
-        startup_output.append("docker rm {0}\n".format(HOSTS[_host].c_name))
-        delete_output.append("docker rm {0}\n".format(HOSTS[_host].c_name))
-        delete_output.append("docker rm {0}-net\n".format(HOSTS[_host].c_name))
-        startup_output.append("{0}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {0}-net)\n".format(HOSTS[_host].c_name))
-        startup_output.append("sudo ln -sf /proc/${{{0}pid}}/ns/net /var/run/netns/{0}\n".format(HOSTS[_host].c_name))
+        startup_output.append(f"docker rm {HOSTS[_host].c_name}\n")
+        delete_output.append(f"docker rm {HOSTS[_host].c_name}\n")
+        delete_output.append(f"docker rm {HOSTS[_host].c_name}-net\n")
+        startup_output.append(f"{HOSTS[_host].c_name}pid=$(docker inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
+        startup_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].c_name}\n")
         create_output.append("# Connecting host containers together\n")
         # Output veth commands
         for _intf in HOSTS[_host].intfs:
             _tmp_intf = HOSTS[_host].intfs[_intf]
             if _host in  _tmp_intf['veth'].split('-')[0]:
-                create_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[0], HOSTS[_host].c_name, _tmp_intf['port']))
-                startup_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[0], HOSTS[_host].c_name, _tmp_intf['port']))
+                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].c_name} name {_tmp_intf['port']} up\n")
+                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].c_name} name {_tmp_intf['port']} up\n")
             else:
                 create_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], HOSTS[_host].c_name, _tmp_intf['port']))
                 startup_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], HOSTS[_host].c_name, _tmp_intf['port']))
         create_output.append("sleep 1\n")
-        create_output.append("docker run -d --name={0} --privileged --log-opt max-size=1m --net=container:{0}-net -e HOSTNAME={0} -e HOST_IP={1} -e HOST_MASK={3} -e HOST_GW={4} chost:{2} ipnet\n".format(HOSTS[_host].c_name, HOSTS[_host].ip, HOSTS[_host].image, HOSTS[_host].mask, HOSTS[_host].gw))
+        create_output.append(f"docker run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} chost:{HOSTS[_host].image} ipnet\n")
         startup_output.append("sleep 1\n")
-        startup_output.append("docker run -d --name={0} --privileged --log-opt max-size=1m --net=container:{0}-net -e HOSTNAME={0} -e HOST_IP={1} -e HOST_MASK={3} -e HOST_GW={4} chost:{2} ipnet\n".format(HOSTS[_host].c_name, HOSTS[_host].ip, HOSTS[_host].image, HOSTS[_host].mask, HOSTS[_host].gw))
+        startup_output.append(f"docker run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} chost:{HOSTS[_host].image} ipnet\n")
     # Check for iPerf3 commands
     if topo_yaml['iperf']:
         _iperf = topo_yaml['iperf']
         _port = _iperf['port']
         _brate = _iperf['brate']
         for _server in _iperf['servers']:
-            create_output.append("docker exec -d {0} iperf3 -s -p {1}\n".format(HOSTS[_server].c_name, _port))
-            startup_output.append("docker exec -d {0} iperf3 -s -p {1}\n".format(HOSTS[_server].c_name, _port))
+            create_output.append(f"docker exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
+            startup_output.append(f"docker exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
         for _client in _iperf['clients']:
             _target = topo_yaml['hosts'][_client['target']]['ipaddress']
-            create_output.append("docker exec -d {0} iperf3client {1} {2} {3}\n".format(HOSTS[_client['client']].c_name, _target, _port, _brate))
-            startup_output.append("docker exec -d {0} iperf3client {1} {2} {3}\n".format(HOSTS[_client['client']].c_name, _target, _port, _brate))
+            create_output.append(f"docker exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
+            startup_output.append(f"docker exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
     # Create the initial deployment files
     with open(CEOS_SCRIPTS + '/{0}/Create.sh'.format(_tag), 'w') as cout:
         for _create in create_output:
@@ -405,6 +414,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--topo", type=str, help="Topology to build", default=None, required=True)
     parser.add_argument("-s", "--startup", help="Create a bare startup-config for each node", action="store_true")
+    parser.add_argument("-r", "--runtime", type=str, help="Container Runtime; Docker or Podman", default="docker", required=False, choices=["docker","podman"])
     args = parser.parse_args()
     #TODO add in logic to load custom build file. Default to tag's build file
     main(args)
