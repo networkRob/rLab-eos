@@ -30,6 +30,14 @@ To run the network topology on a container host machine, there are a few require
 - pydot
 - jsonrpclib
 
+#### NOTE:
+For running topologies via Podman, you will need to disable cgroups_v2. To do this run the following commands:
+
+```
+sudo grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"
+sudo reboot now
+```
+
 ### Getting Started
 To build a new topology, the following files/data structures need to be created.
 - `topologies/{name}.yaml` - This file is leveraged by `build/topo-builder.py` to create the necessary commands to build the topology.
@@ -43,6 +51,13 @@ To install the necessary packages and libraries enter the following commands: (F
 ```
 sudo dnf install bridge-utils net-tools graphviz docker podman python3-pip
 pip3 install -r requirements.txt
+```
+
+To leverage Podman for containers, cgroups_v2 will need to be disabled. A reboot is required after for the change.
+
+```
+sudo grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"
+sudo reboot now
 ```
 
 #### NOTE:
