@@ -1,33 +1,33 @@
 #!/bin/bash
-sudo podman stop l3spine1
-sudo podman stop l3spine1-net
-sudo podman stop l3spine2
-sudo podman stop l3spine2-net
-sudo podman stop l3leaf11
-sudo podman stop l3leaf11-net
-sudo podman stop l3leaf12
-sudo podman stop l3leaf12-net
-sudo podman stop l3leaf21
-sudo podman stop l3leaf21-net
-sudo podman stop l3leaf22
-sudo podman stop l3leaf22-net
-sudo podman stop l3leaf31
-sudo podman stop l3leaf31-net
-sudo podman stop l3leaf32
-sudo podman stop l3leaf32-net
-sudo podman stop l3brdr1
-sudo podman stop l3brdr1-net
-sudo podman stop l3brdr2
-sudo podman stop l3brdr2-net
-sudo podman stop l3host11
-sudo podman stop l3host11-net
-sudo podman stop l3host12
-sudo podman stop l3host12-net
-sudo podman stop l3host21
-sudo podman stop l3host21-net
-sudo podman stop l3host22
-sudo podman stop l3host22-net
-sudo podman stop l3host31
-sudo podman stop l3host31-net
-sudo podman stop l3host32
-sudo podman stop l3host32-net
+docker stop l3spine1
+docker stop l3spine1-net
+docker stop l3spine2
+docker stop l3spine2-net
+docker stop l3leaf11
+docker stop l3leaf11-net
+docker stop l3leaf12
+docker stop l3leaf12-net
+docker stop l3leaf21
+docker stop l3leaf21-net
+docker stop l3leaf22
+docker stop l3leaf22-net
+docker stop l3leaf31
+docker stop l3leaf31-net
+docker stop l3leaf32
+docker stop l3leaf32-net
+docker stop l3brdr1
+docker stop l3brdr1-net
+docker stop l3brdr2
+docker stop l3brdr2-net
+docker stop l3host11
+docker stop l3host11-net
+docker stop l3host12
+docker stop l3host12-net
+docker stop l3host21
+docker stop l3host21-net
+docker stop l3host22
+docker stop l3host22-net
+docker stop l3host31
+docker stop l3host31-net
+docker stop l3host32
+docker stop l3host32-net
