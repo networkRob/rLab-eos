@@ -7,12 +7,13 @@ infra:
   bridge: vmgmt
   gateway: 192.168.50.1
 images:
+  registry: local
   ceos: 4.25.0F
   host: 0.5
 nodes:
-  spine1:
+  - spine1:
     mac: 00:1c:73:b0:c6:01
-    ipaddress: 192.168.50.21
+    ip_addr: 192.168.50.21
     neighbors:
       - neighborDevice: spine2
         neighborPort: Ethernet1
@@ -26,9 +27,9 @@ nodes:
       - neighborDevice: leaf3
         neighborPort: Ethernet1
         port: Ethernet4
-  spine2:
+  - spine2:
     mac: 00:1c:73:b1:c6:01
-    ipaddress: 192.168.50.22
+    ip_addr: 192.168.50.22
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet1
@@ -42,9 +43,9 @@ nodes:
       - neighborDevice: leaf3
         neighborPort: Ethernet2
         port: Ethernet4
-  leaf1:
+  - leaf1:
     mac: 00:1c:73:b2:c6:01
-    ipaddress: 192.168.50.23
+    ip_addr: 192.168.50.23
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet2
@@ -58,9 +59,9 @@ nodes:
       - neighborDevice: host11
         neighborPort: Ethernet0
         port: Ethernet4
-  leaf2:
+  - leaf2:
     mac: 00:1c:73:b3:c6:01
-    ipaddress: 192.168.50.24
+    ip_addr: 192.168.50.24
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet3
@@ -74,9 +75,9 @@ nodes:
       - neighborDevice: host21
         neighborPort: Ethernet0
         port: Ethernet4
-  leaf3:
+  - leaf3:
     mac: 00:1c:73:b4:c6:01
-    ipaddress: 192.168.50.25
+    ip_addr: 192.168.50.25
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet4
@@ -91,48 +92,48 @@ nodes:
         neighborPort: Ethernet0
         port: Ethernet4
 hosts:
-  host10:
-    ipaddress: 10.0.12.11
+  - host10:
+    ip_addr: 10.0.12.11
     mask: 255.255.255.0
     gateway: 10.0.12.1
     neighbors:
       - neighborDevice: leaf1
         neighborPort: Ethernet3
         port: Ethernet0
-  host11:
-    ipaddress: 10.0.13.11
+  - host11:
+    ip_addr: 10.0.13.11
     mask: 255.255.255.0
     gateway: 10.0.13.1
     neighbors:
       - neighborDevice: leaf1
         neighborPort: Ethernet4
         port: Ethernet0
-  host20:
-    ipaddress: 10.0.12.21
+  - host20:
+    ip_addr: 10.0.12.21
     mask: 255.255.255.0
     gateway: 10.0.12.1
     neighbors:
       - neighborDevice: leaf2
         neighborPort: Ethernet3
         port: Ethernet0
-  host21:
-    ipaddress: 10.0.13.21
+  - host21:
+    ip_addr: 10.0.13.21
     mask: 255.255.255.0
     gateway: 10.0.13.1
     neighbors:
       - neighborDevice: leaf2
         neighborPort: Ethernet4
         port: Ethernet0
-  host30:
-    ipaddress: 10.0.12.31
+  - host30:
+    ip_addr: 10.0.12.31
     mask: 255.255.255.0
     gateway: 10.0.12.1
     neighbors:
       - neighborDevice: leaf3
         neighborPort: Ethernet3
         port: Ethernet0
-  host31:
-    ipaddress: 10.0.13.31
+  - host31:
+    ip_addr: 10.0.13.31
     mask: 255.255.255.0
     gateway: 10.0.13.1
     neighbors:
