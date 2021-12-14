@@ -1,24 +1,31 @@
 #!/bin/bash
 
-while getopts t:s: option
+while getopts t:s:r: option
 do
 case "${option}"
 in
 t) TOPO=${OPTARG};;
 s) FLAG=true;;
+r) RUNTIME=${OPTARG};;
 esac
 done
 
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
+# Check for runtime flag
+if [ -z "$RUNTIME" ]
+then
+  RUNTIME="docker"
+fi
+
 #topobuilder
 echo -e "${YELLOW}Building topo: $TOPO${NC}\n"
 if [[ $FLAG == true ]];
 then
-  build/topo-builder.py -t $TOPO -s
+  build/topo-builder.py -t $TOPO -s -r $RUNTIME
 else
-  build/topo-builder.py -t $TOPO 
+  build/topo-builder.py -t $TOPO  -r $RUNTIME
 fi
 
 
