@@ -103,8 +103,9 @@ def main(args):
     topo = openTopo(args.topo)
     nodes = []
     for node in topo['nodes']:
+        node_name = list(node.keys())[0]
         nodes.append(
-            {'name': node, 'neighbors': topo['nodes'][node]['neighbors']})
+            {'name': node_name, 'neighbors': node['neighbors']})
     topo_name = str(topo['topology']['name'])
     my_topo = create_topo(topo_name, nodes)
     dot = Digraph(comment=topo_name)
