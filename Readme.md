@@ -75,6 +75,7 @@ infra:
   bridge: {MGMT_BRIDGE}
   gateway: {MGMT_NETWORK_GATEWAY}
 images:
+  registry: {LOCATION}
   ceos: {ceosimage_tag}
   host: {chostimage_tag}
 nodes:
@@ -112,6 +113,7 @@ commands:
 - The `CVP_KEY` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP.
 - The `MGMT_BRIDGE` parameter is optional, this is if you wish to attach the cEOS containers Management0 Interface to this network.
 - The `MGMT_NETWORK_GATEWAY` parameter is optional, this is if a bare startup-config is created, but should be specified if the `MGMT_BRIDGE` parameter is set.
+- The `LOCATION` parameter should be set to `local` as default. Update this to the url of any private/remote registries.
 - The `mac` section for each cEOS-lab node needs to be unique, this helps specify the correct system-id in cEOS so MLAG will function properly.
 - The `neighbors` section for each cEOS-lab node is a mapping to the remote peer and which interfaces to connect.
 - If you do not want to run iperf on the host nodes, you can leave that section empty and only set `iperf:`
