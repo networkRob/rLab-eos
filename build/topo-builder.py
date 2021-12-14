@@ -176,6 +176,7 @@ def main(args):
     container_runtime = args.runtime.lower()
     topo_yaml = openTopo(args.topo)
     create_startup = args.startup
+    container_registry = topo_yaml['images']['registry']
     ceos_image = topo_yaml['images']['ceos']
     host_image = topo_yaml['images']['host']
     _tag = topo_yaml['topology']['name']
@@ -220,6 +221,13 @@ hostname {0}
 
     if create_startup:
         pS("INFO", "Bare Startup config will be created for all cEOS nodes")
+    # Perform check on container registry option
+    if container_registry == "local":
+        registry_cmd = ""
+        pS("INFO", "Local host registry will be leveraged for container iamges.")
+    else:
+        registry_cmd = f"{container_registry}/"
+        pS("INFO", f"{container_registry} will be leverated for container images.")
     # Check for mgmt Bridge
     try:
         mgmt_network = topo_yaml['infra']['bridge']
@@ -241,15 +249,16 @@ hostname {0}
     # Load cEOS nodes specific information
     for _node in nodes:
         try:
-            _node_ip = nodes[_node]['ipaddress']
+            _node_ip = _node['ip_addr']
         except KeyError:
             _node_ip = ""
-        CEOS[_node] = CEOS_NODE(_node, _node_ip, nodes[_node]['mac'], nodes[_node]['neighbors'], _tag, ceos_image)
+        _node_name = list(_node.keys())[0]
+        CEOS[_node_name] = CEOS_NODE(_node_name, _node_ip, _node['mac'], _node['neighbors'], _tag, ceos_image)
     # Load Host nodes specific information
     if hosts:
         for _host in hosts:
-            _tmp_host = hosts[_host]
-            HOSTS[_host] = HOST_NODE(_host, _tmp_host['ipaddress'], _tmp_host['mask'], _tmp_host['gateway'], _tmp_host['neighbors'], _tag, host_image)
+            _host_name = list(_host.keys())[0]
+            HOSTS[_host_name] = HOST_NODE(_host_name, _host['ip_addr'], _host['mask'], _host['gateway'], _host['neighbors'], _tag, host_image)
     # Check for output directory
     if checkDir(_ceos_script_location):
         pS("OK", "Directory is present now.")
@@ -257,11 +266,14 @@ hostname {0}
         pS("iBerg", "Error creating directory.")
     create_output.append("#!/bin/bash\n")
     create_output.append(NOTIFY_ADJUST)
-    # Check for container images are present
-    create_output.append(f"if [ \"$({cnt_cmd} image ls | grep ceosimage | grep -c {ceos_image})\" == 0 ]\n")
-    create_output.append(f"then\n    echo \"{container_runtime.capitalize()} image not found for ceosimage:{ceos_image}, please build it first.\"\n    exit\nfi\n")
-    create_output.append(f"if [ \"$({cnt_cmd} image ls | grep chost | grep -c {host_image})\" == 0 ]\n")
-    create_output.append(f"then\n    echo \"{container_runtime.capitalize()} image not found for chost:{host_image}, please build it first.\"\n    exit\nfi\n")
+    # Check for container images are present in local registry deployment
+    if container_registry == "local":
+        create_output.append(f"if [ \"$({cnt_cmd} image ls | grep ceosimage | grep -c {ceos_image})\" == 0 ]\n")
+        create_output.append(f"then\n    echo \"{container_runtime.capitalize()} image not found for ceosimage:{ceos_image}, please build it first.\"\n    exit\nfi\n")
+        create_output.append(f"if [ \"$({cnt_cmd} image ls | grep chost | grep -c {host_image})\" == 0 ]\n")
+        create_output.append(f"then\n    echo \"{container_runtime.capitalize()} image not found for chost:{host_image}, please build it first.\"\n    exit\nfi\n")
+    else:
+        create_output.append(f"echo \"{registry_cmd} will be leveraged for cEOS and cHost images\"\n")
     create_output.append(f"sudo ip netns add {_tag}\n")
     startup_output.append("#!/bin/bash\n")
     startup_output.append(NOTIFY_ADJUST)
@@ -337,23 +349,23 @@ hostname {0}
             create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
             create_output.append("sleep 1\n")
             if container_runtime == "docker":
-                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             else:
-                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             startup_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
             startup_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].ceos_name}-mgmt\n")
             startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
             startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
             startup_output.append("sleep 1\n")
             if container_runtime == "docker":
-                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             else:
-                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
         else:
             create_output.append("sleep 1\n")
-            create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             startup_output.append("sleep 1\n")
-            startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
     # Create initial host anchor containers
     for _host in HOSTS:
         create_output.append(f"# Getting {_host} nodes plumbing\n")
@@ -384,9 +396,9 @@ hostname {0}
                 create_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], HOSTS[_host].c_name, _tmp_intf['port']))
                 startup_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], HOSTS[_host].c_name, _tmp_intf['port']))
         create_output.append("sleep 1\n")
-        create_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} chost:{HOSTS[_host].image} ipnet\n")
+        create_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} {registry_cmd}chost:{HOSTS[_host].image} ipnet\n")
         startup_output.append("sleep 1\n")
-        startup_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} chost:{HOSTS[_host].image} ipnet\n")
+        startup_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} {registry_cmd}chost:{HOSTS[_host].image} ipnet\n")
     # Check for iPerf3 commands
     if topo_yaml['iperf']:
         _iperf = topo_yaml['iperf']
@@ -396,7 +408,7 @@ hostname {0}
             create_output.append(f"{cnt_cmd} exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
             startup_output.append(f"{cnt_cmd} exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
         for _client in _iperf['clients']:
-            _target = topo_yaml['hosts'][_client['target']]['ipaddress']
+            _target = HOSTS[_client['target']].ip
             create_output.append(f"{cnt_cmd} exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
             startup_output.append(f"{cnt_cmd} exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
     # Create the initial deployment files

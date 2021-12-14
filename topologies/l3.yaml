@@ -7,12 +7,13 @@ infra:
   bridge: vmgmt
   gateway: 192.168.50.1
 images:
+  registry: local
   ceos: 4.26.1F
   host: 1.0
 nodes:
-  spine1:
+  - spine1:
     mac: 00:1c:73:c0:c6:01
-    ipaddress: 192.168.50.31
+    ip_addr: 192.168.50.31
     neighbors:
       - neighborDevice: leaf11
         neighborPort: Ethernet2
@@ -38,9 +39,9 @@ nodes:
       - neighborDevice: brdr2
         neighborPort: Ethernet2
         port: Ethernet8
-  spine2:
+  - spine2:
     mac: 00:1c:73:c1:c6:01
-    ipaddress: 192.168.50.32
+    ip_addr: 192.168.50.32
     neighbors:
       - neighborDevice: leaf11
         neighborPort: Ethernet3
@@ -66,9 +67,9 @@ nodes:
       - neighborDevice: brdr2
         neighborPort: Ethernet3
         port: Ethernet8
-  leaf11:
+  - leaf11:
     mac: 00:1c:73:c2:c6:01
-    ipaddress: 192.168.50.33
+    ip_addr: 192.168.50.33
     neighbors:
       - neighborDevice: leaf12
         neighborPort: Ethernet1
@@ -85,9 +86,9 @@ nodes:
       - neighborDevice: host12
         neighborPort: Ethernet0
         port: Ethernet5
-  leaf12:
+  - leaf12:
     mac: 00:1c:73:c3:c6:01
-    ipaddress: 192.168.50.34
+    ip_addr: 192.168.50.34
     neighbors:
       - neighborDevice: leaf11
         neighborPort: Ethernet1
@@ -98,9 +99,9 @@ nodes:
       - neighborDevice: spine2
         neighborPort: Ethernet2
         port: Ethernet3
-  leaf21:
+  - leaf21:
     mac: 00:1c:73:c4:c6:01
-    ipaddress: 192.168.50.35
+    ip_addr: 192.168.50.35
     neighbors:
       - neighborDevice: leaf22
         neighborPort: Ethernet1
@@ -114,9 +115,9 @@ nodes:
       - neighborDevice: host21
         neighborPort: Ethernet0
         port: Ethernet4
-  leaf22:
+  - leaf22:
     mac: 00:1c:73:c5:c6:01
-    ipaddress: 192.168.50.36
+    ip_addr: 192.168.50.36
     neighbors:
       - neighborDevice: leaf21
         neighborPort: Ethernet1
@@ -130,9 +131,9 @@ nodes:
       - neighborDevice: host22
         neighborPort: Ethernet0
         port: Ethernet4
-  leaf31:
+  - leaf31:
     mac: 00:1c:73:c6:c6:01
-    ipaddress: 192.168.50.37
+    ip_addr: 192.168.50.37
     neighbors:
       - neighborDevice: leaf32
         neighborPort: Ethernet1
@@ -149,9 +150,9 @@ nodes:
       - neighborDevice: host32
         neighborPort: Ethernet0
         port: Ethernet5
-  leaf32:
+  - leaf32:
     mac: 00:1c:73:c7:c6:01
-    ipaddress: 192.168.50.38
+    ip_addr: 192.168.50.38
     neighbors:
       - neighborDevice: leaf31
         neighborPort: Ethernet1
@@ -162,9 +163,9 @@ nodes:
       - neighborDevice: spine2
         neighborPort: Ethernet6
         port: Ethernet3
-  brdr1:
+  - brdr1:
     mac: 00:1c:73:c8:c6:01
-    ipaddress: 192.168.50.39
+    ip_addr: 192.168.50.39
     neighbors:
       - neighborDevice: brdr2
         neighborPort: Ethernet1
@@ -175,9 +176,9 @@ nodes:
       - neighborDevice: spine2
         neighborPort: Ethernet7
         port: Ethernet3
-  brdr2:
+  - brdr2:
     mac: 00:1c:73:c9:c6:01
-    ipaddress: 192.168.50.40
+    ip_addr: 192.168.50.40
     neighbors:
       - neighborDevice: brdr1
         neighborPort: Ethernet1
@@ -189,48 +190,48 @@ nodes:
         neighborPort: Ethernet8
         port: Ethernet3
 hosts:
-  host11:
-    ipaddress: 192.168.12.11
+  - host11:
+    ip_addr: 192.168.12.11
     mask: 255.255.255.0
     gateway: 192.168.12.1
     neighbors:
       - neighborDevice: leaf11
         neighborPort: Ethernet4
         port: Ethernet0
-  host12:
-    ipaddress: 192.168.13.11
+  - host12:
+    ip_addr: 192.168.13.11
     mask: 255.255.255.0
     gateway: 192.168.13.1
     neighbors:
       - neighborDevice: leaf11
         neighborPort: Ethernet5
         port: Ethernet0
-  host21:
-    ipaddress: 192.168.12.21
+  - host21:
+    ip_addr: 192.168.12.21
     mask: 255.255.255.0
     gateway: 192.168.12.1
     neighbors:
       - neighborDevice: leaf21
         neighborPort: Ethernet4
         port: Ethernet0
-  host22:
-    ipaddress: 192.168.13.21
+  - host22:
+    ip_addr: 192.168.13.21
     mask: 255.255.255.0
     gateway: 192.168.13.1
     neighbors:
       - neighborDevice: leaf22
         neighborPort: Ethernet4
         port: Ethernet0
-  host31:
-    ipaddress: 192.168.12.31
+  - host31:
+    ip_addr: 192.168.12.31
     mask: 255.255.255.0
     gateway: 192.168.12.1
     neighbors:
       - neighborDevice: leaf31
         neighborPort: Ethernet4
         port: Ethernet0
-  host32:
-    ipaddress: 192.168.13.31
+  - host32:
+    ip_addr: 192.168.13.31
     mask: 255.255.255.0
     gateway: 192.168.13.1
     neighbors:

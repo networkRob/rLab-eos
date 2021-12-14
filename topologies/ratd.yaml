@@ -1,10 +1,11 @@
 topology:
   name: RATD
 images:
+  registry: local
   ceos: 4.25.0F
   host: 0.5
 nodes:
-  eos1:
+  - eos1:
     mac: 00:1c:73:d0:c6:01
     neighbors:
       - neighborDevice: eos2
@@ -25,7 +26,7 @@ nodes:
       - neighborDevice: eos17
         neighborPort: Ethernet1
         port: Ethernet6
-  eos2:
+  - eos2:
     mac: 00:1c:73:d1:c6:01
     neighbors:
       - neighborDevice: eos3
@@ -43,7 +44,7 @@ nodes:
       - neighborDevice: eos1
         neighborPort: Ethernet1
         port: Ethernet5
-  eos3:
+  - eos3:
     mac: 00:1c:73:d2:c6:01
     neighbors:
       - neighborDevice: eos9
@@ -64,7 +65,7 @@ nodes:
       - neighborDevice: eos20
         neighborPort: Ethernet1
         port: Ethernet6
-  eos4:
+  - eos4:
     mac: 00:1c:73:d3:c6:01
     neighbors:
       - neighborDevice: eos9
@@ -85,7 +86,7 @@ nodes:
       - neighborDevice: eos16
         neighborPort: Ethernet1
         port: Ethernet6
-  eos5:
+  - eos5:
     mac: 00:1c:73:d4:c6:01
     neighbors:
       - neighborDevice: eos4
@@ -103,7 +104,7 @@ nodes:
       - neighborDevice: eos6
         neighborPort: Ethernet1
         port: Ethernet5
-  eos6:
+  - eos6:
     mac: 00:1c:73:d5:c6:01
     neighbors:
       - neighborDevice: eos5
@@ -124,7 +125,7 @@ nodes:
       - neighborDevice: eos14
         neighborPort: Ethernet2
         port: Ethernet6
-  eos7:
+  - eos7:
     mac: 00:1c:73:d6:c6:01
     neighbors:
       - neighborDevice: eos3
@@ -139,7 +140,7 @@ nodes:
       - neighborDevice: eos19
         neighborPort: Ethernet1
         port: Ethernet4
-  eos8:
+  - eos8:
     mac: 00:1c:73:d7:c6:01
     neighbors:
       - neighborDevice: eos4
@@ -157,7 +158,7 @@ nodes:
       - neighborDevice: eos18
         neighborPort: Ethernet1
         port: Ethernet5
-  eos9:
+  - eos9:
     mac: 00:1c:73:d8:c6:01
     neighbors:
       - neighborDevice: eos4
@@ -166,13 +167,13 @@ nodes:
       - neighborDevice: eos3
         neighborPort: Ethernet1
         port: Ethernet2
-  eos10:
+  - eos10:
     mac: 00:1c:73:d9:c6:01
     neighbors:
       - neighborDevice: eos7
         neighborPort: Ethernet2
         port: Ethernet1
-  eos11:
+  - eos11:
     mac: 00:1c:73:e0:c6:01
     neighbors:
       - neighborDevice: eos1
@@ -184,7 +185,7 @@ nodes:
       - neighborDevice: eos13
         neighborPort: Ethernet3
         port: Ethernet3
-  eos12:
+  - eos12:
     mac: 00:1c:73:e1:c6:01
     neighbors:
       - neighborDevice: eos13
@@ -193,7 +194,7 @@ nodes:
       - neighborDevice: eos11
         neighborPort: Ethernet2
         port: Ethernet2
-  eos13:
+  - eos13:
     mac: 00:1c:73:e2:c6:01
     neighbors:
       - neighborDevice: eos6
@@ -205,7 +206,7 @@ nodes:
       - neighborDevice: eos11
         neighborPort: Ethernet3
         port: Ethernet3
-  eos14:
+  - eos14:
     mac: 00:1c:73:e3:c6:01
     neighbors:
       - neighborDevice: eos8
@@ -214,37 +215,37 @@ nodes:
       - neighborDevice: eos6
         neighborPort: Ethernet6
         port: Ethernet2
-  eos15:
+  - eos15:
     mac: 00:1c:73:e4:c6:01
     neighbors:
       - neighborDevice: eos8
         neighborPort: Ethernet2
         port: Ethernet1
-  eos16:
+  - eos16:
     mac: 00:1c:73:d5:c6:01
     neighbors:
       - neighborDevice: eos4
         neighborPort: Ethernet6
         port: Ethernet1
-  eos17:
+  - eos17:
     mac: 00:1c:73:e6:c6:01
     neighbors:
       - neighborDevice: eos1
         neighborPort: Ethernet6
         port: Ethernet1
-  eos18:
+  - eos18:
     mac: 00:1c:73:e7:c6:01
     neighbors:
       - neighborDevice: eos8
         neighborPort: Ethernet5
         port: Ethernet1
-  eos19:
+  - eos19:
     mac: 00:1c:73:e8:c6:01
     neighbors:
       - neighborDevice: eos7
         neighborPort: Ethernet4
         port: Ethernet1
-  eos20:
+  - eos20:
     mac: 00:1c:73:e9:c6:01
     neighbors:
       - neighborDevice: eos3

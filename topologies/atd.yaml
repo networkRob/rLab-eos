@@ -1,10 +1,11 @@
 topology:
   name: ATD
 images:
+  registry: local
   ceos: 4.25.0F
   host: chost:0.5
 nodes:
-  spine1:
+  - spine1:
     mac: 00:1c:73:f0:c6:01
     neighbors:
       - neighborDevice: spine2
@@ -25,7 +26,7 @@ nodes:
       - neighborDevice: spine2
         neighborPort: Ethernet6
         port: Ethernet6
-  spine2:
+  - spine2:
     mac: 00:1c:73:f1:c6:01
     neighbors:
       - neighborDevice: spine1
@@ -46,7 +47,7 @@ nodes:
       - neighborDevice: spine1
         neighborPort: Ethernet6
         port: Ethernet6
-  leaf1:
+  - leaf1:
     mac: 00:1c:73:f2:c6:01
     neighbors:
       - neighborDevice: leaf2
@@ -67,7 +68,7 @@ nodes:
       - neighborDevice: leaf2
         neighborPort: Ethernet6
         port: Ethernet6
-  leaf2:
+  - leaf2:
     mac: 00:1c:73:f3:c6:01
     neighbors:
       - neighborDevice: leaf1
@@ -88,7 +89,7 @@ nodes:
       - neighborDevice: leaf1
         neighborPort: Ethernet6
         port: Ethernet6
-  leaf3:
+  - leaf3:
     mac: 00:1c:73:f4:c6:01
     neighbors:
       - neighborDevice: leaf4
@@ -109,7 +110,7 @@ nodes:
       - neighborDevice: leaf4
         neighborPort: Ethernet6
         port: Ethernet6
-  leaf4:
+  - leaf4:
     mac: 00:1c:73:f5:c6:01
     neighbors:
       - neighborDevice: leaf3
@@ -130,7 +131,7 @@ nodes:
       - neighborDevice: leaf3
         neighborPort: Ethernet6
         port: Ethernet6
-  host1:
+  - host1:
     mac: 00:1c:73:f7:c6:01
     neighbors:
       - neighborDevice: leaf1
@@ -145,7 +146,7 @@ nodes:
       - neighborDevice: leaf2
         neighborPort: Ethernet5
         port: Ethernet4
-  host2:
+  - host2:
     mac: 00:1c:73:f8:c6:01
     neighbors:
       - neighborDevice: leaf3
