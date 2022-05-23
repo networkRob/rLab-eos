@@ -1,10 +1,10 @@
-FROM centos:8
+FROM fedora:36
 
 ENV container docker
 
-RUN yum update -y
+RUN dnf update -y
 
-RUN yum install -y net-tools iperf3 vim lldpad nmap
+RUN dnf install -y net-tools iperf3 vim lldpad nmap
 
 COPY iperf3client.sh /usr/bin/iperf3client
 
