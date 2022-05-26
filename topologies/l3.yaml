@@ -5,6 +5,7 @@ topology:
   cvp-key: rob-lab
 infra:
   bridge: vmgmt
+  vrf: MGMT
   gateway: 192.168.50.1
 images:
   registry: local

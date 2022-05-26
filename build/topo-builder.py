@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from platform import mac_ver
 from ruamel.yaml import YAML
 from time import sleep
 from os.path import exists
@@ -190,17 +191,40 @@ daemon TerminAttr
    no shutdown
 !
     """
+    BASE_TERMINATTR_VRF = """
+daemon TerminAttr
+   exec /usr/bin/TerminAttr -cvaddr={0}:9910 -cvvrf={2} -taillogs -cvcompression=gzip -cvauth=key,{1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
+   no shutdown
+!
+    """
     BASE_MGMT = """
+vrf instance {2}
 interface Management0
    description Management
    ip address {0}/24
 !
 ip routing
 !
-ip route 0.0.0.0/0 {1}
 !
 management api http-commands
    no shutdown
+!
+    """
+    BASE_MGMT_VRF = """
+vrf instance {2}
+interface Management0
+   description Management
+   vrf {2}
+   ip address {0}/24
+!
+ip routing
+!
+ip route vrf {2} 0.0.0.0/0 {1}
+!
+management api http-commands
+   no shutdown
+   vrf {2}
+      no shutdown
 !
     """
     BASE_STARTUP = """
@@ -236,6 +260,14 @@ hostname {0}
     except KeyError:
         pS("INFO", "No mgmt bridge specified. Creating isolated network.")
         mgmt_network = False
+    # Check for vrf
+    try:
+        mgmt_vrf = topo_yaml['infra']['vrf']
+        if not mgmt_vrf:
+            pS("INFO", "No mgmt VRF specified. Creating network in default VRF.")
+    except KeyError:
+        pS("INFO", "No mgmt VRF specified. Creating network in default VRF.")
+        mgmt_vrf = "default"
     # Check for TFA Version
     try:
         _tfa_version = topo_yaml['topology']['vforward']
@@ -307,9 +339,15 @@ hostname {0}
             _tmp_startup = []
             _tmp_startup.append(BASE_STARTUP.format(CEOS[_node].ceos_name))
             if mgmt_network:
-                _tmp_startup.append(BASE_MGMT.format(CEOS[_node].ip, topo_yaml['infra']['gateway']))
+                if mgmt_vrf != "default":
+                    _tmp_startup.append(BASE_MGMT_VRF.format(CEOS[_node].ip, topo_yaml['infra']['gateway'], mgmt_vrf))
+                else:    
+                    _tmp_startup.append(BASE_MGMT.format(CEOS[_node].ip, topo_yaml['infra']['gateway']))
                 if 'cvpaddress' and 'cvp-key' in topo_yaml['topology']:
-                    _tmp_startup.append(BASE_TERMINATTR.format(topo_yaml['topology']['cvpaddress'], topo_yaml['topology']['cvp-key']))
+                    if mgmt_vrf != "default":
+                        _tmp_startup.append(BASE_TERMINATTR_VRF.format(topo_yaml['topology']['cvpaddress'], topo_yaml['topology']['cvp-key'], mgmt_vrf))
+                    else:
+                        _tmp_startup.append(BASE_TERMINATTR.format(topo_yaml['topology']['cvpaddress'], topo_yaml['topology']['cvp-key']))
             create_output.append('echo "{0}" > {1}/{2}/{3}/startup-config\n'.format(''.join(_tmp_startup), CONFIGS, _tag, _node))
         # Creating anchor containers
         create_output.append("# Getting {0} nodes plumbing\n".format(_node))
