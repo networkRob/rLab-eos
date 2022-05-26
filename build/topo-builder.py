@@ -197,7 +197,6 @@ daemon TerminAttr
 !
     """
     BASE_MGMT = """
-vrf instance {2}
 interface Management0
    description Management
    ip address {0}/24
