@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from platform import mac_ver
 from ruamel.yaml import YAML
 from time import sleep
 from os.path import exists
