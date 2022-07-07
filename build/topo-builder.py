@@ -5,7 +5,7 @@ from time import sleep
 from os.path import exists
 from os import makedirs, getcwd
 import argparse
-
+import secrets
 
 BASE_PATH = getcwd()
 CONFIGS = BASE_PATH + "/configs"
@@ -16,6 +16,9 @@ NOTIFY_BASE = 1250
 VETH_PAIRS = []
 CEOS = {}
 HOSTS = {}
+CEOS_IDS = []
+CEOS_MAPPER = {}
+CEOS_LINKS = {}
 # Setting inotify value to 40 times EOS base value
 NOTIFY_ADJUST = """
 sudo sh -c 'echo "fs.inotify.max_user_instances = {notify_instances}" > /etc/sysctl.d/99-zceos.conf'
@@ -32,24 +35,25 @@ class CEOS_NODE():
         self.image = image
         self.ceos_name = self.tag + self.name
         self.intfs = {}
-        self.portMappings(node_neighbors)
         self.system_mac = node_sys_mac
+        self.dev_id = CEOS_MAPPER[self.name]
+        self.portMappings(node_neighbors)
 
     def portMappings(self, node_neighbors):
         """
         Function to create port mappings.
         """
         for intf in node_neighbors:
-            lport = parseNames(intf['port'])
-            rport = parseNames(intf['neighborPort'])
-            rneigh = parseNames(self.tag + intf['neighborDevice'])
-            _vethCheck = checkVETH('{0}{1}'.format(self.ceos_name, lport['code']), '{0}{1}'.format(rneigh['name'], rport['code']))
+            lport = intf['port']
+            rport = intf['neighborPort']
+            rneigh = CEOS_MAPPER[intf['neighborDevice']]
+            _vethCheck = checkVETH('{0}{1}'.format(self.dev_id, lport), '{0}{1}'.format(rneigh, rport))
             if _vethCheck['status']:
-                pS("OK", "VETH Pair {0} will be created.".format(_vethCheck['name']))
+                pS("OK", f"Found Patch Cable for {self.name} {lport} to {intf['neighborDevice']} {rport} will be created.")
                 VETH_PAIRS.append(_vethCheck['name'])
             self.intfs[intf['port']] = {
                 'veth': _vethCheck['name'],
-                'port': lport['code']
+                'port': lport
             }
 
 class HOST_NODE():
@@ -63,22 +67,24 @@ class HOST_NODE():
         self.image = image
         self.ceos_name = self.tag + self.name
         self.intfs = {}
+        self.dev_id = CEOS_MAPPER[self.name]
         self.portMappings(node_neighbors)
+
     def portMappings(self, node_neighbors):
         """
         Function to create port mappings.
         """
         for intf in node_neighbors:
-            lport = parseNames(intf['port'])
-            rport = parseNames(intf['neighborPort'])
-            rneigh = parseNames(self.tag + intf['neighborDevice'])
-            _vethCheck = checkVETH('{0}{1}'.format(self.ceos_name, lport['code']), '{0}{1}'.format(rneigh['name'], rport['code']))
+            lport = intf['port']
+            rport = intf['neighborPort']
+            rneigh = CEOS_MAPPER[intf['neighborDevice']]
+            _vethCheck = checkVETH('{0}{1}'.format(self.dev_id, lport), '{0}{1}'.format(rneigh, rport))
             if _vethCheck['status']:
-                pS("OK", "VETH Pair {0} will be created.".format(_vethCheck['name']))
+                pS("OK", f"Found Patch Cable for {self.name} {lport} to {intf['neighborDevice']} {rport} will be created.")
                 VETH_PAIRS.append(_vethCheck['name'])
             self.intfs[intf['port']] = {
                 'veth': _vethCheck['name'],
-                'port': lport['code']
+                'port': lport
             }
 
 def openTopo(topo):
@@ -112,6 +118,16 @@ def parseNames(devName):
         'code': dev_name
     }
     return(devInfo)
+
+def getDevID():
+    """
+    Function to generate and set a unique device ID for veth pair usage
+    """
+    while True:
+        _tmp_uuid = secrets.token_hex(2)
+        if _tmp_uuid not in CEOS_IDS:
+            return(_tmp_uuid)
+
 
 def checkVETH(dev1, dev2):
     """
@@ -180,6 +196,7 @@ def main(args):
     ceos_image = topo_yaml['images']['ceos']
     host_image = topo_yaml['images']['host']
     _tag = topo_yaml['topology']['name']
+    links = topo_yaml['links']
     nodes = topo_yaml['nodes']
     hosts = topo_yaml['hosts']
     _ceos_script_location = "{0}/{1}".format(CEOS_SCRIPTS, _tag)
@@ -276,6 +293,54 @@ hostname {0}
     except:
         pS("INFO", "Leveraging default dataplane")
 
+    # Load and Gather network Link information
+    pS("INFO", "Gathering patch cable lengths and quantities...")
+    for _link in links:
+        # Map out links
+        _sideA = _link[0][0]
+        _portA = _link[0][1]
+        _sideB = _link[1][0]
+        _portB = _link[1][1]
+        if _sideA in CEOS_LINKS:
+            CEOS_LINKS[_sideA].append({
+                'port': _portA,
+                'neighborPort': _portB,
+                'neighborDevice': _sideB
+            })
+        else:
+            CEOS_LINKS[_sideA] = [{
+                'port': _portA,
+                'neighborPort': _portB,
+                'neighborDevice': _sideB
+            }]
+        if _sideB in CEOS_LINKS:
+            CEOS_LINKS[_sideB].append({
+                'port': _portB,
+                'neighborPort': _portA,
+                'neighborDevice': _sideA
+            })
+        else:
+            CEOS_LINKS[_sideB] = [{
+                'port': _portB,
+                'neighborPort': _portA,
+                'neighborDevice': _sideA
+            }]
+
+    # Generate Unique IDs for container hosts
+    pS("INFO", "Examining devices for topology")
+    if hosts:
+        for _container_node in (nodes + hosts):
+            _node_name = list(_container_node.keys())[0]
+            _container_uid = getDevID()
+            CEOS_IDS.append(_container_uid)
+            CEOS_MAPPER[_node_name] = _container_uid
+    else:
+        for _container_node in nodes:
+            _node_name = list(_container_node.keys())[0]
+            _container_uid = getDevID()
+            CEOS_IDS.append(_container_uid)
+            CEOS_MAPPER[_node_name] = _container_uid
+
     # Load cEOS nodes specific information
     for _node in nodes:
         try:
@@ -283,12 +348,12 @@ hostname {0}
         except KeyError:
             _node_ip = ""
         _node_name = list(_node.keys())[0]
-        CEOS[_node_name] = CEOS_NODE(_node_name, _node_ip, _node['mac'], _node['neighbors'], _tag, ceos_image)
+        CEOS[_node_name] = CEOS_NODE(_node_name, _node_ip, _node['mac'], CEOS_LINKS[_node_name], _tag, ceos_image)
     # Load Host nodes specific information
     if hosts:
         for _host in hosts:
             _host_name = list(_host.keys())[0]
-            HOSTS[_host_name] = HOST_NODE(_host_name, _host['ip_addr'], _host['mask'], _host['gateway'], _host['neighbors'], _tag, host_image)
+            HOSTS[_host_name] = HOST_NODE(_host_name, _host['ip_addr'], _host['mask'], _host['gateway'], CEOS_LINKS[_host_name], _tag, host_image)
     # Check for output directory
     if checkDir(_ceos_script_location):
         pS("OK", "Directory is present now.")
@@ -313,6 +378,7 @@ hostname {0}
     delete_net_output.append(f"sudo ip netns delete {_tag}\n")
     # Get the veths created
     create_output.append("# Creating veths\n")
+
     for _veth in VETH_PAIRS:
         _v1, _v2 = _veth.split("-")
         create_output.append(f"sudo ip link add {_v1} type veth peer name {_v2}\n")
@@ -369,7 +435,7 @@ hostname {0}
         # Output veth commands
         for _intf in CEOS[_node].intfs:
             _tmp_intf = CEOS[_node].intfs[_intf]
-            if _node in  _tmp_intf['veth'].split('-')[0]:
+            if CEOS[_node].dev_id in  _tmp_intf['veth'].split('-')[0]:
                 create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
                 startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
             else:
@@ -428,7 +494,7 @@ hostname {0}
         # Output veth commands
         for _intf in HOSTS[_host].intfs:
             _tmp_intf = HOSTS[_host].intfs[_intf]
-            if _host in  _tmp_intf['veth'].split('-')[0]:
+            if HOSTS[_host].dev_id in  _tmp_intf['veth'].split('-')[0]:
                 create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].c_name} name {_tmp_intf['port']} up\n")
                 startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].c_name} name {_tmp_intf['port']} up\n")
             else:

@@ -1,26 +1,28 @@
 #!/bin/bash
-sudo ip link delete atdspine1et1 type veth peer name atdspine2et1
-sudo ip link delete atdspine1et2 type veth peer name atdleaf1et2
-sudo ip link delete atdspine1et3 type veth peer name atdleaf2et2
-sudo ip link delete atdspine1et4 type veth peer name atdleaf3et2
-sudo ip link delete atdspine1et5 type veth peer name atdleaf4et2
-sudo ip link delete atdspine1et6 type veth peer name atdspine2et6
-sudo ip link delete atdspine2et2 type veth peer name atdleaf1et3
-sudo ip link delete atdspine2et3 type veth peer name atdleaf2et3
-sudo ip link delete atdspine2et4 type veth peer name atdleaf3et3
-sudo ip link delete atdspine2et5 type veth peer name atdleaf4et3
-sudo ip link delete atdleaf1et1 type veth peer name atdleaf2et1
-sudo ip link delete atdleaf1et4 type veth peer name atdhost1et1
-sudo ip link delete atdleaf1et5 type veth peer name atdhost1et3
-sudo ip link delete atdleaf1et6 type veth peer name atdleaf2et6
-sudo ip link delete atdleaf2et4 type veth peer name atdhost1et2
-sudo ip link delete atdleaf2et5 type veth peer name atdhost1et4
-sudo ip link delete atdleaf3et1 type veth peer name atdleaf4et1
-sudo ip link delete atdleaf3et4 type veth peer name atdhost2et1
-sudo ip link delete atdleaf3et5 type veth peer name atdhost2et3
-sudo ip link delete atdleaf3et6 type veth peer name atdleaf4et6
-sudo ip link delete atdleaf4et4 type veth peer name atdhost2et2
-sudo ip link delete atdleaf4et5 type veth peer name atdhost2et4
+sudo ip link delete 657cet1 type veth peer name 8f30et1
+sudo ip link delete 657cet2 type veth peer name 0aafet2
+sudo ip link delete 657cet3 type veth peer name 7b82et2
+sudo ip link delete 657cet4 type veth peer name 0369et2
+sudo ip link delete 657cet5 type veth peer name 3226et2
+sudo ip link delete 657cet6 type veth peer name 8f30et6
+sudo ip link delete 8f30et2 type veth peer name 0aafet3
+sudo ip link delete 8f30et3 type veth peer name 7b82et3
+sudo ip link delete 8f30et4 type veth peer name 0369et3
+sudo ip link delete 8f30et5 type veth peer name 3226et3
+sudo ip link delete 0aafet1 type veth peer name 7b82et1
+sudo ip link delete 0aafet4 type veth peer name 57e1et1
+sudo ip link delete 0aafet5 type veth peer name 57e1et3
+sudo ip link delete 0aafet6 type veth peer name 7b82et6
+sudo ip link delete 7b82et4 type veth peer name 57e1et2
+sudo ip link delete 7b82et5 type veth peer name 57e1et4
+sudo ip link delete 7b82et6 type veth peer name 57e1et6
+sudo ip link delete 0369et1 type veth peer name 3226et1
+sudo ip link delete 0369et4 type veth peer name a49det1
+sudo ip link delete 0369et5 type veth peer name a49det3
+sudo ip link delete 0369et6 type veth peer name 3226et6
+sudo ip link delete 3226et4 type veth peer name a49det2
+sudo ip link delete 3226et5 type veth peer name a49det4
+sudo ip link delete 3226et6 type veth peer name a49det6
 docker stop atdspine1
 docker stop atdspine1-net
 docker rm atdspine1
