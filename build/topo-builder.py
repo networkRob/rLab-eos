@@ -328,7 +328,6 @@ hostname {0}
         create_output.append(f'if ! [ -d "{CONFIGS}/{_tag}/{_node}" ]; then mkdir {CONFIGS}/{_tag}/{_node}; fi\n')
         create_output.append("# Creating the ceos-config file.\n")
         create_output.append(f'echo "SERIALNUMBER={CEOS[_node].ceos_name}" > {CONFIGS}/{_tag}/{_node}/ceos-config\n')
-        create_output.append(f'echo "SYSTEMMACADDR={CEOS[_node].system_mac}" >> {CONFIGS}/{_tag}/{_node}/ceos-config\n')
         if _tfa_version > 1:
             create_output.append('echo "TFA_VERSION={0}" >> {1}/{2}/{3}/ceos-config\n'.format(_tfa_version, CONFIGS, _tag, _node))
         # Perform check to see if a bare startup-config needs to be created
@@ -376,31 +375,35 @@ hostname {0}
             else:
                 create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
                 startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
-            # Perform check if mgmt network is available
+        # Get MGMT VETHS
+        create_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
+        create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
+        create_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 down\n")
+        create_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 address {CEOS[_node].system_mac}\n")
+        create_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 up\n")
+        create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
+        create_output.append("sleep 1\n")
+        startup_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
+        startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
+        startup_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 down\n")
+        startup_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 address {CEOS[_node].system_mac}\n")
+        startup_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 up\n")
+        startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
+        startup_output.append("sleep 1\n")
+        # Perform check if mgmt network is available
         if mgmt_network:
-            # Get MGMT VETHS
-            create_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
             create_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].ceos_name}-mgmt\n")
-            create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
-            create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
-            create_output.append("sleep 1\n")
+            startup_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].ceos_name}-mgmt\n")
             if container_runtime == "docker":
                 create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             else:
                 create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
-            startup_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
-            startup_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].ceos_name}-mgmt\n")
-            startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
-            startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
-            startup_output.append("sleep 1\n")
             if container_runtime == "docker":
                 startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             else:
                 startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
         else:
-            create_output.append("sleep 1\n")
             create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
-            startup_output.append("sleep 1\n")
             startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
     # Create initial host anchor containers
     for _host in HOSTS:
