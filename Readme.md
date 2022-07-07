@@ -78,26 +78,19 @@ images:
   registry: {LOCATION}
   ceos: {ceosimage_tag}
   host: {chostimage_tag}
+links:
+  - [["spine1", "et1"], ["spine2", "et1"]]
+  - [["spine1", "et2"], ["leaf1", "et1"]]
+  - [["leaf1", "et3"], ["host10", "et0"]]
 nodes:
   spine1:
     mac: 00:1c:73:c0:c6:01
     ipaddress: 192.168.0.10
-    neighbors:
-      - neighborDevice: spine2
-        neighborPort: Ethernet1
-        port: Ethernet1
-      - neighborDevice: leaf1
-        neighborPort: Ethernet1
-        port: Ethernet2
 hosts:
   host10:
     ipaddress: 10.0.12.11
     mask: 255.255.255.0
     gateway: 10.0.12.1
-    neighbors:
-      - neighborDevice: leaf1
-        neighborPort: Ethernet3
-        port: Ethernet0
 iperf:
   port: 5010
   brate: 1000000
@@ -115,7 +108,7 @@ commands:
 - The `MGMT_NETWORK_GATEWAY` parameter is optional, this is if a bare startup-config is created, but should be specified if the `MGMT_BRIDGE` parameter is set.
 - The `LOCATION` parameter should be set to `local` as default. Update this to the url of any private/remote registries.
 - The `mac` section for each cEOS-lab node needs to be unique, this sets the mgmt interface MAC Address which also sets the system-id.
-- The `neighbors` section for each cEOS-lab node is a mapping to the remote peer and which interfaces to connect.
+- The `links` section is used to create a "virtual" patch cable between each node.
 - If you do not want to run iperf on the host nodes, you can leave that section empty and only set `iperf:`
 - The `commands:` section can create additional bash scripts to load new configurations on the nodes.  The `topologies/ratd.yaml` file has examples for this.
 

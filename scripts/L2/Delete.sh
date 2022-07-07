@@ -1,17 +1,17 @@
 #!/bin/bash
-sudo ip link delete l2spine1et1 type veth peer name l2spine2et1
-sudo ip link delete l2spine1et2 type veth peer name l2leaf1et1
-sudo ip link delete l2spine1et3 type veth peer name l2leaf2et1
-sudo ip link delete l2spine1et4 type veth peer name l2leaf3et1
-sudo ip link delete l2spine2et2 type veth peer name l2leaf1et2
-sudo ip link delete l2spine2et3 type veth peer name l2leaf2et2
-sudo ip link delete l2spine2et4 type veth peer name l2leaf3et2
-sudo ip link delete l2leaf1et3 type veth peer name l2host10et0
-sudo ip link delete l2leaf1et4 type veth peer name l2host11et0
-sudo ip link delete l2leaf2et3 type veth peer name l2host20et0
-sudo ip link delete l2leaf2et4 type veth peer name l2host21et0
-sudo ip link delete l2leaf3et3 type veth peer name l2host30et0
-sudo ip link delete l2leaf3et4 type veth peer name l2host31et0
+sudo ip link delete 32ceet1 type veth peer name 429det1
+sudo ip link delete 32ceet2 type veth peer name 6f70et1
+sudo ip link delete 32ceet3 type veth peer name c06fet1
+sudo ip link delete 32ceet4 type veth peer name fbb5et1
+sudo ip link delete 429det2 type veth peer name 6f70et2
+sudo ip link delete 429det3 type veth peer name c06fet2
+sudo ip link delete 429det4 type veth peer name fbb5et2
+sudo ip link delete 6f70et3 type veth peer name 29a4et0
+sudo ip link delete 6f70et4 type veth peer name 98b4et0
+sudo ip link delete c06fet3 type veth peer name 0bccet0
+sudo ip link delete c06fet4 type veth peer name b143et0
+sudo ip link delete fbb5et3 type veth peer name 2092et0
+sudo ip link delete fbb5et4 type veth peer name 5aacet0
 docker stop l2spine1
 docker stop l2spine1-net
 docker rm l2spine1

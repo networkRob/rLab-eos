@@ -1,30 +1,30 @@
 #!/bin/bash
-sudo ip link delete l3spine1et1 type veth peer name l3leaf11et2
-sudo ip link delete l3spine1et2 type veth peer name l3leaf12et2
-sudo ip link delete l3spine1et3 type veth peer name l3leaf21et2
-sudo ip link delete l3spine1et4 type veth peer name l3leaf22et2
-sudo ip link delete l3spine1et5 type veth peer name l3leaf31et2
-sudo ip link delete l3spine1et6 type veth peer name l3leaf32et2
-sudo ip link delete l3spine1et7 type veth peer name l3brdr1et2
-sudo ip link delete l3spine1et8 type veth peer name l3brdr2et2
-sudo ip link delete l3spine2et1 type veth peer name l3leaf11et3
-sudo ip link delete l3spine2et2 type veth peer name l3leaf12et3
-sudo ip link delete l3spine2et3 type veth peer name l3leaf21et3
-sudo ip link delete l3spine2et4 type veth peer name l3leaf22et3
-sudo ip link delete l3spine2et5 type veth peer name l3leaf31et3
-sudo ip link delete l3spine2et6 type veth peer name l3leaf32et3
-sudo ip link delete l3spine2et7 type veth peer name l3brdr1et3
-sudo ip link delete l3spine2et8 type veth peer name l3brdr2et3
-sudo ip link delete l3leaf11et1 type veth peer name l3leaf12et1
-sudo ip link delete l3leaf11et4 type veth peer name l3host11et0
-sudo ip link delete l3leaf11et5 type veth peer name l3host12et0
-sudo ip link delete l3leaf21et1 type veth peer name l3leaf22et1
-sudo ip link delete l3leaf21et4 type veth peer name l3host21et0
-sudo ip link delete l3leaf22et4 type veth peer name l3host22et0
-sudo ip link delete l3leaf31et1 type veth peer name l3leaf32et1
-sudo ip link delete l3leaf31et4 type veth peer name l3host31et0
-sudo ip link delete l3leaf31et5 type veth peer name l3host32et0
-sudo ip link delete l3brdr1et1 type veth peer name l3brdr2et1
+sudo ip link delete 52bcet1 type veth peer name 69f0et2
+sudo ip link delete 52bcet2 type veth peer name b332et2
+sudo ip link delete 52bcet3 type veth peer name 3979et2
+sudo ip link delete 52bcet4 type veth peer name a9daet2
+sudo ip link delete 52bcet5 type veth peer name f3adet2
+sudo ip link delete 52bcet6 type veth peer name 3b37et2
+sudo ip link delete 52bcet7 type veth peer name 9eaaet2
+sudo ip link delete 52bcet8 type veth peer name 69b5et2
+sudo ip link delete 80ceet1 type veth peer name 69f0et3
+sudo ip link delete 80ceet2 type veth peer name b332et3
+sudo ip link delete 80ceet3 type veth peer name 3979et3
+sudo ip link delete 80ceet4 type veth peer name a9daet3
+sudo ip link delete 80ceet5 type veth peer name f3adet3
+sudo ip link delete 80ceet6 type veth peer name 3b37et3
+sudo ip link delete 80ceet7 type veth peer name 9eaaet3
+sudo ip link delete 80ceet8 type veth peer name 69b5et3
+sudo ip link delete 69f0et1 type veth peer name b332et1
+sudo ip link delete 69f0et4 type veth peer name 8d5aet0
+sudo ip link delete 69f0et5 type veth peer name 679det0
+sudo ip link delete 3979et1 type veth peer name a9daet1
+sudo ip link delete 3979et4 type veth peer name 8872et0
+sudo ip link delete a9daet4 type veth peer name 0259et0
+sudo ip link delete f3adet1 type veth peer name 3b37et1
+sudo ip link delete f3adet4 type veth peer name 0c74et0
+sudo ip link delete f3adet5 type veth peer name 361aet0
+sudo ip link delete 9eaaet1 type veth peer name 69b5et1
 docker stop l3spine1
 docker stop l3spine1-net
 docker rm l3spine1
