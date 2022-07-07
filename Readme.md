@@ -114,7 +114,7 @@ commands:
 - The `MGMT_BRIDGE` parameter is optional, this is if you wish to attach the cEOS containers Management0 Interface to this network.
 - The `MGMT_NETWORK_GATEWAY` parameter is optional, this is if a bare startup-config is created, but should be specified if the `MGMT_BRIDGE` parameter is set.
 - The `LOCATION` parameter should be set to `local` as default. Update this to the url of any private/remote registries.
-- The `mac` section for each cEOS-lab node needs to be unique, this helps specify the correct system-id in cEOS so MLAG will function properly.
+- The `mac` section for each cEOS-lab node needs to be unique, this sets the mgmt interface MAC Address which also sets the system-id.
 - The `neighbors` section for each cEOS-lab node is a mapping to the remote peer and which interfaces to connect.
 - If you do not want to run iperf on the host nodes, you can leave that section empty and only set `iperf:`
 - The `commands:` section can create additional bash scripts to load new configurations on the nodes.  The `topologies/ratd.yaml` file has examples for this.
