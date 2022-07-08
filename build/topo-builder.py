@@ -44,8 +44,8 @@ class CEOS_NODE():
         Function to create port mappings.
         """
         for intf in node_neighbors:
-            lport = intf['port']
-            rport = intf['neighborPort']
+            lport = intf['port'].replace('/', '_')
+            rport = intf['neighborPort'].replace('/', '_')
             rneigh = CEOS_MAPPER[intf['neighborDevice']]
             _vethCheck = checkVETH('{0}{1}'.format(self.dev_id, lport), '{0}{1}'.format(rneigh, rport))
             if _vethCheck['status']:
@@ -75,8 +75,8 @@ class HOST_NODE():
         Function to create port mappings.
         """
         for intf in node_neighbors:
-            lport = intf['port']
-            rport = intf['neighborPort']
+            lport = intf['port'].replace('/', '_')
+            rport = intf['neighborPort'].replace('/', '_')
             rneigh = CEOS_MAPPER[intf['neighborDevice']]
             _vethCheck = checkVETH('{0}{1}'.format(self.dev_id, lport), '{0}{1}'.format(rneigh, rport))
             if _vethCheck['status']:
