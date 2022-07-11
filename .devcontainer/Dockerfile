@@ -1,7 +1,7 @@
 FROM python:3.10
 
 RUN apt update \
-    && apt install -y sudo vim git \
+    && apt install -y man-db sudo vim git \
     zip cloc zsh zsh-syntax-highlighting  \
     zsh-doc less software-properties-common \
     graphviz
