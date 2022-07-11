@@ -46,8 +46,8 @@ class CEOS_NODE():
         for intf in node_neighbors:
             lport = intf['port'].replace('/', '_')
             rport = intf['neighborPort'].replace('/', '_')
-            rneigh = CEOS_MAPPER[intf['neighborDevice']]
-            _vethCheck = checkVETH('{0}{1}'.format(self.dev_id, lport), '{0}{1}'.format(rneigh, rport))
+            rneigh = f"{self.tag}{CEOS_MAPPER[intf['neighborDevice']]}"
+            _vethCheck = checkVETH(f"{self.tag}{self.dev_id}{lport}", f"{rneigh}{rport}")
             if _vethCheck['status']:
                 pS("OK", f"Found Patch Cable for {self.name} {lport} to {intf['neighborDevice']} {rport} will be created.")
                 VETH_PAIRS.append(_vethCheck['name'])
@@ -77,8 +77,8 @@ class HOST_NODE():
         for intf in node_neighbors:
             lport = intf['port'].replace('/', '_')
             rport = intf['neighborPort'].replace('/', '_')
-            rneigh = CEOS_MAPPER[intf['neighborDevice']]
-            _vethCheck = checkVETH('{0}{1}'.format(self.dev_id, lport), '{0}{1}'.format(rneigh, rport))
+            rneigh = f"{self.tag}{CEOS_MAPPER[intf['neighborDevice']]}"
+            _vethCheck = checkVETH(f"{self.tag}{self.dev_id}{lport}", f"{rneigh}{rport}")
             if _vethCheck['status']:
                 pS("OK", f"Found Patch Cable for {self.name} {lport} to {intf['neighborDevice']} {rport} will be created.")
                 VETH_PAIRS.append(_vethCheck['name'])
