@@ -6,6 +6,7 @@ from os.path import exists
 from os import makedirs, getcwd
 import argparse
 import secrets
+import hashlib
 
 BASE_PATH = getcwd()
 CONFIGS = BASE_PATH + "/configs"
@@ -201,6 +202,17 @@ def main(args):
     hosts = topo_yaml['hosts']
     _ceos_script_location = "{0}/{1}".format(CEOS_SCRIPTS, _tag)
     _tfa_version = 1
+    BASE_AUTHENTICATION = """
+aaa authentication login default local
+aaa authentication login console local
+aaa authorization exec default local
+aaa authorization commands all default local
+!
+no aaa root
+!
+username {username} privilege 15 role network-admin secret sha512 {password}
+!    
+    """
     BASE_TERMINATTR = """
 daemon TerminAttr
    exec /usr/bin/TerminAttr -cvaddr={0}:9910 -taillogs -cvcompression=gzip -cvauth=key,{1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
@@ -260,6 +272,18 @@ hostname {0}
 
     if create_startup:
         pS("INFO", "Bare Startup config will be created for all cEOS nodes")
+        # Check for username/password
+        try:
+            mgmt_user = topo_yaml['topology']['username']
+            mgmt_pass = topo_yaml['topology']['password']
+        except KeyError:
+            pS("No username/password provided in build file")
+            mgmt_user = ''
+            mgmt_pass = ''
+        if mgmt_pass:
+            h = hashlib.sha512()
+            h.update(mgmt_pass.encode())
+            mgmt_pass = h.hexdigest()
     # Perform check on container registry option
     if container_registry == "local":
         registry_cmd = ""
@@ -292,7 +316,7 @@ hostname {0}
             pS("INFO", "Leveraging default dataplane")
     except:
         pS("INFO", "Leveraging default dataplane")
-
+    
     # Load and Gather network Link information
     pS("INFO", "Gathering patch cable lengths and quantities...")
     for _link in links:
@@ -401,6 +425,11 @@ hostname {0}
             create_output.append(f"# Creating a bare startup configuration for {_node}\n")
             _tmp_startup = []
             _tmp_startup.append(BASE_STARTUP.format(CEOS[_node].ceos_name))
+            if mgmt_user:
+                _tmp_startup.append(BASE_AUTHENTICATION.format(
+                    username = mgmt_user,
+                    password = mgmt_pass
+                ))
             if mgmt_network:
                 if mgmt_vrf != "default":
                     _tmp_startup.append(BASE_MGMT_VRF.format(CEOS[_node].ip, topo_yaml['infra']['gateway'], mgmt_vrf))

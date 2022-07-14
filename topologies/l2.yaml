@@ -3,6 +3,8 @@ topology:
   vforward: 1
   cvpaddress: 192.168.49.12
   cvp-key: rob-lab
+  username: arista
+  password: d8e17edbd241a98f977e3340c63a62a31242e0c6b2905a74d46f7a15b594c27cce65c4b91a9c5805d566d012c4cbc2d4278765ade9f12b76e741ba2d790fc694
 infra:
   bridge: vmgmt
   vrf: MGMT

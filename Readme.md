@@ -40,6 +40,7 @@ sudo reboot now
 
 ### Getting Started
 To build a new topology, the following files/data structures need to be created.
+- `build/password_hash.py` - This script will generate a SHA512 hashed password to be entered into the topology yaml file.
 - `topologies/{name}.yaml` - This file is leveraged by `build/topo-builder.py` to create the necessary commands to build the topology.
 - `build/yamlviz.py` This script will draw a cabling diagram of your topology. It writes a PNG image named after your topology in the `topologies/` directory. 
 - `build/topo-build.sh` This is a wrapper script that calls both `build/topo-builder.py` and `build/yamlviz.py`
@@ -71,6 +72,8 @@ topology:
   vforward: 1
   cvpaddress: {CVP_IPADDRESS}
   cvp-key: {CVP_KEY}
+  username: {USERNAME}
+  password: {PASSWORD}
 infra:
   bridge: {MGMT_BRIDGE}
   gateway: {MGMT_NETWORK_GATEWAY}
@@ -104,6 +107,8 @@ commands:
 
 - The `CVP_IPADDRESS` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP.
 - The `CVP_KEY` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP.
+- The `USERNAME` parameter is optional, this is if a bare startup-config is created. It will generate a local user account in EOS.
+- The `PASSWORD` parameter is optional, this is if a bare startup-config is created. It will generate the password for the local user account.
 - The `MGMT_BRIDGE` parameter is optional, this is if you wish to attach the cEOS containers Management0 Interface to this network.
 - The `MGMT_NETWORK_GATEWAY` parameter is optional, this is if a bare startup-config is created, but should be specified if the `MGMT_BRIDGE` parameter is set.
 - The `LOCATION` parameter should be set to `local` as default. Update this to the url of any private/remote registries.
