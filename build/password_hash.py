@@ -4,7 +4,7 @@
 Script leveraged to generate a SHA512 hashed password to be put into the topology yaml file.
 """
 
-import hashlib
+import crypt
 import getpass
 
 def main():
@@ -17,9 +17,7 @@ def main():
         else:
             print("Passwords do not match. Please re-enter")
 
-    h = hashlib.sha512()
-    h.update(user_pass.encode())
-    mgmt_pass = h.hexdigest()
+    mgmt_pass = crypt.crypt(user_pass, crypt.METHOD_SHA512)
     print(f"\nSHA512 Hash:\n{mgmt_pass}")
 
 if __name__ == '__main__':
