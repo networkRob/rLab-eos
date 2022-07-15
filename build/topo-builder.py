@@ -275,7 +275,7 @@ hostname {0}
         # Check for username/password
         try:
             mgmt_user = topo_yaml['topology']['username']
-            mgmt_pass = topo_yaml['topology']['password']
+            mgmt_pass = topo_yaml['topology']['password'].replace("$", "\$")
         except KeyError:
             pS("No username/password provided in build file")
             mgmt_user = ''
