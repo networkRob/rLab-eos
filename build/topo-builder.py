@@ -280,10 +280,6 @@ hostname {0}
             pS("No username/password provided in build file")
             mgmt_user = ''
             mgmt_pass = ''
-        if mgmt_pass:
-            h = hashlib.sha512()
-            h.update(mgmt_pass.encode())
-            mgmt_pass = h.hexdigest()
     # Perform check on container registry option
     if container_registry == "local":
         registry_cmd = ""
