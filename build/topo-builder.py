@@ -20,6 +20,7 @@ HOSTS = {}
 CEOS_IDS = []
 CEOS_MAPPER = {}
 CEOS_LINKS = {}
+DEVICE_INFO = ["\n# Device Info Mapping\n# =====================\n"]
 # Setting inotify value to 40 times EOS base value
 NOTIFY_ADJUST = """
 sudo sh -c 'echo "fs.inotify.max_user_instances = {notify_instances}" > /etc/sysctl.d/99-zceos.conf'
@@ -369,17 +370,20 @@ hostname {0}
             _node_ip = ""
         _node_name = list(_node.keys())[0]
         CEOS[_node_name] = CEOS_NODE(_node_name, _node_ip, _node['mac'], CEOS_LINKS[_node_name], _tag, ceos_image)
+        DEVICE_INFO.append(f"# {_node_name} = {CEOS[_node_name].tag}{CEOS[_node_name].dev_id}\n")
     # Load Host nodes specific information
     if hosts:
         for _host in hosts:
             _host_name = list(_host.keys())[0]
             HOSTS[_host_name] = HOST_NODE(_host_name, _host['ip_addr'], _host['mask'], _host['gateway'], CEOS_LINKS[_host_name], _tag, host_image)
+            DEVICE_INFO.append(f"# {_host_name} = {HOSTS[_host_name].tag}{HOSTS[_host_name].dev_id}\n")
     # Check for output directory
     if checkDir(_ceos_script_location):
         pS("OK", "Directory is present now.")
     else:
         pS("iBerg", "Error creating directory.")
     create_output.append("#!/bin/bash\n")
+    create_output += DEVICE_INFO
     create_output.append(NOTIFY_ADJUST)
     # Check for container images are present in local registry deployment
     if container_registry == "local":
@@ -391,9 +395,12 @@ hostname {0}
         create_output.append(f"echo \"{registry_cmd} will be leveraged for cEOS and cHost images\"\n")
     create_output.append(f"sudo ip netns add {_tag}\n")
     startup_output.append("#!/bin/bash\n")
+    startup_output += DEVICE_INFO
     startup_output.append(NOTIFY_ADJUST)
     stop_output.append("#!/bin/bash\n")
+    stop_output += DEVICE_INFO
     delete_output.append("#!/bin/bash\n")
+    delete_output += DEVICE_INFO
     startup_output.append(f"sudo ip netns add {_tag}\n")
     delete_net_output.append(f"sudo ip netns delete {_tag}\n")
     # Get the veths created
@@ -442,7 +449,7 @@ hostname {0}
         create_output.append(f"{cnt_cmd} run -d --restart=always --log-opt max-size=10k --name={CEOS[_node].ceos_name}-net --net=none busybox /bin/init\n")
         startup_output.append(f"{cnt_cmd} start {CEOS[_node].ceos_name}-net\n")
         create_output.append(f"{CEOS[_node].ceos_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
-        create_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].ceos_name}\n")
+        create_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
         # Stop cEOS containers
         startup_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}\n")
         stop_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}\n")
@@ -453,38 +460,38 @@ hostname {0}
         startup_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}\n")
         delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}\n")
         delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}-net\n")
-        delete_net_output.append(f"sudo rm -rf /var/run/netns/{CEOS[_node].ceos_name}\n")
+        delete_net_output.append(f"sudo rm -rf /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
         startup_output.append(f"{CEOS[_node].ceos_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
-        startup_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].ceos_name}\n")
+        startup_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
         create_output.append(f"# Connecting cEOS containers together\n")
         # Output veth commands
         for _intf in CEOS[_node].intfs:
             _tmp_intf = CEOS[_node].intfs[_intf]
             if CEOS[_node].dev_id in  _tmp_intf['veth'].split('-')[0]:
-                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
-                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
+                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].tag}{CEOS[_node].dev_id} name {_tmp_intf['port']} up\n")
+                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].tag}{CEOS[_node].dev_id} name {_tmp_intf['port']} up\n")
             else:
-                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
-                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].ceos_name} name {_tmp_intf['port']} up\n")
+                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].tag}{CEOS[_node].dev_id} name {_tmp_intf['port']} up\n")
+                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].tag}{CEOS[_node].dev_id} name {_tmp_intf['port']} up\n")
         # Get MGMT VETHS
-        create_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
-        create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
-        create_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 down\n")
-        create_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 address {CEOS[_node].system_mac}\n")
-        create_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 up\n")
-        create_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
+        create_output.append(f"sudo ip link add {CEOS[_node].tag}{CEOS[_node].dev_id}-eth0 type veth peer name {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt\n")
+        create_output.append(f"sudo ip link set {CEOS[_node].tag}{CEOS[_node].dev_id}-eth0 netns {CEOS[_node].tag}{CEOS[_node].dev_id} name eth0 up\n")
+        create_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 down\n")
+        create_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 address {CEOS[_node].system_mac}\n")
+        create_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 up\n")
+        create_output.append(f"sudo ip link set {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt up\n")
         create_output.append("sleep 1\n")
-        startup_output.append(f"sudo ip link add {CEOS[_node].ceos_name}-eth0 type veth peer name {CEOS[_node].ceos_name}-mgmt\n")
-        startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-eth0 netns {CEOS[_node].ceos_name} name eth0 up\n")
-        startup_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 down\n")
-        startup_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 address {CEOS[_node].system_mac}\n")
-        startup_output.append(f"sudo ip netns exec {CEOS[_node].ceos_name} ip link set dev eth0 up\n")
-        startup_output.append(f"sudo ip link set {CEOS[_node].ceos_name}-mgmt up\n")
+        startup_output.append(f"sudo ip link add {CEOS[_node].tag}{CEOS[_node].dev_id}-eth0 type veth peer name {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt\n")
+        startup_output.append(f"sudo ip link set {CEOS[_node].tag}{CEOS[_node].dev_id}-eth0 netns {CEOS[_node].tag}{CEOS[_node].dev_id} name eth0 up\n")
+        startup_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 down\n")
+        startup_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 address {CEOS[_node].system_mac}\n")
+        startup_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 up\n")
+        startup_output.append(f"sudo ip link set {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt up\n")
         startup_output.append("sleep 1\n")
         # Perform check if mgmt network is available
         if mgmt_network:
-            create_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].ceos_name}-mgmt\n")
-            startup_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].ceos_name}-mgmt\n")
+            create_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt\n")
+            startup_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt\n")
             if container_runtime == "docker":
                 create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} --log-opt max-size=1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
             else:
@@ -502,7 +509,7 @@ hostname {0}
         create_output.append(f"{cnt_cmd} run -d --restart=always --log-opt max-size=10k --name={HOSTS[_host].c_name}-net --net=none busybox /bin/init\n")
         startup_output.append(f"{cnt_cmd} start {HOSTS[_host].c_name}-net\n")
         create_output.append(f"{HOSTS[_host].c_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
-        create_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].c_name}\n")
+        create_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].tag}{HOSTS[_host].dev_id}\n")
         # Stop host containers
         startup_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}\n")
         stop_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}\n")
@@ -513,18 +520,19 @@ hostname {0}
         startup_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}\n")
         delete_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}\n")
         delete_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}-net\n")
+        delete_net_output.append(f"sudo rm -rf /var/run/netns/{HOSTS[_host].tag}{HOSTS[_host].dev_id}\n")
         startup_output.append(f"{HOSTS[_host].c_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
-        startup_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].c_name}\n")
+        startup_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].tag}{HOSTS[_host].dev_id}\n")
         create_output.append("# Connecting host containers together\n")
         # Output veth commands
         for _intf in HOSTS[_host].intfs:
             _tmp_intf = HOSTS[_host].intfs[_intf]
             if HOSTS[_host].dev_id in  _tmp_intf['veth'].split('-')[0]:
-                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].c_name} name {_tmp_intf['port']} up\n")
-                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].c_name} name {_tmp_intf['port']} up\n")
+                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].tag}{HOSTS[_host].dev_id} name {_tmp_intf['port']} up\n")
+                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].tag}{HOSTS[_host].dev_id} name {_tmp_intf['port']} up\n")
             else:
-                create_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], HOSTS[_host].c_name, _tmp_intf['port']))
-                startup_output.append("sudo ip link set {0} netns {1} name {2} up\n".format(_tmp_intf['veth'].split('-')[1], HOSTS[_host].c_name, _tmp_intf['port']))
+                create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {HOSTS[_host].tag}{HOSTS[_host].dev_id} name {_tmp_intf['port']} up\n")
+                startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {HOSTS[_host].tag}{HOSTS[_host].dev_id} name {_tmp_intf['port']} up\n")
         create_output.append("sleep 1\n")
         create_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged --log-opt max-size=1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} {registry_cmd}chost:{HOSTS[_host].image} ipnet\n")
         startup_output.append("sleep 1\n")
