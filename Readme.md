@@ -41,6 +41,7 @@ sudo reboot now
 ### Getting Started
 To build a new topology, the following files/data structures need to be created.
 - `build/password_hash.py` - This script will generate a SHA512 hashed password to be entered into the topology yaml file.
+- `examples/topologies/{name}.yaml` - This directory containers some example/sample topology files to help get started. These can be copied to the `topologies/` directory for use.
 - `topologies/{name}.yaml` - This file is leveraged by `build/topo-builder.py` to create the necessary commands to build the topology.
 - `build/yamlviz.py` This script will draw a cabling diagram of your topology. It writes a PNG image named after your topology in the `topologies/` directory. 
 - `build/topo-build.sh` This is a wrapper script that calls both `build/topo-builder.py` and `build/yamlviz.py`
