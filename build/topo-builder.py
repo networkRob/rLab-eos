@@ -6,7 +6,7 @@ from os.path import exists
 from os import makedirs, getcwd
 import argparse
 import secrets
-import hashlib
+import random
 
 BASE_PATH = getcwd()
 CONFIGS = BASE_PATH + "/configs"
@@ -14,6 +14,7 @@ CEOS_NODES = BASE_PATH + "/nodes"
 CEOS_SCRIPTS = BASE_PATH + "/scripts"
 sleep_delay = 30
 NOTIFY_BASE = 1250
+ALL_MACS = []
 VETH_PAIRS = []
 CEOS = {}
 HOSTS = {}
@@ -30,14 +31,15 @@ sudo sysctl -w fs.inotify.max_user_instances={notify_instances}
 )
 
 class CEOS_NODE():
-    def __init__(self, node_name, node_ip, node_sys_mac, node_neighbors, _tag, image):
+    def __init__(self, node_name, node_ip, node_mgmt_mac, node_neighbors, _tag, image):
         self.name = node_name
         self.ip = node_ip
         self.tag = _tag.lower()
         self.image = image
         self.ceos_name = self.tag + self.name
         self.intfs = {}
-        self.system_mac = node_sys_mac
+        self.mgmt_mac = node_mgmt_mac
+        self.system_mac = generateMac()
         self.dev_id = CEOS_MAPPER[self.name]
         self.portMappings(node_neighbors)
 
@@ -162,6 +164,21 @@ def checkDir(path):
             return(False)
     else:
         return(True)
+
+def generateMac():
+    """
+    Function to generate a unique MAC Address.
+    This would be used to create a unique system MAC in a topology.
+    """
+    _tmp_mac = f"00:1c:73:{hex(random.randint(0, 255))[2:]}:{hex(random.randint(0, 255))[2:]}:{hex(random.randint(0, 255))[2:]}"
+    while True:
+        if _tmp_mac not in ALL_MACS:
+            ALL_MACS.append(_tmp_mac)
+            return(_tmp_mac)
+        else:
+            print("Duplicate")
+            _tmp_mac = f"00:1c:73:{hex(random.randint(0, 255))[2:]}:{hex(random.randint(0, 255))[2:]}:{hex(random.randint(0, 255))[2:]}"
+    
 
 
 def createMac(dev_id):
@@ -362,6 +379,12 @@ hostname {0}
             CEOS_IDS.append(_container_uid)
             CEOS_MAPPER[_node_name] = _container_uid
 
+    # Parse through and grab all configured MACs for cEOS nodes
+    # Redundant to do this, but necessary to grab all configured MACs
+    # prior to generating system macs to prevent duplicates
+    for _node in nodes:
+        ALL_MACS.append(_node['mac'])
+
     # Load cEOS nodes specific information
     for _node in nodes:
         try:
@@ -421,6 +444,7 @@ hostname {0}
         create_output.append(f'if ! [ -d "{CONFIGS}/{_tag}/{_node}" ]; then mkdir {CONFIGS}/{_tag}/{_node}; fi\n')
         create_output.append("# Creating the ceos-config file.\n")
         create_output.append(f'echo "SERIALNUMBER={CEOS[_node].ceos_name}" > {CONFIGS}/{_tag}/{_node}/ceos-config\n')
+        create_output.append(f'echo "SYSTEMMACADDR={CEOS[_node].system_mac}" >> {CONFIGS}/{_tag}/{_node}/ceos-config\n')
         if _tfa_version > 1:
             create_output.append('echo "TFA_VERSION={0}" >> {1}/{2}/{3}/ceos-config\n'.format(_tfa_version, CONFIGS, _tag, _node))
         # Perform check to see if a bare startup-config needs to be created
@@ -477,14 +501,14 @@ hostname {0}
         create_output.append(f"sudo ip link add {CEOS[_node].tag}{CEOS[_node].dev_id}-eth0 type veth peer name {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt\n")
         create_output.append(f"sudo ip link set {CEOS[_node].tag}{CEOS[_node].dev_id}-eth0 netns {CEOS[_node].tag}{CEOS[_node].dev_id} name eth0 up\n")
         create_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 down\n")
-        create_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 address {CEOS[_node].system_mac}\n")
+        create_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 address {CEOS[_node].mgmt_mac}\n")
         create_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 up\n")
         create_output.append(f"sudo ip link set {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt up\n")
         create_output.append("sleep 1\n")
         startup_output.append(f"sudo ip link add {CEOS[_node].tag}{CEOS[_node].dev_id}-eth0 type veth peer name {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt\n")
         startup_output.append(f"sudo ip link set {CEOS[_node].tag}{CEOS[_node].dev_id}-eth0 netns {CEOS[_node].tag}{CEOS[_node].dev_id} name eth0 up\n")
         startup_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 down\n")
-        startup_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 address {CEOS[_node].system_mac}\n")
+        startup_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 address {CEOS[_node].mgmt_mac}\n")
         startup_output.append(f"sudo ip netns exec {CEOS[_node].tag}{CEOS[_node].dev_id} ip link set dev eth0 up\n")
         startup_output.append(f"sudo ip link set {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt up\n")
         startup_output.append("sleep 1\n")
