@@ -125,8 +125,8 @@ Here are the steps required to get it running for the first time. Examples for b
 
 1. Import a cEOS-lab container archive:
 ```
-docker import  --change 'VOLUME /mnt/flash/' cEOS-lab.tar.xz ceosimage:{ceosimage_tag}
-sudo podman import  --change 'VOLUME /mnt/flash/' cEOS-lab.tar.xz ceosimage:{ceosimage_tag}
+docker import cEOS-lab.tar.xz ceosimage:{ceosimage_tag}
+sudo podman import cEOS-lab.tar.xz ceosimage:{ceosimage_tag}
 ```
 {ceosimage_tag} = tag for the image, ie `4.23.1F`
 
