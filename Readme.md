@@ -41,6 +41,7 @@ sudo reboot now
 ### Getting Started
 To build a new topology, the following files/data structures need to be created.
 - `build/password_hash.py` - This script will generate a SHA512 hashed password to be entered into the topology yaml file.
+- `examples/topologies/{name}.yaml` - This directory containers some example/sample topology files to help get started. These can be copied to the `topologies/` directory for use.
 - `topologies/{name}.yaml` - This file is leveraged by `build/topo-builder.py` to create the necessary commands to build the topology.
 - `build/yamlviz.py` This script will draw a cabling diagram of your topology. It writes a PNG image named after your topology in the `topologies/` directory. 
 - `build/topo-build.sh` This is a wrapper script that calls both `build/topo-builder.py` and `build/yamlviz.py`
@@ -137,7 +138,13 @@ sudo podman build -t chost:{chostimage_tag} build/hosts/.
 ```
 {chostimage_tag} = tag for the image, ie `0.5`
 
-3. Create the topology scripts:
+3. Copy or create a topology definition file. Example definition files are found in `examples/topologies`. As a quick-start, copy one of the definition files to the `topologies/` directory. Otherwise you may create your own topology definition file and save it in `topologies/`
+
+```
+cp examples/topologies/l2.yaml topologies
+```
+
+4. Create the topology scripts:
 To create the necessary scripts and leverage either no startup-configs or leverage already provided ones:
 ```
 ./topo-build.sh -t {topo}
@@ -174,7 +181,7 @@ or
 build/topo-builder.py -t {topo} -s
 ```
 
-4. The `topo-builder.py` script will create a minimum of 4 bash scripts.  They are located in `scripts/{TOPO_NAME}/`.  It is important to run the commands for the project directories top-level directory.
+5. The `topo-builder.py` script will create a minimum of 4 bash scripts.  They are located in `scripts/{TOPO_NAME}/`.  It is important to run the commands for the project directories top-level directory.
 The four main scripts created are as follows with their description:
 - `Create.sh` - Creates all Open vSwitch bridges, containers, starts containers and links all containers together.
 - `Start.sh` - Starts all stopped containers and links all containers together.
