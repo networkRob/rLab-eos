@@ -444,9 +444,11 @@ hostname {0}
         # Add in code to perform check in configs directory and create a basis for ceos-config
         create_output.append("# Checking for configs directory for each cEOS node\n")
         create_output.append(f'if ! [ -d "{CONFIGS}/{_tag}/{_node}" ]; then mkdir {CONFIGS}/{_tag}/{_node}; fi\n')
+        create_output.append(f'if ! [ -f "{CONFIGS}/{_tag}/{_node}/ceos-config" ]; then ')
         create_output.append("# Creating the ceos-config file.\n")
         create_output.append(f'echo "SERIALNUMBER={CEOS[_node].ceos_name}" > {CONFIGS}/{_tag}/{_node}/ceos-config\n')
         create_output.append(f'echo "SYSTEMMACADDR={CEOS[_node].system_mac}" >> {CONFIGS}/{_tag}/{_node}/ceos-config\n')
+        create_output.append('fi\n')
         if _tfa_version > 1:
             create_output.append('echo "TFA_VERSION={0}" >> {1}/{2}/{3}/ceos-config\n'.format(_tfa_version, CONFIGS, _tag, _node))
         # Perform check to see if a bare startup-config needs to be created
