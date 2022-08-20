@@ -10,6 +10,7 @@ To run the network topology on a container host machine, there are a few require
 | --------- | ------- | --------------- |
 | CentOS    | 7       | Docker          |
 | Fedora    | >=34    | Docker, Podman  |
+| Ubuntu    | >= 22.04| Docker, Podman  |
 
 #### Container Runtimes
 | Package   | Version   |
