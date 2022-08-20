@@ -14,6 +14,7 @@ CEOS_NODES = BASE_PATH + "/nodes"
 CEOS_SCRIPTS = BASE_PATH + "/scripts"
 sleep_delay = 30
 NOTIFY_BASE = 1250
+STOP_WAIT = 0
 ALL_MACS = []
 VETH_PAIRS = []
 CEOS = {}
@@ -25,7 +26,7 @@ DEVICE_INFO = ["\n# Device Info Mapping\n# =====================\n"]
 # Setting inotify value to 40 times EOS base value
 NOTIFY_ADJUST = """
 sudo sh -c 'echo "fs.inotify.max_user_instances = {notify_instances}" > /etc/sysctl.d/99-zceos.conf'
-sudo sysctl -w fs.inotify.max_user_instances={notify_instances}
+sudo sysctl -w fs.inotify.max_user_instances={notify_instances} 1> /dev/null 2> /dev/null
 """.format(
     notify_instances = (NOTIFY_BASE * 40)
 )
@@ -426,8 +427,8 @@ hostname {0}
     stop_output += DEVICE_INFO
     delete_output.append("#!/bin/bash\n")
     delete_output += DEVICE_INFO
-    startup_output.append(f"sudo ip netns add {_tag}\n")
-    delete_net_output.append(f"sudo ip netns delete {_tag}\n")
+    startup_output.append(f"sudo ip netns add {_tag} 1> /dev/null 2> /dev/null\n")
+    delete_net_output.append(f"sudo ip netns delete {_tag} 1> /dev/null 2> /dev/null\n")
     # Get the veths created
     create_output.append("# Creating veths\n")
 
@@ -435,13 +436,14 @@ hostname {0}
         _v1, _v2 = _veth.split("-")
         create_output.append(f"sudo ip link add {_v1} type veth peer name {_v2}\n")
         startup_output.append(f"sudo ip link add {_v1} type veth peer name {_v2}\n")
-        delete_output.append(f"sudo ip link delete {_v1} type veth peer name {_v2}\n")
+        # delete_output.append(f"sudo ip link delete {_v1} type veth peer name {_v2}\n")
     create_output.append("#\n#\n# Creating anchor containers\n#\n")
     # Create initial cEOS anchor containers
     create_output.append("# Checking to make sure topo config directory exists\n")
     create_output.append(f'if ! [ -d "{CONFIGS}/{_tag}" ]; then mkdir {CONFIGS}/{_tag}; fi\n')
     for _node in CEOS:
         # Add in code to perform check in configs directory and create a basis for ceos-config
+        create_output.append(f"echo \"Racking and Stacking {_node}\"\n")
         create_output.append("# Checking for configs directory for each cEOS node\n")
         create_output.append(f'if ! [ -d "{CONFIGS}/{_tag}/{_node}" ]; then mkdir {CONFIGS}/{_tag}/{_node}; fi\n')
         create_output.append(f'if ! [ -f "{CONFIGS}/{_tag}/{_node}/ceos-config" ]; then ')
@@ -473,21 +475,25 @@ hostname {0}
                         _tmp_startup.append(BASE_TERMINATTR.format(topo_yaml['topology']['cvpaddress'], topo_yaml['topology']['cvp-key']))
             create_output.append('echo "{0}" > {1}/{2}/{3}/startup-config\n'.format(''.join(_tmp_startup), CONFIGS, _tag, _node))
         # Creating anchor containers
+
+        create_output.append(f"echo \"Gathering patch cables for {_node}\"\n")
         create_output.append("# Getting {0} nodes plumbing\n".format(_node))
-        create_output.append(f"{cnt_cmd} run -d --restart=always {cnt_log}10k --name={CEOS[_node].ceos_name}-net --net=none busybox /bin/init\n")
-        startup_output.append(f"{cnt_cmd} start {CEOS[_node].ceos_name}-net\n")
+        create_output.append(f"{cnt_cmd} run -d --restart=always {cnt_log}10k --name={CEOS[_node].ceos_name}-net --net=none busybox /bin/init 1> /dev/null 2> /dev/null\n")
+        startup_output.append(f"{cnt_cmd} start {CEOS[_node].ceos_name}-net 1> /dev/null 2> /dev/null\n")
         create_output.append(f"{CEOS[_node].ceos_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
         create_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
         # Stop cEOS containers
-        startup_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}\n")
-        stop_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}\n")
-        stop_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}-net\n")
-        delete_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}\n")
-        delete_output.append(f"{cnt_cmd} stop {CEOS[_node].ceos_name}-net\n")
+        delete_output.append(f"echo \"Pulling power and removing patch cables from {_node}\"\n")
+        stop_output.append(f"echo \"Pulling power from {_node}\"\n")
+        startup_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {CEOS[_node].ceos_name} 1> /dev/null 2> /dev/null\n")
+        stop_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {CEOS[_node].ceos_name} 1> /dev/null 2> /dev/null\n")
+        stop_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {CEOS[_node].ceos_name}-net 1> /dev/null 2> /dev/null\n")
+        delete_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {CEOS[_node].ceos_name} 1> /dev/null 2> /dev/null\n")
+        delete_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {CEOS[_node].ceos_name}-net 1> /dev/null 2> /dev/null\n")
         # Remove cEOS containers
-        startup_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}\n")
-        delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}\n")
-        delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}-net\n")
+        startup_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name} 1> /dev/null 2> /dev/null\n")
+        delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name} 1> /dev/null 2> /dev/null\n")
+        delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}-net 1> /dev/null 2> /dev/null\n")
         delete_net_output.append(f"sudo rm -rf /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
         startup_output.append(f"{CEOS[_node].ceos_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
         startup_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
@@ -496,9 +502,11 @@ hostname {0}
         for _intf in CEOS[_node].intfs:
             _tmp_intf = CEOS[_node].intfs[_intf]
             if CEOS[_node].dev_id in  _tmp_intf['veth'].split('-')[0]:
+                create_output.append(f"echo \"Plugged patch cable into {_node} port {_tmp_intf['port']}\"\n")
                 create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].tag}{CEOS[_node].dev_id} name {_tmp_intf['port']} up\n")
                 startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {CEOS[_node].tag}{CEOS[_node].dev_id} name {_tmp_intf['port']} up\n")
             else:
+                create_output.append(f"echo \"Plugged patch cable into {_node} port {_tmp_intf['port']}\"\n")
                 create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].tag}{CEOS[_node].dev_id} name {_tmp_intf['port']} up\n")
                 startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {CEOS[_node].tag}{CEOS[_node].dev_id} name {_tmp_intf['port']} up\n")
         # Get MGMT VETHS
@@ -520,63 +528,73 @@ hostname {0}
         if mgmt_network:
             create_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt\n")
             startup_output.append(f"sudo brctl addif {mgmt_network} {CEOS[_node].tag}{CEOS[_node].dev_id}-mgmt\n")
+            create_output.append(f"echo \"Powering on {_node}\"\n")
+            startup_output.append(f"echo \"Powering on {_node}\"\n")
             if container_runtime == "docker":
-                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker 1> /dev/null 2> /dev/null\n")
             else:
-                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+                create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker 1> /dev/null 2> /dev/null\n")
             if container_runtime == "docker":
-                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --ip {CEOS[_node].ip} --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker 1> /dev/null 2> /dev/null\n")
             else:
-                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+                startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker 1> /dev/null 2> /dev/null\n")
         else:
-            create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
-            startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker\n")
+            create_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker 1> /dev/null 2> /dev/null\n")
+            startup_output.append(f"{cnt_cmd} run -d --name={CEOS[_node].ceos_name} {cnt_log}1m --net=container:{CEOS[_node].ceos_name}-net --privileged -v /etc/sysctl.d/99-zceos.conf:/etc/sysctl.d/99-zceos.conf:ro -v {CONFIGS}/{_tag}/{_node}:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t {registry_cmd}ceosimage:{CEOS[_node].image} /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker 1> /dev/null 2> /dev/null\n")
     # Create initial host anchor containers
+    create_output.append(f"echo \"Waiting on the server team to get their servers up and running...\"\n")
+    startup_output.append(f"echo \"Waiting on the server team to get their servers up and running...\"\n")
     for _host in HOSTS:
         create_output.append(f"# Getting {_host} nodes plumbing\n")
-        create_output.append(f"{cnt_cmd} run -d --restart=always {cnt_log}10k --name={HOSTS[_host].c_name}-net --net=none busybox /bin/init\n")
-        startup_output.append(f"{cnt_cmd} start {HOSTS[_host].c_name}-net\n")
+        create_output.append(f"{cnt_cmd} run -d --restart=always {cnt_log}10k --name={HOSTS[_host].c_name}-net --net=none busybox /bin/init 1> /dev/null 2> /dev/null\n")
+        startup_output.append(f"{cnt_cmd} start {HOSTS[_host].c_name}-net 1> /dev/null 2> /dev/null\n")
         create_output.append(f"{HOSTS[_host].c_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
         create_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].tag}{HOSTS[_host].dev_id}\n")
         # Stop host containers
-        startup_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}\n")
-        stop_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}\n")
-        stop_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}-net\n")
-        delete_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}\n")
-        delete_output.append(f"{cnt_cmd} stop {HOSTS[_host].c_name}-net\n")
+        delete_output.append(f"echo \"Pulling power and removing patch cables from {_host}\"\n")
+        stop_output.append(f"echo \"Pulling power from {_host}\"\n")
+        startup_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {HOSTS[_host].c_name} 1> /dev/null 2> /dev/null\n")
+        stop_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {HOSTS[_host].c_name} 1> /dev/null 2> /dev/null\n")
+        stop_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {HOSTS[_host].c_name}-net 1> /dev/null 2> /dev/null\n")
+        delete_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {HOSTS[_host].c_name} 1> /dev/null 2> /dev/null\n")
+        delete_output.append(f"{cnt_cmd} stop -t {STOP_WAIT} {HOSTS[_host].c_name}-net 1> /dev/null 2> /dev/null\n")
         # Remove host containers
-        startup_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}\n")
-        delete_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}\n")
-        delete_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}-net\n")
+        startup_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name} 1> /dev/null 2> /dev/null\n")
+        delete_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name} 1> /dev/null 2> /dev/null\n")
+        delete_output.append(f"{cnt_cmd} rm {HOSTS[_host].c_name}-net 1> /dev/null 2> /dev/null\n")
         delete_net_output.append(f"sudo rm -rf /var/run/netns/{HOSTS[_host].tag}{HOSTS[_host].dev_id}\n")
-        startup_output.append(f"{HOSTS[_host].c_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net)\n")
-        startup_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].tag}{HOSTS[_host].dev_id}\n")
+        startup_output.append(f"{HOSTS[_host].c_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {HOSTS[_host].c_name}-net) 1> /dev/null 2> /dev/null\n")
+        startup_output.append(f"sudo ln -sf /proc/${{{HOSTS[_host].c_name}pid}}/ns/net /var/run/netns/{HOSTS[_host].tag}{HOSTS[_host].dev_id} 1> /dev/null 2> /dev/null\n")
         create_output.append("# Connecting host containers together\n")
         # Output veth commands
         for _intf in HOSTS[_host].intfs:
             _tmp_intf = HOSTS[_host].intfs[_intf]
             if HOSTS[_host].dev_id in  _tmp_intf['veth'].split('-')[0]:
+                create_output.append(f"echo \"Plugged patch cable into {_host} port {_tmp_intf['port']}\"\n")
                 create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].tag}{HOSTS[_host].dev_id} name {_tmp_intf['port']} up\n")
                 startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[0]} netns {HOSTS[_host].tag}{HOSTS[_host].dev_id} name {_tmp_intf['port']} up\n")
             else:
+                create_output.append(f"echo \"Plugged patch cable into {_host} port {_tmp_intf['port']}\"\n")
                 create_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {HOSTS[_host].tag}{HOSTS[_host].dev_id} name {_tmp_intf['port']} up\n")
                 startup_output.append(f"sudo ip link set {_tmp_intf['veth'].split('-')[1]} netns {HOSTS[_host].tag}{HOSTS[_host].dev_id} name {_tmp_intf['port']} up\n")
+        create_output.append(f"echo \"Powering on {_host}\"\n")
+        startup_output.append(f"echo \"Powering on {_host}\"\n")
         create_output.append("sleep 1\n")
-        create_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged {cnt_log}1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} {registry_cmd}chost:{HOSTS[_host].image} ipnet\n")
+        create_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged {cnt_log}1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} {registry_cmd}chost:{HOSTS[_host].image} ipnet 1> /dev/null 2> /dev/null\n")
         startup_output.append("sleep 1\n")
-        startup_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged {cnt_log}1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} {registry_cmd}chost:{HOSTS[_host].image} ipnet\n")
+        startup_output.append(f"{cnt_cmd} run -d --name={HOSTS[_host].c_name} --privileged {cnt_log}1m --net=container:{HOSTS[_host].c_name}-net -e HOSTNAME={HOSTS[_host].c_name} -e HOST_IP={HOSTS[_host].ip} -e HOST_MASK={HOSTS[_host].mask} -e HOST_GW={HOSTS[_host].gw} {registry_cmd}chost:{HOSTS[_host].image} ipnet 1> /dev/null 2> /dev/null\n")
     # Check for iPerf3 commands
     if topo_yaml['iperf']:
         _iperf = topo_yaml['iperf']
         _port = _iperf['port']
         _brate = _iperf['brate']
         for _server in _iperf['servers']:
-            create_output.append(f"{cnt_cmd} exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
-            startup_output.append(f"{cnt_cmd} exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port}\n")
+            create_output.append(f"{cnt_cmd} exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port} 1> /dev/null 2> /dev/null\n")
+            startup_output.append(f"{cnt_cmd} exec -d {HOSTS[_server].c_name} iperf3 -s -p {_port} 1> /dev/null 2> /dev/null\n")
         for _client in _iperf['clients']:
             _target = HOSTS[_client['target']].ip
-            create_output.append(f"{cnt_cmd} exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
-            startup_output.append(f"{cnt_cmd} exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate}\n")
+            create_output.append(f"{cnt_cmd} exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate} 1> /dev/null 2> /dev/null\n")
+            startup_output.append(f"{cnt_cmd} exec -d {HOSTS[_client['client']].c_name} iperf3client {_target} {_port} {_brate} 1> /dev/null 2> /dev/null\n")
     # Create the initial deployment files
     with open(CEOS_SCRIPTS + '/{0}/Create.sh'.format(_tag), 'w') as cout:
         for _create in create_output:
