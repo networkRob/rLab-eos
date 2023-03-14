@@ -234,13 +234,13 @@ username {username} privilege 15 role network-admin secret sha512 {password}
     """
     BASE_TERMINATTR = """
 daemon TerminAttr
-   exec /usr/bin/TerminAttr -cvaddr={0} -taillogs -cvcompression=gzip -cvauth={1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
+   exec /usr/bin/TerminAttr -disableaaa -cvaddr={0} -taillogs -cvcompression=gzip -cvauth={1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
    no shutdown
 !
     """
     BASE_TERMINATTR_VRF = """
 daemon TerminAttr
-   exec /usr/bin/TerminAttr -cvaddr={0} -cvvrf={2} -taillogs -cvcompression=gzip -cvauth={1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
+   exec /usr/bin/TerminAttr -disableaaa -cvaddr={0} -cvvrf={2} -taillogs -cvcompression=gzip -cvauth={1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
    no shutdown
 !
     """
