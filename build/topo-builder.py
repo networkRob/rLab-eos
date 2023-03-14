@@ -234,13 +234,13 @@ username {username} privilege 15 role network-admin secret sha512 {password}
     """
     BASE_TERMINATTR = """
 daemon TerminAttr
-   exec /usr/bin/TerminAttr -cvaddr={0}:9910 -taillogs -cvcompression=gzip -cvauth=key,{1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
+   exec /usr/bin/TerminAttr -cvaddr={0} -taillogs -cvcompression=gzip -cvauth={1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
    no shutdown
 !
     """
     BASE_TERMINATTR_VRF = """
 daemon TerminAttr
-   exec /usr/bin/TerminAttr -cvaddr={0}:9910 -cvvrf={2} -taillogs -cvcompression=gzip -cvauth=key,{1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
+   exec /usr/bin/TerminAttr -cvaddr={0} -cvvrf={2} -taillogs -cvcompression=gzip -cvauth={1} -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent
    no shutdown
 !
     """
@@ -333,6 +333,16 @@ hostname {0}
             pS("INFO", "Leveraging default dataplane")
     except:
         pS("INFO", "Leveraging default dataplane")
+    # Check for new CV section
+    if 'cv' in topo_yaml:
+        try:
+            cv_nodes = f":{topo_yaml['cv']['port']},".join(topo_yaml['cv']['nodes'])
+            cv_nodes = f"{cv_nodes}:{topo_yaml['cv']['port']}"
+            cv_auth = f"token,{topo_yaml['cv']['auth']['path']}/token"
+            cv_token = topo_yaml['cv']['auth']['cert']
+        except:
+            pS("INFO", "New CV schema not formatted correctly")
+            cv_nodes = False
     
     # Load and Gather network Link information
     pS("INFO", "Gathering patch cable lengths and quantities...")
@@ -468,11 +478,22 @@ hostname {0}
                     _tmp_startup.append(BASE_MGMT_VRF.format(CEOS[_node].ip, topo_yaml['infra']['gateway'], mgmt_vrf))
                 else:    
                     _tmp_startup.append(BASE_MGMT.format(CEOS[_node].ip, topo_yaml['infra']['gateway']))
-                if 'cvpaddress' and 'cvp-key' in topo_yaml['topology']:
+                # Perform eval based on CV schema
+                if cv_nodes:
                     if mgmt_vrf != "default":
-                        _tmp_startup.append(BASE_TERMINATTR_VRF.format(topo_yaml['topology']['cvpaddress'], topo_yaml['topology']['cvp-key'], mgmt_vrf))
+                        _tmp_startup.append(BASE_TERMINATTR_VRF.format(cv_nodes, cv_auth, mgmt_vrf))
                     else:
-                        _tmp_startup.append(BASE_TERMINATTR.format(topo_yaml['topology']['cvpaddress'], topo_yaml['topology']['cvp-key']))
+                        _tmp_startup.append(BASE_TERMINATTR.format(cv_nodes, cv_auth))
+                    # Copy CV Cert info to startup config
+                    create_output.append('echo "{0}" > {1}/{2}/{3}/token\n'.format(cv_token, CONFIGS, _tag, _node))
+                else:
+                    if 'cvpaddress' and 'cvp-key' in topo_yaml['topology']:
+                        if mgmt_vrf != "default":
+                            _cv_node = f"{topo_yaml['topology']['cvpaddress']}:9910"
+                            _cv_auth = f"key,{topo_yaml['topology']['cvp-key']}"
+                            _tmp_startup.append(BASE_TERMINATTR_VRF.format(_cv_node, _cv_auth, mgmt_vrf))
+                        else:
+                            _tmp_startup.append(BASE_TERMINATTR.format(_cv_node, _cv_auth))
             create_output.append('echo "{0}" > {1}/{2}/{3}/startup-config\n'.format(''.join(_tmp_startup), CONFIGS, _tag, _node))
         # Creating anchor containers
 
