@@ -496,13 +496,13 @@ hostname {0}
                             _tmp_startup.append(BASE_TERMINATTR.format(_cv_node, _cv_auth))
             create_output.append('echo "{0}" > {1}/{2}/{3}/startup-config\n'.format(''.join(_tmp_startup), CONFIGS, _tag, _node))
         # Creating anchor containers
-
+        _dev_name_adusted = CEOS[_node].ceos_name.replace("-", "_")
         create_output.append(f"echo \"Gathering patch cables for {_node}\"\n")
         create_output.append("# Getting {0} nodes plumbing\n".format(_node))
         create_output.append(f"{cnt_cmd} run -d --restart=always {cnt_log}10k --name={CEOS[_node].ceos_name}-net --net=none busybox /bin/init 1> /dev/null 2> /dev/null\n")
         startup_output.append(f"{cnt_cmd} start {CEOS[_node].ceos_name}-net 1> /dev/null 2> /dev/null\n")
-        create_output.append(f"{CEOS[_node].ceos_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
-        create_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
+        create_output.append(f"{_dev_name_adusted}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
+        create_output.append(f"sudo ln -sf /proc/${{{_dev_name_adusted}pid}}/ns/net /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
         # Stop cEOS containers
         delete_output.append(f"echo \"Pulling power and removing patch cables from {_node}\"\n")
         stop_output.append(f"echo \"Pulling power from {_node}\"\n")
@@ -516,8 +516,8 @@ hostname {0}
         delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name} 1> /dev/null 2> /dev/null\n")
         delete_output.append(f"{cnt_cmd} rm {CEOS[_node].ceos_name}-net 1> /dev/null 2> /dev/null\n")
         delete_net_output.append(f"sudo rm -rf /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
-        startup_output.append(f"{CEOS[_node].ceos_name}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
-        startup_output.append(f"sudo ln -sf /proc/${{{CEOS[_node].ceos_name}pid}}/ns/net /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
+        startup_output.append(f"{_dev_name_adusted}pid=$({cnt_cmd} inspect --format '{{{{.State.Pid}}}}' {CEOS[_node].ceos_name}-net)\n")
+        startup_output.append(f"sudo ln -sf /proc/${{{_dev_name_adusted}pid}}/ns/net /var/run/netns/{CEOS[_node].tag}{CEOS[_node].dev_id}\n")
         create_output.append(f"# Connecting cEOS containers together\n")
         # Output veth commands
         for _intf in CEOS[_node].intfs:
