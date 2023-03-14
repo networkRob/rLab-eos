@@ -76,6 +76,13 @@ topology:
   cvp-key: {CVP_KEY}
   username: {USERNAME}
   password: {PASSWORD}
+cv:
+  nodes: 
+    - {CV_NODE}
+  port: {CV_PORT}
+  auth:
+    cert: {CV_ONBOARDING_TOKEN}
+    path: /mnt/flash
 infra:
   bridge: {MGMT_BRIDGE}
   gateway: {MGMT_NETWORK_GATEWAY}
@@ -107,8 +114,11 @@ iperf:
 commands:
 ```
 
-- The `CVP_IPADDRESS` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP.
-- The `CVP_KEY` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP.
+- The `CVP_IPADDRESS` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP. (Deprecated)
+- The `CVP_KEY` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP. (Deprecated)
+- The `CV_NODE` This paramter is to specity the address of the CV instance. Can be a list of Addresses
+- The `CV_PORT` This paramter is to specify the destination port for CV. On-Prem = `9910`, CVaaS = `443`
+- The `CV_ONBOARDING_TOKEN` This parameter is to be populated with a device enrollment token from CV
 - The `USERNAME` parameter is optional, this is if a bare startup-config is created. It will generate a local user account in EOS.
 - The `PASSWORD` parameter is optional, this is if a bare startup-config is created. It will generate the password for the local user account.
 - The `MGMT_BRIDGE` parameter is optional, this is if you wish to attach the cEOS containers Management0 Interface to this network.
