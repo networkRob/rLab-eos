@@ -5,6 +5,13 @@ topology:
   cvp-key: rob-lab
   username: arista
   password: $6$BSMT1WbtoeKM/hK4$kJxcK/KXv4shkWUb9y5MOgNG6EUmmHR5fR4BM2e4uKtXB74lXL1fncHNC0d4xUcW86OJeYapbFZtBdjStkEqv.
+cv:
+  nodes: 
+    - 192.168.49.12
+  port: 9910
+  auth:
+    cert: xxxx
+    path: /mnt/flash
 infra:
   bridge: vmgmt
   vrf: MGMT
