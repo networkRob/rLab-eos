@@ -32,17 +32,23 @@ sudo sysctl -w fs.inotify.max_user_instances={notify_instances} 1> /dev/null 2> 
 )
 
 class CEOS_NODE():
-    def __init__(self, node_name, node_ip, node_mgmt_mac, node_neighbors, _tag, image):
+    def __init__(self, node_name, node_ip, mgmt_mac, node_mac, node_neighbors, _tag, image):
         self.name = node_name
         self.ip = node_ip
         self.tag = _tag.lower()
         self.image = image
         self.ceos_name = self.tag + self.name
         self.intfs = {}
-        self.mgmt_mac = node_mgmt_mac
-        self.system_mac = generateMac()
         self.dev_id = CEOS_MAPPER[self.name]
         self.portMappings(node_neighbors)
+        if mgmt_mac:
+            self.mgmt_mac = node_mac
+            self.system_mac = generateMac()
+        else:
+            self.mgmt_mac = generateMac()
+            self.system_mac = node_mac
+
+
 
     def portMappings(self, node_neighbors):
         """
@@ -343,7 +349,16 @@ hostname {0}
         except:
             pS("INFO", "New CV schema not formatted correctly")
             cv_nodes = False
-    
+    # Perform check to see if the defined MAC should be used for the System ID or Ma0 Interface
+    try:
+        mgmt_mac = topo_yaml['infra']['mac_mgmt']
+        if mgmt_mac:
+            pS("INFO", "Device MAC Address will be used for the Ma0 interface")
+        else:
+            pS("INFO", "Device MAC Address will be used for the System ID")
+    except:
+        mgmt_mac = False
+        pS("INFO", "Mgmt Mac Parameter not found. Device MAC Address will be used for the System ID")
     # Load and Gather network Link information
     pS("INFO", "Gathering patch cable lengths and quantities...")
     for _link in links:
@@ -405,7 +420,7 @@ hostname {0}
         except KeyError:
             _node_ip = ""
         _node_name = list(_node.keys())[0]
-        CEOS[_node_name] = CEOS_NODE(_node_name, _node_ip, _node['mac'], CEOS_LINKS[_node_name], _tag, ceos_image)
+        CEOS[_node_name] = CEOS_NODE(_node_name, _node_ip, mgmt_mac, _node['mac'], CEOS_LINKS[_node_name], _tag, ceos_image)
         DEVICE_INFO.append(f"# {_node_name} = {CEOS[_node_name].tag}{CEOS[_node_name].dev_id}\n")
     # Load Host nodes specific information
     if hosts:
