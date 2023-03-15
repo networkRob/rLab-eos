@@ -86,6 +86,7 @@ cv:
 infra:
   bridge: {MGMT_BRIDGE}
   gateway: {MGMT_NETWORK_GATEWAY}
+  mac_mgmt: {MAC_MGMT}
 images:
   registry: {LOCATION}
   ceos: {ceosimage_tag}
@@ -123,6 +124,7 @@ commands:
 - The `PASSWORD` parameter is optional, this is if a bare startup-config is created. It will generate the password for the local user account.
 - The `MGMT_BRIDGE` parameter is optional, this is if you wish to attach the cEOS containers Management0 Interface to this network.
 - The `MGMT_NETWORK_GATEWAY` parameter is optional, this is if a bare startup-config is created, but should be specified if the `MGMT_BRIDGE` parameter is set.
+- The `MAC_MGMT` parameter lets the script know, if the supplied MAC Address for each node should be used for the System ID or Ma0 Interface. (bool) True/False
 - The `LOCATION` parameter should be set to `local` as default. Update this to the url of any private/remote registries.
 - The `mac` section for each cEOS-lab node needs to be unique, this sets the mgmt interface MAC Address which also sets the system-id.
 - The `links` section is used to create a "virtual" patch cable between each node.
