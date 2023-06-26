@@ -12,6 +12,7 @@ cv:
 images:
   registry: local
   ceos: 4.28.0F
+  64-bit: true
   host: 1.0
 links:
   - [["eos1", "et1"], ["eos2", "et5"]]

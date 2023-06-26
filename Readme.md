@@ -90,6 +90,7 @@ infra:
 images:
   registry: {LOCATION}
   ceos: {ceosimage_tag}
+  64-bit: {CEOSTYPE}
   host: {chostimage_tag}
 links:
   - [["spine1", "et1"], ["spine2", "et1"]]
@@ -126,6 +127,7 @@ commands:
 - The `MGMT_NETWORK_GATEWAY` parameter is optional, this is if a bare startup-config is created, but should be specified if the `MGMT_BRIDGE` parameter is set.
 - The `MAC_MGMT` parameter lets the script know, if the supplied MAC Address for each node should be used for the System ID or Ma0 Interface. (bool) True/False
 - The `LOCATION` parameter should be set to `local` as default. Update this to the url of any private/remote registries.
+- The `CEOSTYPE` parameter is used to specify if the ceosimage should be `ceosimage` or `ceosimage-64`. (bool) true/false
 - The `mac` section for each cEOS-lab node needs to be unique, this sets the mgmt interface MAC Address which also sets the system-id.
 - The `links` section is used to create a "virtual" patch cable between each node.
 - If you do not want to run iperf on the host nodes, you can leave that section empty and only set `iperf:`
