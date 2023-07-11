@@ -51,58 +51,58 @@ links:
   - [["brdr1", "et1"], ["brdr2", "et1"]]
 
 nodes:
-  - spine1:
+  - name: spine1
     mac: 00:1c:73:c0:c6:01
     ip_addr: 192.168.50.31
-  - spine2:
+  - name: spine2
     mac: 00:1c:73:c1:c6:01
     ip_addr: 192.168.50.32
-  - leaf11:
+  - name: leaf11
     mac: 00:1c:73:c2:c6:01
     ip_addr: 192.168.50.33
-  - leaf12:
+  - name: leaf12
     mac: 00:1c:73:c3:c6:01
     ip_addr: 192.168.50.34
-  - leaf21:
+  - name: leaf21
     mac: 00:1c:73:c4:c6:01
     ip_addr: 192.168.50.35
-  - leaf22:
+  - name: leaf22
     mac: 00:1c:73:c5:c6:01
     ip_addr: 192.168.50.36
-  - leaf31:
+  - name: leaf31
     mac: 00:1c:73:c6:c6:01
     ip_addr: 192.168.50.37
-  - leaf32:
+  - name: leaf32
     mac: 00:1c:73:c7:c6:01
     ip_addr: 192.168.50.38
-  - brdr1:
+  - name: brdr1
     mac: 00:1c:73:c8:c6:01
     ip_addr: 192.168.50.39
-  - brdr2:
+  - name: brdr2
     mac: 00:1c:73:c9:c6:01
     ip_addr: 192.168.50.40
 hosts:
-  - host11:
+  - name: host11
     ip_addr: 192.168.12.11
     mask: 255.255.255.0
     gateway: 192.168.12.1
-  - host12:
+  - name: host12
     ip_addr: 192.168.13.11
     mask: 255.255.255.0
     gateway: 192.168.13.1
-  - host21:
+  - name: host21
     ip_addr: 192.168.12.21
     mask: 255.255.255.0
     gateway: 192.168.12.1
-  - host22:
+  - name: host22
     ip_addr: 192.168.13.21
     mask: 255.255.255.0
     gateway: 192.168.13.1
-  - host31:
+  - name: host31
     ip_addr: 192.168.12.31
     mask: 255.255.255.0
     gateway: 192.168.12.1
-  - host32:
+  - name: host32
     ip_addr: 192.168.13.31
     mask: 255.255.255.0
     gateway: 192.168.13.1

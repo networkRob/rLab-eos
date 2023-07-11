@@ -48,45 +48,45 @@ links:
   - [["eos12", "et1"], ["eos13", "et2"]]
 
 nodes:
-  - eos1:
+  - name: eos1
     mac: 00:1c:73:d0:c6:01
-  - eos2:
+  - name: eos2
     mac: 00:1c:73:d1:c6:01
-  - eos3:
+  - name: eos3
     mac: 00:1c:73:d2:c6:01
-  - eos4:
+  - name: eos4
     mac: 00:1c:73:d3:c6:01
-  - eos5:
+  - name: eos5
     mac: 00:1c:73:d4:c6:01
-  - eos6:
+  - name: eos6
     mac: 00:1c:73:d5:c6:01
-  - eos7:
+  - name: eos7
     mac: 00:1c:73:d6:c6:01
-  - eos8:
+  - name: eos8
     mac: 00:1c:73:d7:c6:01
-  - eos9:
+  - name: eos9
     mac: 00:1c:73:d8:c6:01
-  - eos10:
+  - name: eos10
     mac: 00:1c:73:d9:c6:01
-  - eos11:
+  - name: eos11
     mac: 00:1c:73:e0:c6:01
-  - eos12:
+  - name: eos12
     mac: 00:1c:73:e1:c6:01
-  - eos13:
+  - name: eos13
     mac: 00:1c:73:e2:c6:01
-  - eos14:
+  - name: eos14
     mac: 00:1c:73:e3:c6:01
-  - eos15:
+  - name: eos15
     mac: 00:1c:73:e4:c6:01
-  - eos16:
+  - name: eos16
     mac: 00:1c:73:d5:c6:01
-  - eos17:
+  - name: eos17
     mac: 00:1c:73:e6:c6:01
-  - eos18:
+  - name: eos18
     mac: 00:1c:73:e7:c6:01
-  - eos19:
+  - name: eos19
     mac: 00:1c:73:e8:c6:01
-  - eos20:
+  - name: eos20
     mac: 00:1c:73:e9:c6:01
 hosts:
 iperf:
