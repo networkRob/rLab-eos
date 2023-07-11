@@ -38,43 +38,43 @@ links:
   - [["leaf3", "et4"], ["host31", "et0"]]
 
 nodes:
-  - spine1:
+  - name: spine1
     mac: 00:1c:73:b0:c6:01
     ip_addr: 192.168.50.21
-  - spine2:
+  - name: spine2
     mac: 00:1c:73:b1:c6:01
     ip_addr: 192.168.50.22
-  - leaf1:
+  - name: leaf1
     mac: 00:1c:73:b2:c6:01
     ip_addr: 192.168.50.23
-  - leaf2:
+  - name: leaf2
     mac: 00:1c:73:b3:c6:01
     ip_addr: 192.168.50.24
-  - leaf3:
+  - name: leaf3
     mac: 00:1c:73:b4:c6:01
     ip_addr: 192.168.50.25
 hosts:
-  - host10:
+  - name: host10
     ip_addr: 10.0.12.11
     mask: 255.255.255.0
     gateway: 10.0.12.1
-  - host11:
+  - name: host11
     ip_addr: 10.0.13.11
     mask: 255.255.255.0
     gateway: 10.0.13.1
-  - host20:
+  - name: host20
     ip_addr: 10.0.12.21
     mask: 255.255.255.0
     gateway: 10.0.12.1
-  - host21:
+  - name: host21
     ip_addr: 10.0.13.21
     mask: 255.255.255.0
     gateway: 10.0.13.1
-  - host30:
+  - name: host30
     ip_addr: 10.0.12.31
     mask: 255.255.255.0
     gateway: 10.0.12.1
-  - host31:
+  - name: host31
     ip_addr: 10.0.13.31
     mask: 255.255.255.0
     gateway: 10.0.13.1

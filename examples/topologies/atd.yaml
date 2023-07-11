@@ -40,21 +40,21 @@ links:
   - [["leaf4", "et5"], ["host2", "et4"]]
   - [["leaf4", "et6"], ["host2", "et6"]]
 nodes:
-  - spine1:
+  - name: spine1
     mac: 00:1c:73:f0:c6:01
-  - spine2:
+  - name: spine2
     mac: 00:1c:73:f1:c6:01
-  - leaf1:
+  - name: leaf1
     mac: 00:1c:73:f2:c6:01
-  - leaf2:
+  - name: leaf2
     mac: 00:1c:73:f3:c6:01
-  - leaf3:
+  - name: leaf3
     mac: 00:1c:73:f4:c6:01
-  - leaf4:
+  - name: leaf4
     mac: 00:1c:73:f5:c6:01
-  - host1:
+  - name: host1
     mac: 00:1c:73:f7:c6:01
-  - host2:
+  - name: host2
     mac: 00:1c:73:f8:c6:01
 hosts:
 iperf:

@@ -97,11 +97,11 @@ links:
   - [["spine1", "et2"], ["leaf1", "et1"]]
   - [["leaf1", "et3"], ["host10", "et0"]]
 nodes:
-  spine1:
+  - name: spine1
     mac: 00:1c:73:c0:c6:01
     ipaddress: 192.168.0.10
 hosts:
-  host10:
+  - name: host10
     ipaddress: 10.0.12.11
     mask: 255.255.255.0
     gateway: 10.0.12.1
