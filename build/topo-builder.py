@@ -483,9 +483,9 @@ hostname {0}
         create_output.append("# Creating the ceos-config file.\n")
         create_output.append(f'echo "SERIALNUMBER={CEOS[_node].ceos_name}" > {CONFIGS}/{_tag}/{_node}/ceos-config\n')
         create_output.append(f'echo "SYSTEMMACADDR={CEOS[_node].system_mac}" >> {CONFIGS}/{_tag}/{_node}/ceos-config\n')
-        create_output.append('fi\n')
         if _tfa_version > 1:
             create_output.append('echo "TFA_VERSION={0}" >> {1}/{2}/{3}/ceos-config\n'.format(_tfa_version, CONFIGS, _tag, _node))
+        create_output.append('fi\n')
         # Perform check to see if a bare startup-config needs to be created
         if create_startup:
             create_output.append(f"# Creating a bare startup configuration for {_node}\n")
