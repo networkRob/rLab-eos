@@ -4,7 +4,7 @@ ENV container docker
 
 RUN dnf update -y
 
-RUN dnf install -y net-tools iperf3 vim lldpad nmap
+RUN dnf install -y net-tools iperf3 vim lldpad nmap iputils
 
 COPY iperf3client.sh /usr/bin/iperf3client
 
