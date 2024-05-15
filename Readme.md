@@ -31,13 +31,6 @@ To run the network topology on a container host machine, there are a few require
 - pydot
 - jsonrpclib
 
-#### NOTE:
-For running topologies via Podman, you will need to disable cgroups_v2. To do this run the following commands:
-
-```
-sudo grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"
-sudo reboot now
-```
 
 ### Getting Started
 To build a new topology, the following files/data structures need to be created.
